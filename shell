@@ -1,0 +1,60 @@
+#!/bin/bash
+set -e
+
+SELFDIR=`dirname "$0"`
+SELFDIR=`cd "$SELFDIR" && pwd`
+
+DATA_DIR=
+
+function usage()
+{
+	echo "Usage: ./shell [options] <DATA DIR>"
+	echo "Open a shell for the specified data directory."
+	echo
+	echo "Options:"
+	echo "  -h      Show this help"
+}
+
+function parse_options()
+{
+	local OPTIND=1
+	local opt
+	while getopts "h" opt; do
+		case "$opt" in
+		h)
+			usage
+			exit
+			;;
+		*)
+			return 1
+			;;
+		esac
+	done
+
+	(( OPTIND += 1 )) || true
+	shift $OPTIND || true
+	DATA_DIR="$1"
+
+	if [[ "$DATA_DIR" = "" ]]; then
+		usage
+		exit 1
+	fi
+	if [[ ! -e "$DATA_DIR" ]]; then
+		echo "ERROR: $DATA_DIR doesn't exist."
+		exit 1
+	fi
+}
+
+
+parse_options "$@"
+DATA_DIR=`cd "$DATA_DIR" && pwd`
+mkdir -p "$DATA_DIR/mock"
+
+exec docker run \
+	--rm -t -i \
+	--cap-add SYS_ADMIN --cap-add SYS_CHROOT \
+	-v "$SELFDIR/internal:/system:ro" \
+	-v "$DATA_DIR/mock:/var/lib/mock" \
+	phusion/ruby-traveler-builder \
+	/system/my_init --quiet --skip-runit --skip-startup-files -- \
+	/bin/bash -l

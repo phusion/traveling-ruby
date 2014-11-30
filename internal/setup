@@ -1,0 +1,67 @@
+#!/bin/bash
+set -e
+source /system/config.sh
+
+function list_db_files()
+{
+	file "$@" | grep 'Berkeley DB' | grep 'version 9' | awk '{ print $1 }' | sed 's/:$//'
+}
+
+function setup_chroot()
+{
+	local name="$1"
+
+	if $INITIALIZE; then
+		/system/setuser app /usr/bin/mock -r $name --init
+	fi
+	/system/setuser app /usr/bin/mock -r $name --install yum
+
+	# CentOS 6's RPM generates database files which CentOS 5's RPM
+	# cannot read, so we fix this. See
+	# http://forums.fedoraforum.org/showthread.php?t=222988
+	pushd /var/lib/mock/$name/root/var/lib/rpm
+	rm -fv __db*
+	for F in $(list_db_files *); do
+		db_dump $F > $F.dump
+		rm $F
+		db43_load $F < $F.dump
+		rm $F.dump
+	done
+	popd
+
+	cp /system/setup-inside-mock /var/lib/mock/$name/root/
+	/system/setuser app /usr/bin/mock -r $name --shell /setup-inside-mock
+	rm /var/lib/mock/$name/root/setup-inside-mock
+}
+
+echo "---------- Setting permissions -----------"
+chown root:mock /var/lib/mock
+chmod g+ws /var/lib/mock
+
+echo
+echo "---------- Setting up i386 chroot -----------"
+(
+	set -x
+	setup_chroot epel-5-i386
+)
+
+echo
+echo "---------- Setting up x86_64 chroot -----------"
+(
+	set -x
+	setup_chroot epel-6-i386
+)
+
+if $DOWNLOAD_RUBY; then
+	echo
+	echo "---------- Downloading Ruby -----------"
+	rm -f /tmp/ruby.tar.gz
+	wget -O /tmp/ruby.tar.gz \
+		http://cache.ruby-lang.org/pub/ruby/$RUBY_MAJOR_MINOR/ruby-$RUBY_VERSION.tar.gz
+	cp /tmp/ruby.tar.gz /var/lib/mock/epel-5-i386/root/ruby-$RUBY_VERSION.tar.gz
+	cp /tmp/ruby.tar.gz /var/lib/mock/epel-5-x86_64/root/ruby-$RUBY_VERSION.tar.gz
+	rm /tmp/ruby.tar.gz
+fi
+
+echo
+echo "---------- Setup finished -----------"

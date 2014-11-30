@@ -1,0 +1,4 @@
+#!/bin/bash
+set -ex
+rpm -vv --rebuilddb
+yum install -y @development-tools fedora-packager gcc gcc-c++

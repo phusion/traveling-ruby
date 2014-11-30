@@ -1,0 +1,72 @@
+#!/bin/bash
+set -e
+
+SELFDIR=`dirname "$0"`
+SELFDIR=`cd "$SELFDIR" && pwd`
+
+DATA_DIR=
+INITIALIZE=true
+DOWNLOAD_RUBY=true
+
+function usage()
+{
+	echo "Usage: ./setup [options] <DATA DIR>"
+	echo "Sets up the Ruby Traveler build system."
+	echo
+	echo "Options:"
+	echo "  -i      Do not initialize chroot environments"
+	echo "  -r      Do not download Ruby"
+	echo "  -h      Show this help"
+}
+
+function parse_options()
+{
+	local OPTIND=1
+	local opt
+	while getopts "irh" opt; do
+		case "$opt" in
+		i)
+			INITIALIZE=false
+			;;
+		r)
+			DOWNLOAD_RUBY=false
+			;;
+		h)
+			usage
+			exit
+			;;
+		*)
+			return 1
+			;;
+		esac
+	done
+
+	(( OPTIND += 1 )) || true
+	shift $OPTIND || true
+	DATA_DIR="$1"
+
+	if [[ "$DATA_DIR" = "" ]]; then
+		usage
+		exit 1
+	fi
+	if [[ ! -e "$DATA_DIR" ]]; then
+		echo "ERROR: $DATA_DIR doesn't exist."
+		exit 1
+	fi
+}
+
+
+parse_options "$@"
+DATA_DIR=`cd "$DATA_DIR" && pwd`
+mkdir -p "$DATA_DIR/mock"
+
+exec docker run \
+	--rm \
+	--cap-add SYS_ADMIN --cap-add SYS_CHROOT \
+	-v "$SELFDIR/internal:/system:ro" \
+	-v "$DATA_DIR/mock:/var/lib/mock" \
+	-e "INITIALIZE=$INITIALIZE" \
+	-e "DOWNLOAD_RUBY=$DOWNLOAD_RUBY" \
+	phusion/ruby-traveler-builder \
+	/system/my_init --quiet --skip-runit --skip-startup-files -- \
+	/system/setup

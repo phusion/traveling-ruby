@@ -1,0 +1,20 @@
+#!/bin/bash
+set -e
+
+SELFDIR=`dirname "$0"`
+SELFDIR=`cd "$SELFDIR" && pwd`
+
+# TODO
+DATA_DIR="$SELFDIR/data"
+OUTPUT_DIR="$SELFDIR/output"
+mkdir -p "$DATA_DIR" "$OUTPUT_DIR"
+
+exec docker run \
+	--rm \
+	--cap-add SYS_ADMIN --cap-add SYS_CHROOT \
+	-v "$SELFDIR/internal:/system:ro" \
+	-v "$DATA_DIR/mock:/var/lib/mock" \
+	-v "$OUTPUT_DIR:/output" \
+	phusion/ruby-traveler-builder \
+	/system/my_init --quiet --skip-runit --skip-startup-files -- \
+	/system/build

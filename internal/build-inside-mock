@@ -1,0 +1,29 @@
+#!/bin/bash
+set -e
+source /system/config.sh
+cd /tmp
+set -x
+
+echo "--------- Extracting source code ---------"
+rm -rf /tmp/ruby
+tar xzf /ruby-$RUBY_VERSION.tar.gz
+cd ruby-$RUBY_VERSION
+
+echo
+echo "--------- Configuring ---------"
+mkdir /tmp/ruby
+./configure \
+	--prefix /tmp/ruby \
+	--disable-install-doc \
+	--disable-install-rdoc \
+	--disable-install-capi
+
+echo
+echo "--------- Compiling ---------"
+make -j2
+
+echo
+echo "--------- Installing ---------"
+make install
+mv /tmp/ruby/* /output/
+rm -rf /tmp/ruby

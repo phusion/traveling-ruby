@@ -1,0 +1,19 @@
+#!/bin/bash
+set -e
+
+function do_build()
+{
+	local chroot_name="$1"
+	local name="$2"
+	local root=/var/lib/mock/$chroot_name/root
+
+	rm -rf $root/system $root/output
+	mkdir $root/system $root/output
+	cp /system/* $root/system/
+	/system/setuser app /usr/bin/mock -r $chroot_name --quiet --shell /system/build-inside-mock
+	mkdir -p /output/$name
+	cp -dpR $root/output/* /output/$name/
+	rm -rf $root/system $root/output
+}
+
+do_build epel-5-i386 x86
