@@ -1,29 +1,180 @@
 #!/bin/bash
 set -e
 source /system/config.sh
+export APP_UID=`cat /system/APP_UID`
+export APP_GID=`cat /system/APP_GID`
+export CONCURRENCY=`cat /system/CONCURRENCY`
+export SETUP_SOURCE=`cat /system/SETUP_SOURCE`
+export COMPILE=`cat /system/COMPILE`
+export SANITY_CHECK_OUTPUT=`cat /system/SANITY_CHECK_OUTPUT`
+
+# Ensure that our static libraries are used first.
+export CFLAGS=-I/usr/local/override/include
+export CXXFLAGS=-I/usr/local/override/include
+export LDFLAGS=-L/usr/local/override/lib
+export PATH=/usr/local/override/bin:$PATH
+export C_INCLUDE_PATH=/usr/local/override/include
+export CPLUS_INCLUDE_PATH=/usr/local/override/include
+export LIBRARY_PATH=/usr/local/override/lib
+export PKG_CONFIG_PATH=/usr/local/override/lib/pkgconfig:/usr/lib/pkgconfig
+
+function grep_without_fail()
+{
+	grep "$@" || true
+}
+
+function create_wrapper()
+{
+	local FILE="$1"
+	local NAME="$2"
+	local IS_RUBY_SCRIPT="$3"
+
+	cat > "$FILE" <<'EOF'
+#!/bin/bash
+set -e
+ROOT=`dirname "$0"`
+ROOT=`cd "$ROOT/.." && pwd`
+eval "`\"$ROOT/bin/ruby_environment\"`"
+EOF
+	if $IS_RUBY_SCRIPT; then
+		cat >> "$FILE" <<EOF
+exec "\$ROOT/bin.real/ruby" "\$ROOT/bin.real/$NAME" "\$@"
+EOF
+	else
+		cat >> "$FILE" <<EOF
+exec "\$ROOT/bin.real/$NAME" "\$@"
+EOF
+	fi
+	chmod +x "$FILE"
+}
+
 cd /tmp
-set -x
-
-echo "--------- Extracting source code ---------"
 rm -rf /tmp/ruby
-tar xzf /ruby-$RUBY_VERSION.tar.gz
-cd ruby-$RUBY_VERSION
+
+if $SETUP_SOURCE; then
+	echo "--------- Extracting source code ---------"
+	(
+		set -x
+		rm -rf /tmp/ruby-$RUBY_VERSION
+		tar xzf /ruby-$RUBY_VERSION.tar.gz
+	)
+	if [[ $? != 0 ]]; then
+		exit 1
+	fi
+	echo "+ cd ruby-$RUBY_VERSION"
+	cd ruby-$RUBY_VERSION
+
+	echo
+	echo "--------- Configuring ---------"
+	(
+		set -o pipefail
+		set -x
+		mkdir /tmp/ruby
+		./configure \
+			--prefix /tmp/ruby \
+			--disable-install-doc \
+			--disable-install-rdoc \
+			--disable-install-capi
+	)
+	if [[ $? != 0 ]]; then
+		exit 1
+	fi
+else
+	echo "+ cd ruby-$RUBY_VERSION"
+	cd ruby-$RUBY_VERSION
+fi
+
+if $COMPILE; then
+	echo
+	echo "--------- Compiling ---------"
+	(
+		set -x
+
+		# Edit Makefiles so that we link to static versions of third-party libraries.
+		make exts.mk
+		MAKEFILES=`find . -name Makefile`
+		sed -i 's| -lz | /usr/lib/libz.a |g' $MAKEFILES
+		sed -i 's| -lreadline | /usr/lib/libreadline.a |g' $MAKEFILES
+		sed -i 's| -ltermcap | /usr/lib/libtermcap.a |g' $MAKEFILES
+
+		make -j$CONCURRENCY
+	)
+	if [[ $? != 0 ]]; then
+		exit 1
+	fi
+fi
 
 echo
-echo "--------- Configuring ---------"
-mkdir /tmp/ruby
-./configure \
-	--prefix /tmp/ruby \
-	--disable-install-doc \
-	--disable-install-rdoc \
-	--disable-install-capi
+echo "--------- Installing into temporary prefix ---------"
+(
+	set -x
+	make install-nodoc
+)
+
+if $SANITY_CHECK_OUTPUT; then
+	echo
+	echo "--------- Sanity checking build output ---------"
+	(
+		SYSTEM_LIBRARIES='(linux-gate|libpthread|librt|libdl|libcrypt|libm|libc|ld-linux|libutil)\.so'
+		ERROR=false
+		set -o pipefail
+		for F in /tmp/ruby/bin/ruby `find /tmp/ruby -name '*.so'`; do
+			EXTRA_LIBS=`ldd $F | grep_without_fail -vE "$SYSTEM_LIBRARIES" | sed 's/.*=> //g' | sed 's/ (.*//g'`
+			EXTRA_LIBS=`echo $EXTRA_LIBS`
+			if [[ "$EXTRA_LIBS" != "" ]]; then
+				echo "$F is linked to non-system libraries: $EXTRA_LIBS"
+				ERROR=true
+			fi
+		done
+		if [[ $? != 0 ]]; then
+			exit 1
+		fi
+		if $ERROR; then
+			exit 1
+		else
+			echo "All OK"
+		fi
+	)
+	if [[ $? != 0 ]]; then
+		exit 1
+	fi
+fi
 
 echo
-echo "--------- Compiling ---------"
-make -j2
+echo "--------- Committing build output ---------"
+(
+	set -o pipefail
+	set -x
+	strip --strip-all /tmp/ruby/bin/ruby
+	find /tmp/ruby -name '*.so' | xargs 
+	rm /tmp/ruby/bin/{erb,rdoc,ri,testrb}
 
-echo
-echo "--------- Installing ---------"
-make install
-mv /tmp/ruby/* /output/
-rm -rf /tmp/ruby
+	mv /tmp/ruby/bin /tmp/ruby/bin.real
+	mkdir /tmp/ruby/bin
+	LOAD_PATHS=`/tmp/ruby/bin.real/ruby /system/dump-load-paths.rb`
+	cat > "/tmp/ruby/bin/ruby_environment" <<'EOF'
+#!/bin/bash
+ROOT=`dirname "$0"`
+ROOT=`cd "$ROOT/.." && pwd`
+echo GEM_HOME="$ROOT/lib/ruby/gems/2.1.0"
+echo GEM_PATH="$ROOT/lib/ruby/gems/2.1.0"
+EOF
+	cat >> "/tmp/ruby/bin/ruby_environment" <<EOF
+echo RUBYLIB="$LOAD_PATHS"
+echo unset RUBYOPT
+echo export GEM_HOME
+echo export GEM_PATH
+echo export RUBYLIB
+EOF
+	chmod +x /tmp/ruby/bin/ruby_environment
+
+	create_wrapper /tmp/ruby/bin/ruby ruby false
+	create_wrapper /tmp/ruby/bin/gem gem true
+	create_wrapper /tmp/ruby/bin/irb irb true
+
+	chown -R $APP_UID:$APP_GID /tmp/ruby
+	mv /tmp/ruby/* /output/
+)
+if [[ $? != 0 ]]; then
+	exit 1
+fi

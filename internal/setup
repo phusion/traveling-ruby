@@ -44,13 +44,21 @@ echo "---------- Setting up i386 chroot -----------"
 	set -x
 	setup_chroot epel-5-i386
 )
+if [[ $? != 0 ]]; then
+	echo "*** Failed setting up i386 chroot"
+	exit 1
+fi
 
 echo
 echo "---------- Setting up x86_64 chroot -----------"
 (
 	set -x
-	setup_chroot epel-6-i386
+	setup_chroot epel-5-x86_64
 )
+if [[ $? != 0 ]]; then
+	echo "*** Failed setting up x86_64 chroot"
+	exit 1
+fi
 
 if $DOWNLOAD_RUBY; then
 	echo

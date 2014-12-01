@@ -11,11 +11,13 @@ DOWNLOAD_RUBY=true
 function usage()
 {
 	echo "Usage: ./setup [options] <DATA DIR>"
-	echo "Sets up the Ruby Traveler build system."
+	echo "Sets up the Traveling Ruby build system."
 	echo
 	echo "Options:"
-	echo "  -i      Do not initialize chroot environments"
-	echo "  -r      Do not download Ruby"
+	echo "  -i      Only initialize chroot environment"
+	echo "  -I      Do not initialize chroot environments"
+	echo "  -r      Only download Ruby"
+	echo "  -R      Do not download Ruby"
 	echo "  -h      Show this help"
 }
 
@@ -23,12 +25,20 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "irh" opt; do
+	while getopts "iIrRh" opt; do
 		case "$opt" in
 		i)
+			INITIALIZE=true
+			DOWNLOAD_RUBY=false
+			;;
+		I)
 			INITIALIZE=false
 			;;
 		r)
+			INITIALIZE=false
+			DOWNLOAD_RUBY=true
+			;;
+		R)
 			DOWNLOAD_RUBY=false
 			;;
 		h)
@@ -41,7 +51,7 @@ function parse_options()
 		esac
 	done
 
-	(( OPTIND += 1 )) || true
+	(( OPTIND -= 1 )) || true
 	shift $OPTIND || true
 	DATA_DIR="$1"
 

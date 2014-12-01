@@ -7,13 +7,48 @@ function do_build()
 	local name="$2"
 	local root=/var/lib/mock/$chroot_name/root
 
+	# Initialize parameters
 	rm -rf $root/system $root/output
 	mkdir $root/system $root/output
 	cp /system/* $root/system/
+	echo $APP_UID > $root/system/APP_UID
+	echo $APP_GID > $root/system/APP_GID
+	echo $CONCURRENCY > $root/system/CONCURRENCY
+	echo $SETUP_SOURCE > $root/system/SETUP_SOURCE
+	echo $COMPILE > $root/system/COMPILE
+	echo $SANITY_CHECK_OUTPUT > $root/system/SANITY_CHECK_OUTPUT
+
+	# Build the binaries
 	/system/setuser app /usr/bin/mock -r $chroot_name --quiet --shell /system/build-inside-mock
+
+	# Move build result to proper output directory
+	rm -rf /output/$name
 	mkdir -p /output/$name
+	chown $APP_UID:$APP_GID /output/$name
 	cp -dpR $root/output/* /output/$name/
+
+	# Cleanup
 	rm -rf $root/system $root/output
 }
 
-do_build epel-5-i386 x86
+if $X86_BINARIES; then
+	echo "------------ Building x86 binaries ------------"
+	(
+		set -x
+		do_build epel-5-i386 x86
+	)
+	if [[ $? != 0 ]]; then
+		exit 1
+	fi
+fi
+if $X64_BINARIES; then
+	echo
+	echo "------------ Building x86_64 binaries ------------"
+	(
+		set -x
+		do_build epel-5-x86_64 x86_64
+	)
+	if [[ $? != 0 ]]; then
+		exit 1
+	fi
+fi

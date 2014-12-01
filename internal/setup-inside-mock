@@ -1,4 +1,43 @@
 #!/bin/bash
-set -ex
-rpm -vv --rebuilddb
-yum install -y @development-tools fedora-packager gcc gcc-c++
+set -e
+cd /tmp
+rm -rf *
+OPENSSL_VERSION=1.0.1i
+FFI_VERSION=3.2.1
+set -x
+
+rpm --rebuilddb
+yum install -y @development-tools gcc gcc-c++ wget sudo zlib-devel readline-devel
+
+# Compile a static OpenSSL library.
+if [[ ! -e /usr/local/override/bin/openssl ]]; then
+	wget http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz
+	tar xzvf openssl-$OPENSSL_VERSION.tar.gz
+	rm openssl-$OPENSSL_VERSION.tar.gz
+	cd openssl-$OPENSSL_VERSION
+	./config --prefix=/usr/local/override --openssldir=/usr/local/override/openssl \
+		threads zlib no-shared no-sse2
+	make
+	make install_sw
+	strip --strip-all /usr/local/override/bin/openssl
+	strip --strip-debug /usr/local/override/lib/libcrypto.a
+	strip --strip-debug /usr/local/override/lib/libssl.a
+	sed -i 's/-lcrypto/-lcrypto -ldl/' /usr/local/override/lib/pkgconfig/openssl.pc
+	sed -i 's/-lcrypto/-lcrypto -ldl/' /usr/local/override/lib/pkgconfig/libssl.pc
+	cd ..
+	rm -rf openssl-$OPENSSL_VERSION
+fi
+
+# Compile a static libffi library.
+if [[ ! -e /usr/local/override/lib/libffi.a ]]; then
+	wget ftp://sourceware.org/pub/libffi/libffi-$FFI_VERSION.tar.gz
+	tar xzf libffi-$FFI_VERSION.tar.gz
+	rm libffi-$FFI_VERSION.tar.gz
+	cd libffi-$FFI_VERSION
+	./configure --prefix=/usr/local/override --disable-shared --enable-static \
+		--enable-portable-binary
+	make -j2
+	make install-strip
+	cd ..
+	rm -rf libffi-$FFI_VERSION
+fi

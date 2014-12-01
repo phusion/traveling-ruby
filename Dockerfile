@@ -1,3 +1,3 @@
 FROM centos:centos6
-ADD install /install
-RUN /install/install.sh
+ADD image /image
+RUN /image/install.sh
