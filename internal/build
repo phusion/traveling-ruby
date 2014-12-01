@@ -11,11 +11,13 @@ function do_build()
 	rm -rf $root/system $root/output
 	mkdir $root/system $root/output
 	cp /system/* $root/system/
+	echo $name > $root/system/NAME
 	echo $APP_UID > $root/system/APP_UID
 	echo $APP_GID > $root/system/APP_GID
 	echo $CONCURRENCY > $root/system/CONCURRENCY
 	echo $SETUP_SOURCE > $root/system/SETUP_SOURCE
 	echo $COMPILE > $root/system/COMPILE
+	echo $INSTALL_GEMS > $root/system/INSTALL_GEMS
 	echo $SANITY_CHECK_OUTPUT > $root/system/SANITY_CHECK_OUTPUT
 
 	# Build the binaries

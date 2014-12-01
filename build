@@ -11,6 +11,7 @@ X64_BINARIES=true
 CONCURRENCY=2
 SETUP_SOURCE=true
 COMPILE=true
+INSTALL_GEMS=true
 SANITY_CHECK_OUTPUT=true
 
 function usage()
@@ -25,7 +26,8 @@ function usage()
 	echo "  -S         Do not build 64-bit binaries"
 	echo
 	echo "  -E         Do not setup source"
-	echo "  -C         Do not compile"
+	echo "  -C         Do not compile Ruby"
+	echo "  -G         Do not install gems"
 	echo
 	echo "  -j NUMBER  Set build concurrency. Default: 2"
 	echo "  -h         Show this help"
@@ -35,17 +37,17 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "tTsSECj:h" opt; do
+	while getopts "tTsSECGj:h" opt; do
 		case "$opt" in
 		t)
-			X84_BINARIES=true
+			X86_BINARIES=true
 			X64_BINARIES=false
 			;;
 		T)
-			X84_BINARIES=false
+			X86_BINARIES=false
 			;;
 		s)
-			X84_BINARIES=false
+			X86_BINARIES=false
 			X64_BINARIES=true
 			;;
 		S)
@@ -56,6 +58,9 @@ function parse_options()
 			;;
 		C)
 			COMPILE=false
+			;;
+		G)
+			INSTALL_GEMS=false
 			;;
 		j)
 			CONCURRENCY=$OPTARG
@@ -111,6 +116,7 @@ exec docker run \
 	-e "CONCURRENCY=$CONCURRENCY" \
 	-e "SETUP_SOURCE=$SETUP_SOURCE" \
 	-e "COMPILE=$COMPILE" \
+	-e "INSTALL_GEMS=$INSTALL_GEMS" \
 	-e "SANITY_CHECK_OUTPUT=$SANITY_CHECK_OUTPUT" \
 	phusion/ruby-traveler-builder \
 	/system/my_init --quiet --skip-runit --skip-startup-files -- \
