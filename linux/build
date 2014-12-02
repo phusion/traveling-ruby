@@ -107,6 +107,7 @@ exec docker run \
 	--rm \
 	--cap-add SYS_ADMIN --cap-add SYS_CHROOT \
 	-v "$SELFDIR/internal:/system:ro" \
+	-v "$SELFDIR/../shared:/system_shared:ro" \
 	-v "$RUNTIME_DIR/mock:/var/lib/mock" \
 	-v "$OUTPUT_DIR:/output" \
 	-e "APP_UID=`id -u`" \

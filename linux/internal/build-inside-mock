@@ -197,13 +197,14 @@ export SSL_CERT_FILE=/tmp/ruby/lib/cert.pem
 	mv /tmp/ruby/bin /tmp/ruby/bin.real
 	mkdir /tmp/ruby/bin
 	create_environment_file /tmp/ruby/bin/ruby_environment
-	cat /tmp/ruby/bin/ruby_environment
 	create_wrapper /tmp/ruby/bin/ruby ruby false
 	create_wrapper /tmp/ruby/bin/gem gem true
 	create_wrapper /tmp/ruby/bin/irb irb true
 	create_wrapper /tmp/ruby/bin/rake rake true
-	create_wrapper /tmp/ruby/bin/bundle bundle true
-	create_wrapper /tmp/ruby/bin/bundler bundler true
+	if $INSTALL_GEMS; then
+		create_wrapper /tmp/ruby/bin/bundle bundle true
+		create_wrapper /tmp/ruby/bin/bundler bundler true
+	fi
 )
 if [[ $? != 0 ]]; then
 	exit 1

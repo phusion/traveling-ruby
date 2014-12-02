@@ -13,6 +13,7 @@ RUNTIME_DIR=
 CONCURRENCY=4
 SETUP_SOURCE=true
 COMPILE=true
+INSTALL_GEMS=true
 
 function _cleanup()
 {
@@ -20,6 +21,74 @@ function _cleanup()
 		echo "Removing working directory $WORKDIR"
 		rm -rf "$WORKDIR"
 	fi
+}
+
+function create_environment_file() {
+	local FILE="$1"
+	local LOAD_PATHS=`ruby "$SELFDIR/../shared/dump-load-paths.rb"`
+	cat > "$FILE" <<'EOF'
+#!/bin/bash
+ROOT=`dirname "$0"`
+ROOT=`cd "$ROOT/.." && pwd`
+
+echo ORIG_DYLD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\"
+echo ORIG_TERMINFO=\"$TERMINFO\"
+echo ORIG_SSL_CERT_DIR=\"$SSL_CERT_DIR\"
+echo ORIG_SSL_CERT_FILE=\"$SSL_CERT_FILE\"
+echo ORIG_RUBYOPT=\"$RUBYOPT\"
+echo ORIG_RUBYLIB=\"$RUBYLIB\"
+
+echo TERMINFO=/usr/share/terminfo
+echo SSL_CERT_FILE=\"$ROOT/lib/cert.pem\"
+echo RUBYOPT=\"-r$ROOT/lib/restore_environment\"
+echo GEM_HOME=\"$ROOT/lib/ruby/gems/2.1.0\"
+echo GEM_PATH=\"$ROOT/lib/ruby/gems/2.1.0\"
+EOF
+	cat >> "$FILE" <<EOF
+echo RUBYLIB=\"$LOAD_PATHS\"
+
+echo export ORIG_DYLD_LIBRARY_PATH
+echo export ORIG_TERMINFO
+echo export ORIG_SSL_CERT_DIR
+echo export ORIG_SSL_CERT_FILE
+echo export ORIG_RUBYOPT
+echo export ORIG_RUBYLIB
+
+echo unset  DYLD_LIBRARY_PATH
+echo export TERMINFO
+echo unset  SSL_CERT_DIR
+echo export SSL_CERT_FILE
+echo export RUBYOPT
+echo export GEM_HOME
+echo export GEM_PATH
+echo export RUBYLIB
+EOF
+	chmod +x "$FILE"
+}
+
+function create_wrapper()
+{
+	local FILE="$1"
+	local NAME="$2"
+	local IS_RUBY_SCRIPT="$3"
+
+	cat > "$FILE" <<'EOF'
+#!/bin/bash
+set -e
+ROOT=`dirname "$0"`
+ROOT=`cd "$ROOT/.." && pwd`
+eval "`\"$ROOT/bin/ruby_environment\"`"
+EOF
+	if $IS_RUBY_SCRIPT; then
+		cat >> "$FILE" <<EOF
+exec "\$ROOT/bin.real/ruby" "\$ROOT/bin.real/$NAME" "\$@"
+EOF
+	else
+		cat >> "$FILE" <<EOF
+exec "\$ROOT/bin.real/$NAME" "\$@"
+EOF
+	fi
+	chmod +x "$FILE"
 }
 
 function usage()
@@ -30,6 +99,7 @@ function usage()
 	echo "Options:"
 	echo "  -E      Do not setup source"
 	echo "  -C      Do not compile Ruby"
+	echo "  -G      Do not install gems"
 	echo
 	echo "  -w DIR  Use the given working directory instead of creating a temporary one"
 	echo "  -j NUM  Compilation concurrency. Default: 4"
@@ -47,6 +117,9 @@ function parse_options()
 			;;
 		C)
 			COMPILE=false
+			;;
+		G)
+			INSTALL_GEMS=false
 			;;
 		w)
 			WORKDIR="$OPTARG"
@@ -143,8 +216,48 @@ echo
 
 
 header "Postprocessing build output..."
-run mv /tmp/ruby/bin /tmp/ruby/bin.real
+
+# Copy over various useful files.
 run cp -p "$RUNTIME_DIR"/lib/*.dylib* /tmp/ruby/lib/
+run cp "$SELFDIR/internal/restore_environment.rb" /tmp/ruby/lib/
+
+if $INSTALL_GEMS; then
+	run /tmp/ruby/bin/gem install bundler --no-rdoc --no-ri
+	run cp "$SELFDIR/shared/Gemfile*" /tmp/ruby
+	echo "+ Entering /tmp/ruby"
+	pushd /tmp/ruby >/dev/null
+	run /tmp/ruby/bin/bundle install --system --retry 3
+	run rm -f Gemfile*
+	echo "+ Leaving /tmp/ruby"
+	popd >/dev/null
+fi
+
+# Strip binaries and remove unnecessary files.
+run strip /tmp/ruby/bin/ruby
+echo "+ Stripping libraries..."
+find /tmp/ruby -name '*.bundle' | xargs strip -S
+find /tmp/ruby -name '*.dylib' | xargs strip -S
+run rm /tmp/ruby/bin/{erb,rdoc,ri,testrb}
+run rm -rf /tmp/ruby/share
+run rm -rf /tmp/ruby/lib/{libruby-static.a,pkgconfig}
+run rm /tmp/ruby/lib/ruby/gems/*/cache/*
+run rm -f /tmp/ruby/lib/ruby/gems/*/extensions/*/*/*/{gem_make.out,mkmf.log}
+run rm -rf /tmp/ruby/lib/ruby/gems/*/gems/*/{test,spec,*.md,*.rdoc}
+
+# Create wrapper scripts.
+run mv /tmp/ruby/bin /tmp/ruby/bin.real
+run mkdir /tmp/ruby/bin
+run create_environment_file /tmp/ruby/bin/ruby_environment
+
+run create_wrapper /tmp/ruby/bin/ruby ruby false
+run create_wrapper /tmp/ruby/bin/gem gem true
+run create_wrapper /tmp/ruby/bin/irb irb true
+run create_wrapper /tmp/ruby/bin/rake rake true
+if $INSTALL_GEMS; then
+	run create_wrapper /tmp/ruby/bin/bundle bundle true
+	run create_wrapper /tmp/ruby/bin/bundler bundler true
+fi
+
 echo
 
 
