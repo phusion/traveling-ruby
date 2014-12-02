@@ -10,6 +10,7 @@ WORKDIR=
 OWNS_WORKDIR=true
 
 RUNTIME_DIR=
+OUTPUT_DIR=
 CONCURRENCY=4
 SETUP_SOURCE=true
 COMPILE=true
@@ -141,9 +142,18 @@ function parse_options()
 	(( OPTIND -= 1 )) || true
 	shift $OPTIND || true
 	RUNTIME_DIR="$1"
+	OUTPUT_DIR="$2"
 
-	if [[ "$RUNTIME_DIR" = "" ]]; then
+	if [[ "$RUNTIME_DIR" = "" || "$OUTPUT_DIR" = "" ]]; then
 		usage
+		exit 1
+	fi
+	if [[ ! -e "$RUNTIME_DIR" ]]; then
+		echo "ERROR: $RUNTIME_DIR doesn't exist."
+		exit 1
+	fi
+	if [[ ! -e "$OUTPUT_DIR" ]]; then
+		echo "ERROR: $OUTPUT_DIR doesn't exist."
 		exit 1
 	fi
 }
@@ -247,16 +257,17 @@ if $INSTALL_GEMS; then
 fi
 
 # Strip binaries and remove unnecessary files.
-#run strip -S /tmp/ruby/bin/ruby
+run strip -S /tmp/ruby/bin/ruby
 echo "+ Stripping libraries..."
-#find /tmp/ruby -name '*.bundle' | xargs strip -S
-#find /tmp/ruby -name '*.dylib' | xargs strip -S
+find /tmp/ruby -name '*.bundle' | xargs strip -S
+find /tmp/ruby -name '*.dylib' | xargs strip -S
 run rm /tmp/ruby/bin/{erb,rdoc,ri,testrb}
 run rm -rf /tmp/ruby/share
 run rm -rf /tmp/ruby/lib/{libruby-static.a,pkgconfig}
 run rm -f /tmp/ruby/lib/ruby/gems/*/cache/*
 run rm -f /tmp/ruby/lib/ruby/gems/*/extensions/*/*/*/{gem_make.out,mkmf.log}
 run rm -rf /tmp/ruby/lib/ruby/gems/*/gems/*/{test,spec,*.md,*.rdoc}
+run rm -rf /tmp/ruby/lib/ruby/gems/*/gems/nokogiri*/ext/nokogiri/tmp
 
 # Create wrapper scripts.
 run mv /tmp/ruby/bin /tmp/ruby/bin.real
@@ -278,3 +289,11 @@ echo
 header "Sanity checking build output..."
 bash "$SELFDIR/internal/sanity_check" /tmp/ruby
 echo
+
+
+header "Committing build output..."
+run mv /tmp/ruby/* "$OUTPUT_DIR"/
+run rm -rf /tmp/ruby
+echo
+
+header "All done!"

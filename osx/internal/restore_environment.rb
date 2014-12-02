@@ -17,6 +17,12 @@ $OVERRIDDEN_ENVIRONMENTS = {
 }
 
 # Get rid of our custom compilation flags.
+RbConfig::CONFIG["CC"] = (String.new << "xcrun clang")
+RbConfig::CONFIG["CXX"] = (String.new << "xcrun clang++")
+RbConfig::CONFIG["CPP"] = (String.new << "xcrun clang -E")
+RbConfig::CONFIG["LDSHARED"] = (String.new << "xcrun clang -dynamic -bundle")
+RbConfig::CONFIG["LDSHAREDXX"] = (String.new << "xcrun clang++ -dynamic -bundle")
 RbConfig::CONFIG["CFLAGS"] = RbConfig::CONFIG["cflags"].dup
 RbConfig::CONFIG["CXXFLAGS"] = RbConfig::CONFIG["cxxflags"].dup
 RbConfig::CONFIG["RUBY_EXEC_PREFIX"] = RbConfig::CONFIG["exec_prefix"].dup
+RbConfig::CONFIG.delete("CC_VERSION")

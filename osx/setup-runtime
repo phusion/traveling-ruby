@@ -24,12 +24,32 @@ FORCE_LIBFFI=false
 SKIP_LIBFFI=false
 FORCE_LIBYAML=false
 SKIP_LIBYAML=false
+FORCE_SQLITE3=false
+SKIP_SQLITE3=false
+FORCE_LIBLZMA=false
+SKIP_LIBLZMA=false
 
 function _cleanup()
 {
 	if [[ "$TEMPDIR" != "" ]]; then
 		rm -rf "$TEMPDIR"
 	fi
+}
+
+function download_and_extract()
+{
+	local BASENAME="$1"
+	local URL="$2"
+	local regex='\.bz2$'
+
+	run rm -f "$BASENAME"
+	run curl --fail -L -o "$BASENAME" "$URL"
+	if [[ "$URL" =~ $regex ]]; then
+		run tar xjf "$BASENAME"
+	else
+		run tar xzf "$BASENAME"
+	fi
+	run rm "$BASENAME"
 }
 
 function usage()
@@ -50,6 +70,10 @@ function usage()
 	echo "  -F      Skip installing libffi"
 	echo "  -y      Force installing libyaml"
 	echo "  -Y      Skip installing libyaml"
+	echo "  -s      Force installing sqlite3"
+	echo "  -S      Skip installing sqlite3"
+	echo "  -z      Force installing liblzma"
+	echo "  -Z      Skip installing liblzma"
 	echo
 	echo "  -j NUM  Compilation concurrency. Default: 4"
 	echo "  -h      Show this help"
@@ -59,7 +83,7 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "oOnNeEgGfFyYj:h" opt; do
+	while getopts "oOnNeEgGfFyYsSzZj:h" opt; do
 		case "$opt" in
 		o)
 			FORCE_OPENSSL=true
@@ -96,6 +120,18 @@ function parse_options()
 			;;
 		Y)
 			SKIP_LIBYAML=true
+			;;
+		s)
+			FORCE_SQLITE3=true
+			;;
+		S)
+			SKIP_SQLITE3=true
+			;;
+		z)
+			FORCE_LIBLZMA=true
+			;;
+		Z)
+			SKIP_LIBLZMA=true
 			;;
 		j)
 			CONCURRENCY=$OPTARG
@@ -137,6 +173,8 @@ GMP_VERSION=6.0.0a
 GMP_DIR_VERSION=6.0.0
 LIBFFI_VERSION=3.2.1
 LIBYAML_VERSION=0.1.5
+SQLITE3_VERSION=3080702
+XZ_VERSION=5.0.7
 export PATH="$RUNTIME_DIR/bin:$PATH"
 export LIBRARY_PATH="$RUNTIME_DIR/lib"
 export DYLD_LIBRARY_PATH="$RUNTIME_DIR/lib"
@@ -163,7 +201,7 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 1/6: OpenSSL..."
+header "Compiling runtime libraries 1/8: OpenSSL..."
 if $SKIP_OPENSSL; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/bin/openssl" ]] || $FORCE_OPENSSL; then
@@ -200,7 +238,7 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 2/6: ncurses..."
+header "Compiling runtime libraries 2/8: ncurses..."
 if $SKIP_NCURSES; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libncurses.5.dylib" ]] || $FORCE_NCURSES; then
@@ -233,7 +271,7 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 3/6: libedit..."
+header "Compiling runtime libraries 3/8: libedit..."
 if $SKIP_LIBEDIT; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libedit.0.dylib" ]] || $FORCE_LIBEDIT; then
@@ -261,7 +299,7 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 4/6: gmp..."
+header "Compiling runtime libraries 4/8: gmp..."
 if $SKIP_GMP; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libgmp.10.dylib" ]] || $FORCE_GMP; then
@@ -286,7 +324,7 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 5/6: libffi..."
+header "Compiling runtime libraries 5/8: libffi..."
 if $SKIP_LIBFFI; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libffi.6.dylib" ]] || $FORCE_LIBFFI; then
@@ -312,14 +350,12 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 6/6: libyaml..."
+header "Compiling runtime libraries 6/8: libyaml..."
 if $SKIP_LIBYAML; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libyaml-0.2.dylib" ]] || $FORCE_LIBYAML; then
-	run rm -f yaml-$LIBYAML_VERSION.tar.gz
-	run curl --fail -L -O http://pyyaml.org/download/libyaml/yaml-$LIBYAML_VERSION.tar.gz
-	run tar xzf yaml-$LIBYAML_VERSION.tar.gz
-	run rm yaml-$LIBYAML_VERSION.tar.gz
+	download_and_extract yaml-$LIBYAML_VERSION.tar.gz \
+		http://pyyaml.org/download/libyaml/yaml-$LIBYAML_VERSION.tar.gz
 	echo "Entering $RUNTIME_DIR/libyaml-$LIBYAML_VERSION"
 	pushd yaml-$LIBYAML_VERSION >/dev/null
 
@@ -332,6 +368,54 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libyaml-0.2.dylib" ]] || $FORCE_LIBYAML; then
 
 	run install_name_tool -id "@executable_path/../lib/libyaml-0.2.dylib" \
 		"$RUNTIME_DIR/lib/libyaml-0.2.dylib"
+else
+	echo "Already installed."
+fi
+echo
+
+header "Compiling runtime libraries 7/8: sqlite3..."
+if $SKIP_SQLITE3; then
+	echo "Skipped."
+elif [[ ! -e "$RUNTIME_DIR/lib/libsqlite3.0.dylib" ]] || $FORCE_SQLITE3; then
+	download_and_extract sqlite-autoconf-$SQLITE3_VERSION.tar.gz \
+		http://www.sqlite.org/2014/sqlite-autoconf-$SQLITE3_VERSION.tar.gz
+	echo "Entering $RUNTIME_DIR/sqlite-autoconf-$SQLITE3_VERSION"
+	pushd sqlite-autoconf-$SQLITE3_VERSION >/dev/null
+
+	run ./configure --prefix="$RUNTIME_DIR" --disable-static --disable-dynamic-extensions
+	run make -j$CONCURRENCY
+	run make install-strip
+	echo "Entering $RUNTIME_DIR"
+	popd >/dev/null
+	run rm -rf sqlite-autoconf-$SQLITE3_VERSION
+
+	run install_name_tool -id "@executable_path/../lib/libsqlite3.0.dylib" \
+		"$RUNTIME_DIR/lib/libsqlite3.0.dylib"
+else
+	echo "Already installed."
+fi
+echo
+
+header "Compiling runtime libraries 8/8: liblzma..."
+if $SKIP_LIBLZMA; then
+	echo "Skipped."
+elif [[ ! -e "$RUNTIME_DIR/lib/liblzma.5.dylib" ]] || $FORCE_LIBLZMA; then
+	download_and_extract xz-$XZ_VERSION.tar.bz2 \
+		http://fossies.org/linux/misc/xz-$XZ_VERSION.tar.bz2
+	echo "Entering $RUNTIME_DIR/xz-$XZ_VERSION"
+	pushd xz-$XZ_VERSION >/dev/null
+
+	run ./configure --prefix="$RUNTIME_DIR" --disable-static --disable-xz \
+		--disable-xzdec --disable-lzmadec --disable-lzmainfo --disable-lzma-links \
+		--disable-scripts --disable-doc
+	run make -j$CONCURRENCY
+	run make install-strip
+	echo "Entering $RUNTIME_DIR"
+	popd >/dev/null
+	run rm -rf xz-$XZ_VERSION
+
+	run install_name_tool -id "@executable_path/../lib/liblzma.5.dylib" \
+		"$RUNTIME_DIR/lib/liblzma.5.dylib"
 else
 	echo "Already installed."
 fi
