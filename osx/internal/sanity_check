@@ -22,6 +22,7 @@ function grep_without_fail()
 trap cleanup EXIT
 DIR="$1"
 TAB=`perl -e 'print "\t"'`
+ERROR=false
 STANDARD_LIBS="(@executable_path/|/usr/lib/libobjc|/usr/lib/libSystem|/usr/lib/libutil|/usr/lib/libz"
 STANDARD_LIBS="$STANDARD_LIBS|/usr/lib/libiconv)\."
 STANDARD_LIBS="($STANDARD_LIBS|CoreFoundation)"
