@@ -194,7 +194,7 @@ export SSL_CERT_FILE=/tmp/ruby/lib/cert.pem
 	rm -f /tmp/ruby/lib/ruby/gems/*/extensions/*/*/*/{gem_make.out,mkmf.log}
 	rm -rf /tmp/ruby/lib/ruby/gems/*/gems/*/{test,spec,*.md,*.rdoc}
 	rm -rf /tmp/ruby/lib/ruby/gems/*/gems/*/ext/*/*.{c,h}
-	run rm -rf /tmp/ruby/lib/ruby/gems/*/gems/nokogiri*/ext/nokogiri/tmp
+	rm -rf /tmp/ruby/lib/ruby/gems/*/gems/nokogiri*/ext/nokogiri/tmp
 
 	# Create wrapper scripts
 	mv /tmp/ruby/bin /tmp/ruby/bin.real
