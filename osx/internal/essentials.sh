@@ -26,3 +26,5 @@ unset RUBYOPT
 unset RUBYLIB
 unset GEM_HOME
 unset GEM_PATH
+unset SSL_CERT_DIR
+unset SSL_CERT_FILE

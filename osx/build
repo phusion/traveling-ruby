@@ -39,7 +39,7 @@ echo ORIG_RUBYOPT=\"$RUBYOPT\"
 echo ORIG_RUBYLIB=\"$RUBYLIB\"
 
 echo TERMINFO=/usr/share/terminfo
-echo SSL_CERT_FILE=\"$ROOT/lib/cert.pem\"
+echo SSL_CERT_FILE=\"$ROOT/lib/ca-bundle.crt\"
 echo RUBYOPT=\"-r$ROOT/lib/restore_environment\"
 echo GEM_HOME=\"$ROOT/lib/ruby/gems/2.1.0\"
 echo GEM_PATH=\"$ROOT/lib/ruby/gems/2.1.0\"
@@ -196,7 +196,7 @@ if $SETUP_SOURCE; then
 		--disable-install-rdoc \
 		--disable-install-capi \
 		--with-out-ext=tk,gdbm,dbm,dl,coverage \
-		--with-openssl-dir="$RUNTIME_DIR/openssl"
+		--with-openssl-dir="$RUNTIME_DIR"
 	echo
 fi
 
@@ -220,12 +220,15 @@ header "Postprocessing build output..."
 # Copy over various useful files.
 run cp -p "$RUNTIME_DIR"/lib/*.dylib* /tmp/ruby/lib/
 run cp "$SELFDIR/internal/restore_environment.rb" /tmp/ruby/lib/
+run cp "$SELFDIR/../shared/ca-bundle.crt" /tmp/ruby/lib/
+export SSL_CERT_FILE=/tmp/ruby/lib/ca-bundle.crt
 
 if $INSTALL_GEMS; then
 	run /tmp/ruby/bin/gem install bundler --no-rdoc --no-ri
 	run cp "$SELFDIR/../shared"/Gemfile* /tmp/ruby
 	echo "+ Entering /tmp/ruby"
 	pushd /tmp/ruby >/dev/null
+	export BUNDLE_IGNORE_CONFIG=1
 	run /tmp/ruby/bin/bundle install --system --retry 3
 	run rm -f Gemfile*
 	echo "+ Leaving /tmp/ruby"

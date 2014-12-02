@@ -4,12 +4,12 @@ set -e
 SELFDIR=`dirname "$0"`
 SELFDIR=`cd "$SELFDIR" && pwd`
 
-DATA_DIR=
+RUNTIME_DIR=
 
 function usage()
 {
-	echo "Usage: ./shell [options] <DATA DIR>"
-	echo "Open a shell for the specified data directory."
+	echo "Usage: ./shell [options] <RUNTIME DIR>"
+	echo "Open a shell for the specified runtime directory."
 	echo
 	echo "Options:"
 	echo "  -h      Show this help"
@@ -33,22 +33,22 @@ function parse_options()
 
 	(( OPTIND += 1 )) || true
 	shift $OPTIND || true
-	DATA_DIR="$1"
+	RUNTIME_DIR="$1"
 
-	if [[ "$DATA_DIR" = "" ]]; then
+	if [[ "$RUNTIME_DIR" = "" ]]; then
 		usage
 		exit 1
 	fi
-	if [[ ! -e "$DATA_DIR" ]]; then
-		echo "ERROR: $DATA_DIR doesn't exist."
+	if [[ ! -e "$RUNTIME_DIR" ]]; then
+		echo "ERROR: $RUNTIME_DIR doesn't exist."
 		exit 1
 	fi
 }
 
 
 parse_options "$@"
-DATA_DIR=`cd "$DATA_DIR" && pwd`
-mkdir -p "$DATA_DIR/mock"
+RUNTIME_DIR=`cd "$RUNTIME_DIR" && pwd`
+mkdir -p "$RUNTIME_DIR/mock"
 
 echo "Within the shell, you can enter one of the mock environments with:"
 echo "  /usr/bin/mock -r epel-5-i386 --shell"
@@ -58,7 +58,7 @@ exec docker run \
 	--rm -t -i \
 	--cap-add SYS_ADMIN --cap-add SYS_CHROOT \
 	-v "$SELFDIR/internal:/system:ro" \
-	-v "$DATA_DIR/mock:/var/lib/mock" \
+	-v "$RUNTIME_DIR/mock:/var/lib/mock" \
 	phusion/ruby-traveler-builder \
 	/system/my_init --quiet --skip-runit --skip-startup-files -- \
 	/bin/bash -l

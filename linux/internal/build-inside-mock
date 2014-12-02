@@ -114,6 +114,7 @@ if $SETUP_SOURCE; then
 			--disable-install-doc \
 			--disable-install-rdoc \
 			--disable-install-capi \
+			--with-out-ext=tk,gdbm,dbm,dl,coverage \
 			--with-openssl-dir=/usr/local/override
 	)
 	if [[ $? != 0 ]]; then
