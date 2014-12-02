@@ -267,6 +267,7 @@ run rm -rf /tmp/ruby/lib/{libruby-static.a,pkgconfig}
 run rm -f /tmp/ruby/lib/ruby/gems/*/cache/*
 run rm -f /tmp/ruby/lib/ruby/gems/*/extensions/*/*/*/{gem_make.out,mkmf.log}
 run rm -rf /tmp/ruby/lib/ruby/gems/*/gems/*/{test,spec,*.md,*.rdoc}
+run rm -rf /tmp/ruby/lib/ruby/gems/*/gems/*/ext/*/*.{c,h}
 run rm -rf /tmp/ruby/lib/ruby/gems/*/gems/nokogiri*/ext/nokogiri/tmp
 
 # Create wrapper scripts.
