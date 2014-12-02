@@ -1,0 +1,17 @@
+#!/bin/bash
+set -e
+ARGS=()
+if [[ "$DEAD_STRIP" != "" ]] && $DEAD_STRIP; then
+	ARGS+=(-Wl,-dead_strip)
+fi
+if [[ "$@" =~ -c ]]; then
+	if [[ "$RUNTIME_DIR" != "" ]]; then
+		ARGS+=("-I$RUNTIME_DIR/lib")
+	fi
+	exec /usr/bin/cc "${ARGS[@]}" "$@"
+else
+	if [[ "$RUNTIME_DIR" != "" ]]; then
+		ARGS+=("-L$RUNTIME_DIR/lib")
+	fi
+	exec /usr/bin/cc -Wl,-headerpad_max_install_names "${ARGS[@]}" "$@"
+fi

@@ -108,7 +108,6 @@ if $SETUP_SOURCE; then
 	echo
 	echo "--------- Configuring ---------"
 	(
-		set -o pipefail
 		set -x
 		./configure \
 			--prefix /tmp/ruby \

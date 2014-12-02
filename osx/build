@@ -1,0 +1,153 @@
+#!/bin/bash
+set -e
+
+SELFDIR=`dirname "$0"`
+SELFDIR=`cd "$SELFDIR" && pwd`
+source "$SELFDIR/internal/essentials.sh"
+source "$SELFDIR/internal/library.sh"
+
+WORKDIR=
+OWNS_WORKDIR=true
+
+RUNTIME_DIR=
+CONCURRENCY=4
+SETUP_SOURCE=true
+COMPILE=true
+
+function _cleanup()
+{
+	if $OWNS_WORKDIR && [[ "$WORKDIR" != "" ]]; then
+		echo "Removing working directory $WORKDIR"
+		rm -rf "$WORKDIR"
+	fi
+}
+
+function usage()
+{
+	echo "Usage: ./build [options] <RUNTIME DIR>"
+	echo "Build Traveling Ruby binaries."
+	echo
+	echo "Options:"
+	echo "  -E      Do not setup source"
+	echo "  -C      Do not compile Ruby"
+	echo
+	echo "  -w DIR  Use the given working directory instead of creating a temporary one"
+	echo "  -j NUM  Compilation concurrency. Default: 4"
+	echo "  -h      Show this help"
+}
+
+function parse_options()
+{
+	local OPTIND=1
+	local opt
+	while getopts "ECw:j:h" opt; do
+		case "$opt" in
+		E)
+			SETUP_SOURCE=false
+			;;
+		C)
+			COMPILE=false
+			;;
+		w)
+			WORKDIR="$OPTARG"
+			OWNS_WORKDIR=false
+			;;
+		j)
+			CONCURRENCY=$OPTARG
+			;;
+		h)
+			usage
+			exit
+			;;
+		*)
+			return 1
+			;;
+		esac
+	done
+
+	(( OPTIND -= 1 )) || true
+	shift $OPTIND || true
+	RUNTIME_DIR="$1"
+
+	if [[ "$RUNTIME_DIR" = "" ]]; then
+		usage
+		exit 1
+	fi
+}
+
+parse_options "$@"
+RUNTIME_DIR="`cd \"$RUNTIME_DIR\" && pwd`"
+if [[ "$WORKDIR" = "" ]]; then
+	WORKDIR=`mktemp -d /tmp/traveling-ruby.XXXXXXXX`
+elif [[ ! -e "$WORKDIR" ]]; then
+	echo "ERROR: working directory $WORKDIR doesn't exist."
+	exit 1
+else
+	WORKDIR="`cd \"$WORKDIR\" && pwd`"
+fi
+
+
+#######################################
+
+
+RUBY_MAJOR_MINOR=2.1
+RUBY_VERSION=2.1.5
+
+
+header "Preparing Ruby source code..."
+
+export PATH="$RUNTIME_DIR/bin:$PATH"
+export LIBRARY_PATH="$RUNTIME_DIR/lib"
+export DYLD_LIBRARY_PATH="$RUNTIME_DIR/lib"
+export PKG_CONFIG_PATH="$RUNTIME_DIR/lib/pkgconfig:/usr/lib/pkgconfig"
+export RUNTIME_DIR
+export DEAD_STRIP=false
+
+echo "Entering working directory $WORKDIR"
+pushd "$WORKDIR" >/dev/null
+
+if $SETUP_SOURCE; then
+	run rm -rf "ruby-$RUBY_VERSION"
+	run tar xzf "$RUNTIME_DIR/ruby.tar.gz"
+fi
+echo "Entering ruby-$RUBY_VERSION"
+pushd "ruby-$RUBY_VERSION" >/dev/null
+echo
+
+
+if $SETUP_SOURCE; then
+	header "Configuring..."
+	./configure \
+		--prefix /tmp/ruby \
+		--disable-install-doc \
+		--disable-install-rdoc \
+		--disable-install-capi \
+		--with-out-ext=tk,gdbm,dbm,dl,coverage \
+		--with-openssl-dir="$RUNTIME_DIR/openssl"
+	echo
+fi
+
+
+if $COMPILE; then
+	header "Compiling..."
+	run make -j$CONCURRENCY exts.mk
+	run make -j$CONCURRENCY
+	echo
+fi
+
+
+header "Installing to temporary build output directory..."
+run rm -rf /tmp/ruby
+run make install-nodoc
+echo
+
+
+header "Postprocessing build output..."
+run mv /tmp/ruby/bin /tmp/ruby/bin.real
+run cp -p "$RUNTIME_DIR"/lib/*.dylib* /tmp/ruby/lib/
+echo
+
+
+header "Sanity checking build output..."
+bash "$SELFDIR/internal/sanity_check" /tmp/ruby
+echo
