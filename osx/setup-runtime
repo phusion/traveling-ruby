@@ -59,7 +59,7 @@ function parse_options()
 		O)
 			SKIP_OPENSSL=true
 			;;
-		7n)
+		n)
 			FORCE_NCURSES=true
 			;;
 		N)
@@ -141,7 +141,7 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 1/4: OpenSSL..."
+header "Compiling runtime libraries 1/6: OpenSSL..."
 if $SKIP_OPENSSL; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/bin/openssl" ]] || $FORCE_OPENSSL; then
@@ -178,7 +178,7 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 2/4: ncurses..."
+header "Compiling runtime libraries 2/6: ncurses..."
 if $SKIP_NCURSES; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libncurses.dylib" ]] || $FORCE_NCURSES; then
@@ -200,8 +200,10 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libncurses.dylib" ]] || $FORCE_NCURSES; then
 
 	run rm -f "$RUNTIME_DIR/lib"/{libpanel,libmenu,libform}*
 	run rm -f "$RUNTIME_DIR/lib"/*.a
-	run strip -S "$RUNTIME_DIR/lib"
+	run strip -S "$RUNTIME_DIR/lib/libncurses.5.dylib"
+	pushd "$RUNTIME_DIR/lib" >/dev/null
 	run ln -sf libncurses.5.dylib libtermcap.dylib
+	popd >/dev/null
 	run install_name_tool -id "@executable_path/../lib/libncurses.5.dylib" \
 		"$RUNTIME_DIR/lib/libncurses.5.dylib"
 else
@@ -209,7 +211,7 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 3/4: libedit..."
+header "Compiling runtime libraries 3/6: libedit..."
 if $SKIP_LIBEDIT; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libedit.dylib" ]] || $FORCE_LIBEDIT; then
@@ -237,7 +239,7 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 4/4: gmp..."
+header "Compiling runtime libraries 4/6: gmp..."
 if $SKIP_GMP; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libgmp.dylib" ]] || $FORCE_GMP; then

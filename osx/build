@@ -25,7 +25,7 @@ function _cleanup()
 
 function create_environment_file() {
 	local FILE="$1"
-	local LOAD_PATHS=`ruby "$SELFDIR/../shared/dump-load-paths.rb"`
+	local LOAD_PATHS=`/tmp/ruby/bin.real/ruby "$SELFDIR/../shared/dump-load-paths.rb"`
 	cat > "$FILE" <<'EOF'
 #!/bin/bash
 ROOT=`dirname "$0"`
