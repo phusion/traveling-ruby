@@ -106,6 +106,10 @@ GMP_VERSION=6.0.0a
 GMP_DIR_VERSION=6.0.0
 RUBY_MAJOR_MINOR=2.1
 RUBY_VERSION=2.1.5
+export PATH="$RUNTIME_DIR/bin:$PATH"
+export LIBRARY_PATH="$RUNTIME_DIR/lib"
+export DYLD_LIBRARY_PATH="$RUNTIME_DIR/lib"
+export PKG_CONFIG_PATH="$RUNTIME_DIR/lib/pkgconfig:/usr/lib/pkgconfig"
 export RUNTIME_DIR
 export DEAD_STRIP=true
 
@@ -127,10 +131,10 @@ elif [[ ! -e "$RUNTIME_DIR/bin/openssl" ]] || $FORCE_OPENSSL; then
 	echo "Entering $RUNTIME_DIR/openssl-$OPENSSL_VERSION"
 	pushd openssl-$OPENSSL_VERSION >/dev/null
 
-	./Configure darwin64-x86_64-cc --prefix="$RUNTIME_DIR" --openssldir="$RUNTIME_DIR/openssl" \
+	run ./Configure darwin64-x86_64-cc --prefix="$RUNTIME_DIR" --openssldir="$RUNTIME_DIR/openssl" \
 		threads zlib shared no-sse2
-	make
-	make install_sw
+	run make
+	run make install_sw
 	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf openssl-$OPENSSL_VERSION
@@ -164,18 +168,19 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libncurses.dylib" ]] || $FORCE_NCURSES; then
 	echo "Entering $RUNTIME_DIR/gmp-$NCURSES_VERSION"
 	pushd ncurses-$NCURSES_VERSION >/dev/null
 
-	./configure --prefix="$RUNTIME_DIR" --with-shared --without-normal --without-cxx --without-cxx-binding \
+	run ./configure --prefix="$RUNTIME_DIR" --with-shared --without-normal --without-cxx --without-cxx-binding \
 		--without-ada --without-manpages --without-progs --without-tests --enable-pc-files \
 		--without-develop
-	make -j$CONCURRENCY
-	make install
+	run make -j$CONCURRENCY
+	run make install
 	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf ncurses-$NCURSES_VERSION
 
-	rm -f "$RUNTIME_DIR/lib"/{libpanel,libmenu,libform}*
-	rm -f "$RUNTIME_DIR/lib"/*.a
-	strip -S "$RUNTIME_DIR/lib"
+	run rm -f "$RUNTIME_DIR/lib"/{libpanel,libmenu,libform}*
+	run rm -f "$RUNTIME_DIR/lib"/*.a
+	run strip -S "$RUNTIME_DIR/lib"
+	run ln -sf libncurses.5.dylib libtermcap.dylib
 	run install_name_tool -id "@executable_path/../lib/libncurses.5.dylib" \
 		"$RUNTIME_DIR/lib/libncurses.5.dylib"
 else
@@ -194,15 +199,15 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libedit.dylib" ]] || $FORCE_LIBEDIT; then
 	echo "Entering $RUNTIME_DIR/libedit-$LIBEDIT_VERSION"
 	pushd libedit-$LIBEDIT_DIR_VERSION >/dev/null
 
-	./configure --prefix="$RUNTIME_DIR" --disable-static --enable-widec
-	make -j$CONCURRENCY
-	make install-strip
+	run ./configure --prefix="$RUNTIME_DIR" --disable-static --enable-widec
+	run make -j$CONCURRENCY
+	run make install-strip
 	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
-	run rm -rf libedit-$LIBEDIT_DIR_VERSION
+	#run rm -rf libedit-$LIBEDIT_DIR_VERSION
 
 	pushd "$RUNTIME_DIR/lib" >/dev/null
-	run ln -s libedit.0.dylib libreadline.dylib
+	run ln -sf libedit.0.dylib libreadline.dylib
 	popd >/dev/null
 	run install_name_tool -id "@executable_path/../lib/libedit.0.dylib" \
 		"$RUNTIME_DIR/lib/libedit.0.dylib"
@@ -222,9 +227,9 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libgmp.dylib" ]] || $FORCE_GMP; then
 	echo "Entering $RUNTIME_DIR/gmp-$GMP_VERSION"
 	pushd gmp-$GMP_DIR_VERSION >/dev/null
 
-	./configure --prefix="$RUNTIME_DIR" --disable-static --without-readline
-	make -j$CONCURRENCY
-	make install-strip
+	run ./configure --prefix="$RUNTIME_DIR" --disable-static --without-readline
+	run make -j$CONCURRENCY
+	run make install-strip
 	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf gmp-$GMP_DIR_VERSION
@@ -240,8 +245,8 @@ header "Downloading Ruby source..."
 if $SKIP_RUBY; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/ruby.tar.gz" ]] || $FORCE_RUBY; then
-	rm -f "$RUNTIME_DIR/ruby.tar.gz"
-	curl --fail -L -o "$RUNTIME_DIR/ruby.tar.gz" \
+	run rm -f "$RUNTIME_DIR/ruby.tar.gz"
+	run curl --fail -L -o "$RUNTIME_DIR/ruby.tar.gz" \
 		http://cache.ruby-lang.org/pub/ruby/$RUBY_MAJOR_MINOR/ruby-$RUBY_VERSION.tar.gz
 else
 	echo "Already downloaded."
