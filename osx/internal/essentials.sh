@@ -22,3 +22,7 @@ unset DYLD_INSERT_LIBRARIES
 unset CFLAGS
 unset CXXFLAGS
 unset LDFLAGS
+unset RUBYOPT
+unset RUBYLIB
+unset GEM_HOME
+unset GEM_PATH

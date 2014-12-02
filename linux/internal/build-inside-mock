@@ -189,7 +189,7 @@ export SSL_CERT_FILE=/tmp/ruby/lib/cert.pem
 	rm /tmp/ruby/bin/{erb,rdoc,ri,testrb}
 	rm -rf /tmp/ruby/share
 	rm -rf /tmp/ruby/lib/{libruby-static.a,pkgconfig}
-	rm /tmp/ruby/lib/ruby/gems/*/cache/*
+	rm -f /tmp/ruby/lib/ruby/gems/*/cache/*
 	rm -f /tmp/ruby/lib/ruby/gems/*/extensions/*/*/*/{gem_make.out,mkmf.log}
 	rm -rf /tmp/ruby/lib/ruby/gems/*/gems/*/{test,spec,*.md,*.rdoc}
 

@@ -110,7 +110,7 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "ECw:j:h" opt; do
+	while getopts "ECGw:j:h" opt; do
 		case "$opt" in
 		E)
 			SETUP_SOURCE=false
@@ -223,7 +223,7 @@ run cp "$SELFDIR/internal/restore_environment.rb" /tmp/ruby/lib/
 
 if $INSTALL_GEMS; then
 	run /tmp/ruby/bin/gem install bundler --no-rdoc --no-ri
-	run cp "$SELFDIR/shared/Gemfile*" /tmp/ruby
+	run cp "$SELFDIR/../shared"/Gemfile* /tmp/ruby
 	echo "+ Entering /tmp/ruby"
 	pushd /tmp/ruby >/dev/null
 	run /tmp/ruby/bin/bundle install --system --retry 3
@@ -233,14 +233,14 @@ if $INSTALL_GEMS; then
 fi
 
 # Strip binaries and remove unnecessary files.
-run strip /tmp/ruby/bin/ruby
+#run strip -S /tmp/ruby/bin/ruby
 echo "+ Stripping libraries..."
-find /tmp/ruby -name '*.bundle' | xargs strip -S
-find /tmp/ruby -name '*.dylib' | xargs strip -S
+#find /tmp/ruby -name '*.bundle' | xargs strip -S
+#find /tmp/ruby -name '*.dylib' | xargs strip -S
 run rm /tmp/ruby/bin/{erb,rdoc,ri,testrb}
 run rm -rf /tmp/ruby/share
 run rm -rf /tmp/ruby/lib/{libruby-static.a,pkgconfig}
-run rm /tmp/ruby/lib/ruby/gems/*/cache/*
+run rm -f /tmp/ruby/lib/ruby/gems/*/cache/*
 run rm -f /tmp/ruby/lib/ruby/gems/*/extensions/*/*/*/{gem_make.out,mkmf.log}
 run rm -rf /tmp/ruby/lib/ruby/gems/*/gems/*/{test,spec,*.md,*.rdoc}
 

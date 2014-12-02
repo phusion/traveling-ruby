@@ -6,6 +6,8 @@ SELFDIR=`cd "$SELFDIR" && pwd`
 source "$SELFDIR/internal/essentials.sh"
 source "$SELFDIR/internal/library.sh"
 
+TEMPDIR=
+
 RUNTIME_DIR=
 CONCURRENCY=4
 FORCE_OPENSSL=false
@@ -18,6 +20,13 @@ FORCE_GMP=false
 SKIP_GMP=false
 FORCE_RUBY=false
 SKIP_RUBY=false
+
+function _cleanup()
+{
+	if [[ "$TEMPDIR" != "" ]]; then
+		rm -rf "$TEMPDIR"
+	fi
+}
 
 function usage()
 {
@@ -50,7 +59,7 @@ function parse_options()
 		O)
 			SKIP_OPENSSL=true
 			;;
-		n)
+		7n)
 			FORCE_NCURSES=true
 			;;
 		N)
@@ -118,6 +127,18 @@ header "Initializing..."
 run mkdir -p "$RUNTIME_DIR"
 echo "Entering $RUNTIME_DIR"
 cd "$RUNTIME_DIR"
+echo
+
+header "Downloading Ruby source..."
+if $SKIP_RUBY; then
+	echo "Skipped."
+elif [[ ! -e "$RUNTIME_DIR/ruby.tar.gz" ]] || $FORCE_RUBY; then
+	run rm -f "$RUNTIME_DIR/ruby.tar.gz"
+	run curl --fail -L -o "$RUNTIME_DIR/ruby.tar.gz" \
+		http://cache.ruby-lang.org/pub/ruby/$RUBY_MAJOR_MINOR/ruby-$RUBY_VERSION.tar.gz
+else
+	echo "Already downloaded."
+fi
 echo
 
 header "Compiling runtime libraries 1/4: OpenSSL..."
@@ -240,14 +261,3 @@ else
 	echo "Already installed."
 fi
 echo
-
-header "Downloading Ruby source..."
-if $SKIP_RUBY; then
-	echo "Skipped."
-elif [[ ! -e "$RUNTIME_DIR/ruby.tar.gz" ]] || $FORCE_RUBY; then
-	run rm -f "$RUNTIME_DIR/ruby.tar.gz"
-	run curl --fail -L -o "$RUNTIME_DIR/ruby.tar.gz" \
-		http://cache.ruby-lang.org/pub/ruby/$RUBY_MAJOR_MINOR/ruby-$RUBY_VERSION.tar.gz
-else
-	echo "Already downloaded."
-fi
