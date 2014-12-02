@@ -1,0 +1,4 @@
+#!/bin/bash
+SELFDIR=`dirname "$0"`
+cd "$SELFDIR"
+exec docker build --force-rm -t phusion/ruby-traveler-builder .

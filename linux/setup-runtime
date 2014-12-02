@@ -10,8 +10,8 @@ DOWNLOAD_RUBY=true
 
 function usage()
 {
-	echo "Usage: ./setup [options] <DATA DIR>"
-	echo "Sets up the Traveling Ruby build system."
+	echo "Usage: ./setup-runtime [options] <DATA DIR>"
+	echo "Sets up the Traveling Ruby build system's runtime."
 	echo
 	echo "Options:"
 	echo "  -i      Only initialize chroot environment"
@@ -79,4 +79,4 @@ exec docker run \
 	-e "DOWNLOAD_RUBY=$DOWNLOAD_RUBY" \
 	phusion/ruby-traveler-builder \
 	/system/my_init --quiet --skip-runit --skip-startup-files -- \
-	/system/setup
+	/system/setup-runtime

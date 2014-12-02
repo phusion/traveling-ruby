@@ -29,9 +29,9 @@ function setup_chroot()
 	done
 	popd
 
-	cp /system/setup-inside-mock /var/lib/mock/$name/root/
-	/system/setuser app /usr/bin/mock -r $name --shell /setup-inside-mock
-	rm /var/lib/mock/$name/root/setup-inside-mock
+	cp /system/setup-runtime-inside-mock /var/lib/mock/$name/root/
+	/system/setuser app /usr/bin/mock -r $name --shell /setup-runtime-inside-mock
+	rm /var/lib/mock/$name/root/setup-runtime-inside-mock
 }
 
 echo "---------- Setting permissions -----------"
