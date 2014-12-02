@@ -204,7 +204,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libedit.dylib" ]] || $FORCE_LIBEDIT; then
 	run make install-strip
 	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
-	#run rm -rf libedit-$LIBEDIT_DIR_VERSION
+	run rm -rf libedit-$LIBEDIT_DIR_VERSION
 
 	pushd "$RUNTIME_DIR/lib" >/dev/null
 	run ln -sf libedit.0.dylib libreadline.dylib
