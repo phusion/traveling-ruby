@@ -4,7 +4,7 @@ set -e
 SELFDIR=`dirname "$0"`
 SELFDIR=`cd "$SELFDIR" && pwd`
 
-DATA_DIR=
+RUNTIME_DIR=
 OUTPUT_DIR=
 X86_BINARIES=true
 X64_BINARIES=true
@@ -16,7 +16,7 @@ SANITY_CHECK_OUTPUT=true
 
 function usage()
 {
-	echo "Usage: ./build [options] <DATA DIR> <OUTPUT_DIR>"
+	echo "Usage: ./build [options] <RUNTIME DIR> <OUTPUT_DIR>"
 	echo "Build Traveling Ruby binaries."
 	echo
 	echo "Options:"
@@ -77,15 +77,15 @@ function parse_options()
 
 	(( OPTIND -= 1 )) || true
 	shift $OPTIND || true
-	DATA_DIR="$1"
+	RUNTIME_DIR="$1"
 	OUTPUT_DIR="$2"
 
-	if [[ "$DATA_DIR" = "" || "$OUTPUT_DIR" = "" ]]; then
+	if [[ "$RUNTIME_DIR" = "" || "$OUTPUT_DIR" = "" ]]; then
 		usage
 		exit 1
 	fi
-	if [[ ! -e "$DATA_DIR" ]]; then
-		echo "ERROR: $DATA_DIR doesn't exist."
+	if [[ ! -e "$RUNTIME_DIR" ]]; then
+		echo "ERROR: $RUNTIME_DIR doesn't exist."
 		exit 1
 	fi
 	if [[ ! -e "$OUTPUT_DIR" ]]; then
@@ -96,10 +96,10 @@ function parse_options()
 
 
 parse_options "$@"
-DATA_DIR=`cd "$DATA_DIR" && pwd`
+RUNTIME_DIR=`cd "$RUNTIME_DIR" && pwd`
 OUTPUT_DIR=`cd "$OUTPUT_DIR" && pwd`
-if [[ ! -e "$DATA_DIR/mock" ]]; then
-	echo "ERROR: data directory $DATA_DIR not set up. Please run ./setup first."
+if [[ ! -e "$RUNTIME_DIR/mock" ]]; then
+	echo "ERROR: runtime directory $RUNTIME_DIR not set up. Please run ./setup-runtime first."
 	exit 1
 fi
 
@@ -107,7 +107,7 @@ exec docker run \
 	--rm \
 	--cap-add SYS_ADMIN --cap-add SYS_CHROOT \
 	-v "$SELFDIR/internal:/system:ro" \
-	-v "$DATA_DIR/mock:/var/lib/mock" \
+	-v "$RUNTIME_DIR/mock:/var/lib/mock" \
 	-v "$OUTPUT_DIR:/output" \
 	-e "APP_UID=`id -u`" \
 	-e "APP_GID=`id -g`" \

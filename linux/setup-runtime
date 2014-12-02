@@ -4,13 +4,13 @@ set -e
 SELFDIR=`dirname "$0"`
 SELFDIR=`cd "$SELFDIR" && pwd`
 
-DATA_DIR=
+RUNTIME_DIR=
 INITIALIZE=true
 DOWNLOAD_RUBY=true
 
 function usage()
 {
-	echo "Usage: ./setup-runtime [options] <DATA DIR>"
+	echo "Usage: ./setup-runtime [options] <RUNTIME DIR>"
 	echo "Sets up the Traveling Ruby build system's runtime."
 	echo
 	echo "Options:"
@@ -53,28 +53,28 @@ function parse_options()
 
 	(( OPTIND -= 1 )) || true
 	shift $OPTIND || true
-	DATA_DIR="$1"
+	RUNTIME_DIR="$1"
 
-	if [[ "$DATA_DIR" = "" ]]; then
+	if [[ "$RUNTIME_DIR" = "" ]]; then
 		usage
 		exit 1
 	fi
-	if [[ ! -e "$DATA_DIR" ]]; then
-		echo "ERROR: $DATA_DIR doesn't exist."
+	if [[ ! -e "$RUNTIME_DIR" ]]; then
+		echo "ERROR: $RUNTIME_DIR doesn't exist."
 		exit 1
 	fi
 }
 
 
 parse_options "$@"
-DATA_DIR=`cd "$DATA_DIR" && pwd`
-mkdir -p "$DATA_DIR/mock"
+RUNTIME_DIR=`cd "$RUNTIME_DIR" && pwd`
+mkdir -p "$RUNTIME_DIR/mock"
 
 exec docker run \
 	--rm \
 	--cap-add SYS_ADMIN --cap-add SYS_CHROOT \
 	-v "$SELFDIR/internal:/system:ro" \
-	-v "$DATA_DIR/mock:/var/lib/mock" \
+	-v "$RUNTIME_DIR/mock:/var/lib/mock" \
 	-e "INITIALIZE=$INITIALIZE" \
 	-e "DOWNLOAD_RUBY=$DOWNLOAD_RUBY" \
 	phusion/ruby-traveler-builder \
