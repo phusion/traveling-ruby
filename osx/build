@@ -224,13 +224,24 @@ run cp "$SELFDIR/../shared/ca-bundle.crt" /tmp/ruby/lib/
 export SSL_CERT_FILE=/tmp/ruby/lib/ca-bundle.crt
 
 if $INSTALL_GEMS; then
-	run /tmp/ruby/bin/gem install bundler --no-rdoc --no-ri
+	if [[ -e "$RUNTIME_DIR/vendor" ]]; then
+		run cp -pR "$RUNTIME_DIR/vendor" /tmp/ruby/vendor
+	fi
+	if [[ -e "$RUNTIME_DIR/vendor/cache/bundler-1.7.3.gem" ]]; then
+		run /tmp/ruby/bin/gem install "$RUNTIME_DIR/vendor/cache/bundler-1.7.3.gem" --no-rdoc --no-ri
+	else
+		run /tmp/ruby/bin/gem install bundler -v 1.7.3 --no-rdoc --no-ri
+	fi
 	run cp "$SELFDIR/../shared"/Gemfile* /tmp/ruby
 	echo "+ Entering /tmp/ruby"
 	pushd /tmp/ruby >/dev/null
-	export BUNDLE_IGNORE_CONFIG=1
+	run /tmp/ruby/bin/bundle config --local build.nokogiri ''
 	run /tmp/ruby/bin/bundle install --system --retry 3
-	run rm -f Gemfile*
+	run /tmp/ruby/bin/bundle package
+	run rm -rf "$RUNTIME_DIR/vendor"
+	run mv vendor "$RUNTIME_DIR/"
+	run cp /tmp/ruby/lib/ruby/gems/2.1.0/cache/bundler-1.7.3.gem "$RUNTIME_DIR/vendor/cache/"
+	run rm -rf Gemfile* .bundle
 	echo "+ Leaving /tmp/ruby"
 	popd >/dev/null
 fi
