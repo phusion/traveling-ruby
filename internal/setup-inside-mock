@@ -8,7 +8,7 @@ set -x
 
 rpm --rebuilddb
 yum install -y @development-tools gcc gcc-c++ wget sudo zlib-devel readline-devel \
-	libxml2-devel libxslt-devel
+	libxml2-devel libxslt-devel sqlite-devel
 
 # Compile a static OpenSSL library.
 if [[ ! -e /usr/local/override/bin/openssl ]]; then

@@ -130,21 +130,8 @@ if $COMPILE; then
 	echo "--------- Compiling ---------"
 	(
 		set -x
-
-		# Make the OpenSSL extension static link to zlib.
 		sed -i 's|dir_config("openssl")|$libs << " -lz "; dir_config("openssl")|' ext/openssl/extconf.rb
 		make -j$CONCURRENCY exts.mk
-
-		# Edit Makefiles so that we link to static versions of third-party libraries.
-		MAKEFILES=`find . -name Makefile`
-		if [[ "$NAME" = x86 ]]; then
-			sed -i 's| -lreadline | /usr/lib/libreadline.a |g' $MAKEFILES
-			sed -i 's| -ltermcap | /usr/lib/libtermcap.a |g' $MAKEFILES
-		else
-			sed -i 's| -lreadline | /usr/lib64/libreadline.a |g' $MAKEFILES
-			sed -i 's| -ltermcap | /usr/lib64/libtermcap.a |g' $MAKEFILES
-		fi
-
 		make -j$CONCURRENCY
 	)
 	if [[ $? != 0 ]]; then
@@ -162,32 +149,50 @@ echo "--------- Installing into temporary prefix ---------"
 
 echo
 echo "--------- Postprocessing build output ---------"
+export SSL_CERT_FILE=/tmp/ruby/lib/cert.pem
 (
 	set -o pipefail
 	set -x
 
 	# Copy over non-statically linked third-party libraries and other files.
 	if [[ "$NAME" = x86 ]]; then
-		cp /lib/libz.so.1 /tmp/ruby/lib/
-		cp /usr/lib/libxslt.so.1 /tmp/ruby/lib/
-		cp /usr/lib/libxml2.so.2 /tmp/ruby/lib/
+		LIBDIR=/lib
+		USRLIBDIR=/usr/lib
 	else
-		cp /lib64/libz.so.1 /tmp/ruby/lib/
-		cp /usr/lib64/libxslt.so.1 /tmp/ruby/lib/
-		cp /usr/lib64/libxml2.so.2 /tmp/ruby/lib/
+		LIBDIR=/lib64
+		USRLIBDIR=/usr/lib64
 	fi
+	cp $LIBDIR/libz.so.1 /tmp/ruby/lib/
+	cp $LIBDIR/libtermcap.so.2 /tmp/ruby/lib/
+	cp $USRLIBDIR/libxslt.so.1 /tmp/ruby/lib/
+	cp $USRLIBDIR/libxml2.so.2 /tmp/ruby/lib/
+	cp $USRLIBDIR/libreadline.so.5 /tmp/ruby/lib/
+	cp $USRLIBDIR/libsqlite3.so.0 /tmp/ruby/lib/
 	cp /etc/pki/tls/cert.pem /tmp/ruby/lib/
 	cp /system/restore_environment.rb /tmp/ruby/lib/
 
 	if $INSTALL_GEMS; then
-		export SSL_CERT_FILE=/tmp/ruby/lib/cert.pem
-		/tmp/ruby/bin/gem install nokogiri --no-rdoc --no-ri
+		/tmp/ruby/bin/gem install bundler --no-rdoc --no-ri
+		(
+			cp /system/Gemfile* /tmp/ruby
+			cd /tmp/ruby
+			/tmp/ruby/bin/bundle install --system --retry 3
+			rm Gemfile*
+		)
+		if [[ $? != 0 ]]; then
+			exit 1
+		fi
 	fi
 
 	# Strip binaries and remove unnecessary files.
 	strip --strip-all /tmp/ruby/bin/ruby
 	find /tmp/ruby -name '*.so' | xargs strip --strip-debug
-	rm /tmp/ruby/bin/{erb,rdoc,ri,testrb} /tmp/ruby/lib/libruby-static.a
+	rm /tmp/ruby/bin/{erb,rdoc,ri,testrb}
+	rm -rf /tmp/ruby/share
+	rm -rf /tmp/ruby/lib/{libruby-static.a,pkgconfig}
+	rm /tmp/ruby/lib/ruby/gems/*/cache/*
+	rm -f /tmp/ruby/lib/ruby/gems/*/extensions/*/*/*/{gem_make.out,mkmf.log}
+	rm -rf /tmp/ruby/lib/ruby/gems/*/gems/*/{test,spec,*.md,*.rdoc}
 
 	# Create wrapper scripts
 	mv /tmp/ruby/bin /tmp/ruby/bin.real
@@ -197,6 +202,9 @@ echo "--------- Postprocessing build output ---------"
 	create_wrapper /tmp/ruby/bin/ruby ruby false
 	create_wrapper /tmp/ruby/bin/gem gem true
 	create_wrapper /tmp/ruby/bin/irb irb true
+	create_wrapper /tmp/ruby/bin/rake rake true
+	create_wrapper /tmp/ruby/bin/bundle bundle true
+	create_wrapper /tmp/ruby/bin/bundler bundler true
 )
 if [[ $? != 0 ]]; then
 	exit 1
@@ -207,7 +215,8 @@ if $SANITY_CHECK_OUTPUT; then
 	echo "--------- Sanity checking build output ---------"
 	(
 		SYSTEM_LIBRARIES="(linux-gate|linux-vdso|libpthread|librt|libdl|libcrypt|libm|libc"
-		SYSTEM_LIBRARIES="$SYSTEM_LIBRARIES|ld-linux.*|libutil|libz|libxslt|libxml2)\.so"
+		SYSTEM_LIBRARIES="$SYSTEM_LIBRARIES|ld-linux.*|libutil|libz|libxslt|libxml2|libreadline"
+		SYSTEM_LIBRARIES="$SYSTEM_LIBRARIES|libtermcap|sqlite3)\.so"
 		ERROR=false
 		set -o pipefail
 		for F in /tmp/ruby/bin.real/ruby `find /tmp/ruby -name '*.so'`; do

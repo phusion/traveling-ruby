@@ -1,4 +1,7 @@
-# -*- immutable: string -*-
+# encoding: utf-8
+# immutable: string
+
+require 'rbconfig'
 
 restorable_envs = ['LD_LIBRARY_PATH', 'RUBYOPT', 'RUBYLIB'].freeze
 restorable_envs.each do |name|
@@ -12,3 +15,8 @@ $OVERRIDDEN_ENVIRONMENTS = {
   'SSL_CERT_DIR'  => ENV['OLD_SSL_CERT_DIR'],
   'SSL_CERT_FILE' => ENV['OLD_SSL_CERT_FILE']
 }
+
+# Get rid of our custom compilation flags.
+RbConfig::CONFIG["CFLAGS"] = RbConfig::CONFIG["cflags"].dup
+RbConfig::CONFIG["CXXFLAGS"] = RbConfig::CONFIG["cxxflags"].dup
+RbConfig::CONFIG["RUBY_EXEC_PREFIX"] = RbConfig::CONFIG["exec_prefix"].dup
