@@ -90,10 +90,10 @@ If the user has to use RubyGems to install your app then it can cause a lot of c
 
  * On some OSes, RubyGems is configured in such a way that the RubyGems-installed commands are not in PATH. For a classic example, try running this on Debian 6:
 
-       $ sudo apt-get install rubygems
-       $ sudo gem install rails
-       $ rails new foo
-       bash: rails: command not found
+         $ sudo apt-get install rubygems
+         $ sudo gem install rails
+         $ rails new foo
+         bash: rails: command not found
 
    Not a good first impression for end users.
  * Depending on how Ruby is installed, you may or may not have to run `gem install` with `sudo`. It depends on whether `GEM_HOME` is writable by the current user or not. You can't tell them "always run with sudo", because if their `GEM_HOME` is in their home directory, running `gem install` with sudo will mess up all sorts of permissions.
