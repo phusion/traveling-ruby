@@ -294,6 +294,8 @@ echo
 
 
 header "Committing build output..."
+shopt -s dotglob
+run rm -rf "$OUTPUT_DIR"/*
 run mv /tmp/ruby/* "$OUTPUT_DIR"/
 run rm -rf /tmp/ruby
 echo

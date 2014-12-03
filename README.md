@@ -31,15 +31,23 @@ Yet Chef has chosen exactly this approach. They built [Omnibus](https://github.c
 
 Let's take a step back and look at Go. Go allows you to compile a statically linked binary for any of its supported platforms, regardless of which platform you are running on. You could compile a Linux binary while running on OS X. And this binary would run on all Linux distributions. Or you could compile an OS X binary, and it would work on all OS X versions. **This is beautifully simple.** Can't we take the same approach for Ruby?
 
-That's where Travling Ruby comes in. This project supplies binaries that can work on any Linux version, any OS X version. You create just 3 tar.gz/zip packages for your app: x86 Linux, x86_64 Linux, OS X. In each package, you insert your app's Ruby code, plus the corresponding Traveling Ruby binaries, plus a shell script that starts your app using the Traveling Ruby binary. And that's it: you've created end-user packages for all major operating systems (excluding Windows). Users can just run the shell script inside the package and your app will just work. Like the Go approach, this is beautifully simple: you don't have to spawn any VMs, and you can cross-build packages for any of your target OSes, regardless of which OS you are running on.
+That's where Traveling Ruby comes in. This project supplies binaries that can work on any Linux version, any OS X version. You create just 3 tar.gz/zip packages for your app: x86 Linux, x86_64 Linux, OS X. In each package, you insert your app's Ruby code, plus the corresponding Traveling Ruby binaries, plus a shell script that starts your app using the Traveling Ruby binary. And that's it: you've created end-user packages for all major operating systems (excluding Windows). Users can just run the shell script inside the package and your app will just work. Like the Go approach, this is beautifully simple: you don't have to spawn any VMs, and you can cross-build packages for any of your target OSes, regardless of which OS you are running on.
 
-## Usage
+## Using the binaries
+
+To be written.
+
+Suffice to say for now that you can use any Ruby gems, subject to the documented limitations.
+
+### Packaging your app
 
 To be written.
 
 ## Limitations
 
 To be written.
+
+ * You cannot use gems with native extensions. Well technically you can, but then you have to compile for 3 different platforms. I haven't documented this yet.
 
 ## FAQ
 
@@ -60,7 +68,13 @@ There is no way to tell the compiler and linker to use older symbol versions unl
 
 The Traveling Ruby project provides such a holy build box.
 
-### Why not just statically link?
+### Why not just statically link the Ruby binary?
+
+First of all: easier said than done. The compiler prefers to link to dynamic libraries. You have to hand-edit lots of Makefiles to make everything properly link statically. You can't just add `-static` as compiler flag and expect everything to work.
+
+Second: Ruby is incompatible with static linking. On Linux systems, executables which are statically linked to the C library cannot dynamically load shared libraries. Yet Ruby extensions are shared libraries, and a Ruby interpreter that cannot load Ruby extensions is heavily crippled.
+
+So in Traveling Ruby we've taken a different approach. Our Ruby binaries are dynamically linked against the C library, but only uses old symbols to avoid glibc symbol problems. We also ship carefully-compiled versions of dependent shared libraries, like OpenSSL, ncurses, libedit, etc.
 
 <a name="examples_of_end_user_problems"></a>
 
