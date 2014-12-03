@@ -49,6 +49,10 @@ To be written.
 
  * You cannot use gems with native extensions. Well technically you can, but then you have to compile for 3 different platforms. I haven't documented this yet.
 
+## The Traveling Ruby build system
+
+To be written.
+
 ## FAQ
 
 <a name="why_compile_for_each_os_version"></a>
