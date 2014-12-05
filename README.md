@@ -1,5 +1,7 @@
 # Traveling Ruby: self-contained, portable Ruby binaries
 
+![](https://openclipart.org/image/300px/svg_to_png/181225/Travel_backpacks.png)
+
 Traveling Ruby is a project which supplies self-contained, "portable" Ruby binaries: Ruby binaries that can run on any Linux distribution and any OS X machine. Ruby appp developers can bundle these binaries with their Ruby app so that they can distribute a single package to end users, without needing end users to first install Ruby or gems.
 
 ## Motivation
@@ -17,7 +19,7 @@ This is exactly the approach that Chef has chosen. They built [Omnibus](https://
 
 But there is another -- much simpler -- solution.
 
-## Way of the Traveling Ruby
+### Way of the Traveling Ruby
 
 The solution that Traveling Ruby advocates, is to distribute your app as a single self-contained tar.gz/zip package that already includes a precompiled Ruby interpreter for a specific platform (that the Traveling Ruby project provides), as well as all gems that your app depends on. This eliminates the need for heavyweight tooling:
 
@@ -89,7 +91,7 @@ So in Traveling Ruby we've taken a different approach. Our Ruby binaries are dyn
 
 <a name="end_user_problems"></a>
 
-### Why is it problematic for end users if I don't bundle a Ruby interpter?
+### Why is it problematic for end users if I don't bundle a Ruby interpreter?
 
 First of all, users just want to run your app as quickly as possible. Requiring them to install Ruby first is not only a distraction, but it can also cause problems. Here are a few examples of such problems:
 
