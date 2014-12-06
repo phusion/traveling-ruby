@@ -27,10 +27,8 @@ function do_build()
 	/system/setuser app /usr/bin/mock -r $chroot_name --quiet --shell /system/build-inside-mock
 
 	# Move build result to proper output directory
-	rm -rf /output/$name
-	mkdir -p /output/$name
-	chown $APP_UID:$APP_GID /output/$name
-	cp -dpR $root/output/* /output/$name/
+	chown $APP_UID:$APP_GID /output
+	cp -dpR $root/output/* /output/
 
 	# Cleanup
 	rm -rf $root/system $root/output

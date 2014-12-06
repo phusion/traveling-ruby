@@ -22,7 +22,7 @@ runtime/x86/ok:
 runtime/x86_64/ok:
 	mkdir -p runtime/x86_64
 	./setup-runtime -a x86_64 runtime/x86_64
-	touch runtime/x86_64ok
+	touch runtime/x86_64/ok
 
 output/x86/bin:
 	mkdir -p output/x86
