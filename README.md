@@ -2,7 +2,7 @@
 
 ![](https://openclipart.org/image/300px/svg_to_png/181225/Travel_backpacks.png)
 
-Traveling Ruby is a project which supplies self-contained, "portable" Ruby binaries: Ruby binaries that can run on any Linux distribution and any OS X machine. Ruby appp developers can bundle these binaries with their Ruby app so that they can distribute a single package to end users, without needing end users to first install Ruby or gems.
+Traveling Ruby is a project which supplies self-contained, "portable" Ruby binaries: Ruby binaries that can run on any Linux distribution and any OS X machine. This allows Ruby app developers to bundle these binaries with their Ruby app, so that they can distribute a single package to end users, without needing end users to first install Ruby or gems.
 
 ## Motivation
 
