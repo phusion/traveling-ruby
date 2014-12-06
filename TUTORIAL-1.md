@@ -6,7 +6,7 @@ The process is as follows. First, you create several package directories (one fo
 
 You can find the end result of this tutorial at https://github.com/phusion/traveling-ruby-hello-demo.
 
-### Preparation
+## Preparation
 
 Let's begin by creating a hello world app:
 
@@ -21,7 +21,7 @@ You must also install the Traveling Ruby SDK, which will give you the `traveling
 
     gem install traveling-ruby
 
-### Creating package directories
+## Creating package directories
 
 The next step is to prepare packages for all the target platforms, by creating a directory each platform, and by copying your app into each directory.
 
@@ -81,7 +81,7 @@ Let's do a basic sanity test by running your app with a bundled Ruby interpreter
     hello world
     $ cd ..
 
-### Creating a wrapper script
+## Creating a wrapper script
 
 Now that you've verified that the bundled Ruby interpreter works, you'll want create a *wrapper script*. After all, you don't want your users to run `/path-to-your-app/runtime/bin/ruby /path-to-your-app/app/hello.rb`. You want them to run `/path-to-your-app/hello`.
 
@@ -107,7 +107,7 @@ Save this file as `packaging/wrapper.sh` in your project's root directory. Then 
     $ cp packaging/wrapper.sh hello-1.0.0-linux-x86_64/hello
     $ cp packaging/wrapper.sh hello-1.0.0-osx/hello
 
-### Finalizing packages
+## Finalizing packages
 
 Your package directories are now ready. You can finalize the packages by packaging up all these directories using tar:
 
@@ -129,7 +129,7 @@ An x86 Linux user could now use your app like this:
          $ /path-to/hello-1.0.0-linux-x86/hello
          hello world
 
-### Automating the process using Rake
+## Automating the process using Rake
 
 Going through all of the above steps on every release is a hassle, so you should automate the packaging process, for example by using Rake. Here's how the Rakefile could look like:
 
@@ -180,7 +180,7 @@ You can also create a package for a specific platform by running one of:
     $ rake package:linux:x86_64
     $ rake package:osx
 
-### End users
+## End users
 
 You now have three files which you can distribute to end users.
 
@@ -197,6 +197,6 @@ Suppose the end user is on Linux x86_64. S/he uses your app by downloading `hell
     user$ ./hello
     hello world
 
-### Conclusion
+## Conclusion
 
 Creating self-contained packages with Traveling Ruby is simple and straightforward. But most apps will have gem dependencies. [Read tutorial 2](TUTORIAL-2.md) to learn how to handle gem dependencies.
