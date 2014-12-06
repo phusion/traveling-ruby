@@ -12,7 +12,7 @@ $(PACKAGE)-x86.tar.gz: runtime/x86/ok output/x86/bin
 	cd output/x86 && env GZIP=--best tar -czf ../../$(PACKAGE)-x86.tar.gz *
 
 $(PACKAGE)-x86_64.tar.gz: runtime/x86_64/ok output/x86_64/bin
-	cd output/x86 && env GZIP=--best tar -czf ../../$(PACKAGE)-x86_64.tar.gz *
+	cd output/x86_64 && env GZIP=--best tar -czf ../../$(PACKAGE)-x86_64.tar.gz *
 
 runtime/x86/ok:
 	mkdir -p runtime/x86

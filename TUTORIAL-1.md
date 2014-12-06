@@ -17,10 +17,6 @@ Let's begin by creating a hello world app:
     $ ruby hello.rb
     hello world
 
-You must also install the Traveling Ruby SDK, which will give you the `traveling-ruby` command.
-
-    gem install traveling-ruby
-
 ## Creating package directories
 
 The next step is to prepare packages for all the target platforms, by creating a directory each platform, and by copying your app into each directory.
@@ -37,11 +33,15 @@ The next step is to prepare packages for all the target platforms, by creating a
     $ mkdir hello-1.0.0-osx/app
     $ cp hello.rb hello-1.0.0-osx/app/
 
-Next, use the `traveling-ruby extract <PLATFORM> <DIRECTORY>` command to download binaries for each platform, and to extract them into each directory.
+Next, download binaries for each platform, and to extract them into each directory. You can find a list of binaries at [the Traveling Ruby Amazon S3 bucket](https://traveling-ruby.s3-us-west-2.amazonaws.com/list.html). In this tutorial we're extracting version 20141206-2.1.5.
 
-    $ traveling-ruby extract linux-x86 hello-1.0.0-linux-x86/runtime
-    $ traveling-ruby extract linux-x86_64 hello-1.0.0-linux-x86_64/runtime
-    $ traveling-ruby extract osx hello-1.0.0-osx/runtime
+    $ curl -L -O --fail https://s3-us-west-2.amazonaws.com/traveling-ruby/releases/traveling-ruby-20141206-2.1.5-linux-x86.tar.gz
+    $ curl -L -O --fail https://s3-us-west-2.amazonaws.com/traveling-ruby/releases/traveling-ruby-20141206-2.1.5-linux-x86_86.tar.gz
+    $ curl -L -O --fail https://s3-us-west-2.amazonaws.com/traveling-ruby/releases/traveling-ruby-20141206-2.1.5-osx.tar.gz
+
+    $ mkdir hello-1.0.0-linux-x86/ruby && tar -xzf traveling-ruby-20141206-2.1.5-linux-x86.tar.gz -C hello-1.0.0-linux-x86/ruby
+    $ mkdir hello-1.0.0-linux-x86_64/ruby && tar -xzf traveling-ruby-20141206-2.1.5-linux-x86_64.tar.gz -C hello-1.0.0-linux-x86_64/ruby
+    $ mkdir hello-1.0.0-osx/ruby && tar -xzf traveling-ruby-20141206-2.1.5-linux-x86.tar.gz -C hello-1.0.0-osx/ruby
 
 Now, each package directory will have Ruby binaries included. It looks like this:
 Your directory structure will now look like this:
