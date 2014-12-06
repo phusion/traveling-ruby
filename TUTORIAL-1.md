@@ -180,15 +180,16 @@ Going through all of the above steps on every release is a hassle, so you should
       sh "mkdir #{package_dir}/runtime"
       sh "tar -xzf packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz -C #{package_dir}/runtime"
       sh "cp packaging/wrapper.sh #{package_dir}/hello"
-      sh "tar -czf #{package_dir}.tar.gz #{package_dir}"
-      sh "rm -rf #{package_dir}"
+      if !ENV['DIR_ONLY']
+        sh "tar -czf #{package_dir}.tar.gz #{package_dir}"
+        sh "rm -rf #{package_dir}"
+      end
     end
 
     def download_runtime(target)
       sh "cd packaging && curl -L -O --fail " +
         "http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz"
     end
-
 
 You can then create all 3 packages by running:
 
@@ -199,6 +200,13 @@ You can also create a package for a specific platform by running one of:
     $ rake package:linux:x86
     $ rake package:linux:x86_64
     $ rake package:osx
+
+You can also just create package directories, without creating the .tar.gz files, by passing DIR_ONLY=1:
+
+    $ rake package DIR_ONLY=1
+    $ rake package:linux:x86 DIR_ONLY=1
+    $ rake package:linux:x86_64 DIR_ONLY=1
+    $ rake package:osx DIR_ONLY=1
 
 ## End users
 
@@ -218,5 +226,7 @@ Suppose the end user is on Linux x86_64. S/he uses your app by downloading `hell
     hello world
 
 ## Conclusion
+
+You can download the end result of this tutorial at https://github.com/phusion/traveling-ruby-hello-demo.
 
 Creating self-contained packages with Traveling Ruby is simple and straightforward. But most apps will have gem dependencies. [Read tutorial 2](TUTORIAL-2.md) to learn how to handle gem dependencies.
