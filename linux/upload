@@ -54,7 +54,7 @@ done
 
 echo "Uploading ${BASENAMES[@]} to Amazon S3..."
 S3CFG="`echo ~/.s3cfg`"
-exec docker run --rm \
+exec docker run --rm -t -i \
 	"${MOUNTS[@]}" \
 	-v "$S3CFG:/s3cfg:ro" \
 	-v "$SELFDIR/internal:/system:ro" \
