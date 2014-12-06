@@ -22,7 +22,7 @@ runtime/x86:
 	mv runtime/x86.tmp runtime/x86
 
 runtime/x86_64:
-	rm -rf runtime/x86.tmp
+	rm -rf runtime/x86_64.tmp
 	mkdir -p runtime/x86_64.tmp
 	./setup-runtime -a x86_64 runtime/x86_64.tmp
 	rm -rf runtime/x86_64
