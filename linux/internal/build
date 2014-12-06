@@ -35,6 +35,11 @@ function do_build()
 }
 
 echo "------------ Building binaries ------------"
+if [[ "$ARCHITECTURE" = x86 ]]; then
+	CHROOT_NAME=epel-5-i386
+else
+	CHROOT_NAME=epel-5-x86_64
+fi
 (
 	set -x
 	do_build $CHROOT_NAME $ARCHITECTURE
