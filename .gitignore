@@ -1,0 +1,6 @@
+.DS_Store
+*.gz
+osx
+linux
+_site
+foo
