@@ -33,11 +33,11 @@ The next step is to prepare packages for all the target platforms, by creating a
     $ mkdir hello-1.0.0-osx/app
     $ cp hello.rb hello-1.0.0-osx/app/
 
-Next, download binaries for each platform, and to extract them into each directory. You can find a list of binaries at [the Traveling Ruby Amazon S3 bucket](http://traveling-ruby.s3-us-west-2.amazonaws.com/list.html). In this tutorial we're extracting version 20141206-2.1.5.
+Next, download binaries for each platform, and to extract them into each directory. You can find a list of binaries at [the Traveling Ruby Amazon S3 bucket](http://traveling-ruby.s3-us-west-2.amazonaws.com/list.html). For faster download times, use the CloudFront domain "http://d6r77u77i8pq3.cloudfront.net". In this tutorial we're extracting version 20141206-2.1.5.
 
-    $ curl -L -O --fail http://traveling-ruby.s3-us-west-2.amazonaws.com/releases/traveling-ruby-20141206-2.1.5-linux-x86.tar.gz
-    $ curl -L -O --fail http://traveling-ruby.s3-us-west-2.amazonaws.com/releases/traveling-ruby-20141206-2.1.5-linux-x86_64.tar.gz
-    $ curl -L -O --fail http://traveling-ruby.s3-us-west-2.amazonaws.com/releases/traveling-ruby-20141206-2.1.5-osx.tar.gz
+    $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141206-2.1.5-linux-x86.tar.gz
+    $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141206-2.1.5-linux-x86_64.tar.gz
+    $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141206-2.1.5-osx.tar.gz
 
     $ mkdir hello-1.0.0-linux-x86/ruby && tar -xzf traveling-ruby-20141206-2.1.5-linux-x86.tar.gz -C hello-1.0.0-linux-x86/runtime
     $ mkdir hello-1.0.0-linux-x86_64/ruby && tar -xzf traveling-ruby-20141206-2.1.5-linux-x86_64.tar.gz -C hello-1.0.0-linux-x86_64/runtime
@@ -135,6 +135,7 @@ Going through all of the above steps on every release is a hassle, so you should
 
     PACKAGE_NAME = "hello"
     VERSION = "1.0.0"
+    TRAVELING_RUBY_VERSION = "20141206-2.1.5"
 
     desc "Package your app"
     task :package => ['package:linux:x86', 'package:linux:x86_64', 'package:osx']
@@ -142,20 +143,32 @@ Going through all of the above steps on every release is a hassle, so you should
     namespace :package do
       namespace :linux do
         desc "Package your app for Linux x86"
-        task :x86 do
+        task :x86 => "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86.tar.gz" do
           create_package("linux-x86")
         end
 
         desc "Package your app for Linux x86_64"
-        task :x86_64 do
+        task :x86_64 => "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86_64.tar.gz" do
           create_package("linux-x86_64")
         end
       end
 
       desc "Package your app for OS X"
-      task :osx do
+      task :osx => "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz" do
         create_package("osx")
       end
+    end
+
+    file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86.tar.gz" do
+      download_runtime("linux-x86")
+    end
+
+    file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86_64.tar.gz" do
+      download_runtime("linux-x86_64")
+    end
+
+    file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz" do
+      download_runtime("osx")
     end
 
     def create_package(target)
@@ -164,11 +177,18 @@ Going through all of the above steps on every release is a hassle, so you should
       sh "mkdir #{package_dir}"
       sh "mkdir #{package_dir}/app"
       sh "cp hello.rb #{package_dir}/app/"
-      sh "traveling-ruby extract #{package_dir}/runtime"
+      sh "mkdir #{package_dir}/runtime"
+      sh "tar -xzf packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz -C #{package_dir}/runtime"
       sh "cp packaging/wrapper.sh #{package_dir}/hello"
       sh "tar -czf #{package_dir}.tar.gz #{package_dir}"
       sh "rm -rf #{package_dir}"
     end
+
+    def download_runtime(target)
+      sh "cd packaging && curl -L -O --fail " +
+        "http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz"
+    end
+
 
 You can then create all 3 packages by running:
 
