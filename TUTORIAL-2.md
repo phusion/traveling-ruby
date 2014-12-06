@@ -4,6 +4,8 @@ In [tutorial 1](TUTORIAL-1.md), we've packaged a hello world app and automated t
 
 Your app can depend on any gem you wish, subject to the [limitations described in README.md](README.md#limitations). You must include the gems in your packages, and your wrapper script must pass the right parameters to the Ruby interpreter in order for your gems to be found. In this tutorial, we'll teach you how to manage gems using Bundler.
 
+You can find the end result of this tutorial at https://github.com/phusion/traveling-ruby-gems-demo.
+
 ## Preparation
 
 Suppose that we want our hello world app from tutorial 1 to print the message in red. We'll want to use [the paint gem](https://github.com/janlelis/paint) for that. Let's start by creating a Gemfile...
