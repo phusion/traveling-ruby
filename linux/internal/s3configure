@@ -1,0 +1,4 @@
+#!/bin/bash
+set -e
+/system/setuser app s3cmd --configure
+cat ~app/.s3cfg > /work/s3cfg
