@@ -28,7 +28,7 @@ cd /tmp
 rpm -Uvh http://mirror.overthewire.com.au/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
 yum update -y
 yum install -y --skip-broken --enablerepo centosplus \
-	centos-release-SCL file db4-utils compat-db43 mock wget perl
+	centos-release-SCL file db4-utils compat-db43 mock wget s3cmd
 yum install -y --skip-broken --enablerepo centosplus \
 	python27-python
 create_user app "App" 1000
