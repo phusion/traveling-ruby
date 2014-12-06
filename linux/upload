@@ -29,7 +29,7 @@ if [[ ! -e ~/.s3cfg ]]; then
 	echo "~/.s3cfg doesn't exist; configuring one..."
 	TEMPDIR=`mktemp -d /tmp/traveling-ruby.XXXXXXXX`
 	touch "$TEMPDIR/s3cfg"
-	docker run --rm \
+	docker run --rm -t -i \
 		-v "$SELFDIR/internal:/system:ro" \
 		-v "$TEMPDIR:/work" \
 		phusion/ruby-traveler-builder \
