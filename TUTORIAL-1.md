@@ -131,4 +131,72 @@ An x86 Linux user could now use your app like this:
 
 ### Automating the process using Rake
 
+Going through all of the above steps on every release is a hassle, so you should automate the packaging process, for example by using Rake. Here's how the Rakefile could look like:
+
+    PACKAGE_NAME = "hello"
+    VERSION = "1.0.0"
+
+    desc "Package your app"
+    task :package => ['package:linux:x86', 'package:linux:x86_64', 'package:osx']
+
+    namespace :package do
+      namespace :linux do
+        desc "Package your app for Linux x86"
+        task :x86 do
+          create_package("linux-x86")
+        end
+
+        desc "Package your app for Linux x86_64"
+        task :x86_64 do
+          create_package("linux-x86_64")
+        end
+      end
+
+      desc "Package your app for OS X"
+      task :osx do
+        create_package("osx")
+      end
+    end
+
+    def create_package(target)
+      package_dir = "#{PACKAGE_NAME}-#{VERSION}-#{target}"
+      sh "rm -rf #{package_dir}"
+      sh "mkdir #{package_dir}"
+      sh "mkdir #{package_dir}/app"
+      sh "cp hello.rb #{package_dir}/app/"
+      sh "traveling-ruby extract #{package_dir}/runtime"
+      sh "cp packaging/wrapper.sh #{package_dir}/hello"
+      sh "tar -czf #{package_dir}.tar.gz #{package_dir}"
+      sh "rm -rf #{package_dir}"
+    end
+
+You can then create all 3 packages by running:
+
+    $ rake package
+
+You can also create a package for a specific platform by running one of:
+
+    $ rake package:linux:x86
+    $ rake package:linux:x86_64
+    $ rake package:osx
+
+### End users
+
+You now have three files which you can distribute to end users.
+
+ * hello-1.0.0-linux-x86.tar.gz
+ * hello-1.0.0-linux-x86_64.tar.gz
+ * hello-1.0.0-osx.tar.gz
+
+Suppose the end user is on Linux x86_64. S/he uses your app by downloading `hello-1.0.0-linux-x86_64.tar.gz`, extracting it and running it:
+
+    user$ wget hello-1.0.0-linux-x86_64.tar.gz
+    ...
+    user$ tar xzf hello-1.0.0-linux-x86_64.tar.gz
+    user$ cd hello-1.0.0-linux-x86_64
+    user$ ./hello
+    hello world
+
 ### Conclusion
+
+Creating self-contained packages with Traveling Ruby is simple and straightforward. But most apps will have gem dependencies. [Read tutorial 2](TUTORIAL-2.md) to learn how to handle gem dependencies.
