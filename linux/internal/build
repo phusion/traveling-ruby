@@ -1,5 +1,6 @@
 #!/bin/bash
 set -e
+source /system/library.sh
 
 function do_build()
 {
@@ -35,7 +36,7 @@ function do_build()
 	rm -rf $root/system $root/output
 }
 
-echo "------------ Building binaries ------------"
+header "Building binaries"
 if [[ "$ARCHITECTURE" = x86 ]]; then
 	CHROOT_NAME=epel-5-i386
 else
