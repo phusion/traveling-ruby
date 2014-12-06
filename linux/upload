@@ -15,6 +15,8 @@ function cleanup()
 
 trap cleanup EXIT
 
+SELFDIR=`dirname "$0"`
+SELFDIR=`cd "$SELFDIR" && pwd`
 TEMPDIR=
 
 if [[ $# == 0 ]]; then
@@ -24,6 +26,7 @@ if [[ $# == 0 ]]; then
 fi
 
 if [[ ! -e ~/.s3cfg ]]; then
+	echo "~/.s3cfg doesn't exist; configuring one..."
 	TEMPDIR=`mktemp -d /tmp/traveling-ruby.XXXXXXXX`
 	touch "$TEMPDIR/s3cfg"
 	docker run --rm \
@@ -49,6 +52,7 @@ for F in "$@"; do
 	BASENAMES+=("$BASENAME")
 done
 
+echo "Uploading ${BASENAMES[@]} to Amazon S3..."
 exec docker run --rm \
 	"${MOUNTS[@]}" \
 	-v "$SELFDIR/internal:/system:ro" \
