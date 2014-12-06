@@ -53,9 +53,12 @@ for F in "$@"; do
 done
 
 echo "Uploading ${BASENAMES[@]} to Amazon S3..."
+S3CFG="`echo ~/.s3cfg`"
 exec docker run --rm \
 	"${MOUNTS[@]}" \
+	-v "$S3CFG:/s3cfg:ro" \
 	-v "$SELFDIR/internal:/system:ro" \
 	phusion/ruby-traveler-builder \
 	/system/my_init --quiet --skip-runit --skip-startup-files -- \
+	/system/s3init \
 	s3cmd -P put "${BASENAMES[@]}" s3://traveling-ruby/releases/

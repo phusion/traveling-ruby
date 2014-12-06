@@ -1,0 +1,5 @@
+#!/bin/bash
+set -e
+cp /s3cfg ~app/.s3cfg
+chown app: ~app/.s3cfg
+exec "$@"
