@@ -100,6 +100,78 @@ Copy over this wrapper script to each of your package directories and finalize t
 
 ## Automating the process using Rake
 
+We update the Rakefile so that all of the above steps are automated by running `rake package`. The various `package` tasks have been updated to run `package:bundle_install` which installs the gem bundle, and the `create_package` function has been updated to package the Gemfile and Bundler config file.
+
+    PACKAGE_NAME = "hello"
+    VERSION = "1.0.0"
+    TRAVELING_RUBY_VERSION = "20141206-2.1.5"
+
+    desc "Package your app"
+    task :package => ['package:linux:x86', 'package:linux:x86_64', 'package:osx']
+
+    namespace :package do
+      namespace :linux do
+        desc "Package your app for Linux x86"
+        task :x86 => [:bundle_install, "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86.tar.gz"] do
+          create_package("linux-x86")
+        end
+
+        desc "Package your app for Linux x86_64"
+        task :x86_64 => [:bundle_install, "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86_64.tar.gz"] do
+          create_package("linux-x86_64")
+        end
+      end
+
+      desc "Package your app for OS X"
+      task :osx => [:bundle_install, "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz"] do
+        create_package("osx")
+      end
+
+      desc "Install gems to local directory"
+      task :bundle_install do
+        if RUBY_VERSION !~ /^2\.1\./
+          abort "You can only 'bundle install' using Ruby 2.1, because that's what Traveling Ruby uses."
+        end
+        sh "env BUNDLE_IGNORE_CONFIG=1 bundle install --path packaging/vendor"
+      end
+    end
+
+    file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86.tar.gz" do
+      download_runtime("linux-x86")
+    end
+
+    file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86_64.tar.gz" do
+      download_runtime("linux-x86_64")
+    end
+
+    file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz" do
+      download_runtime("osx")
+    end
+
+    def create_package(target)
+      package_dir = "#{PACKAGE_NAME}-#{VERSION}-#{target}"
+      sh "rm -rf #{package_dir}"
+      sh "mkdir #{package_dir}"
+      sh "mkdir #{package_dir}/app"
+      sh "cp hello.rb #{package_dir}/app/"
+      sh "mkdir #{package_dir}/runtime"
+      sh "tar -xzf packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz -C #{package_dir}/runtime"
+      sh "cp packaging/wrapper.sh #{package_dir}/hello"
+      sh "cp -pR packaging/vendor #{package_dir}/"
+      sh "cp Gemfile Gemfile.lock #{package_dir}/vendor/"
+      sh "mkdir #{package_dir}/vendor/.bundle"
+      sh "cp packaging/bundler-config #{package_dir}/vendor/.bundle/config"
+      if !ENV['DIR_ONLY']
+        sh "tar -czf #{package_dir}.tar.gz #{package_dir}"
+        sh "rm -rf #{package_dir}"
+      end
+    end
+
+    def download_runtime(target)
+      sh "cd packaging && curl -L -O --fail " +
+        "http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz"
+    end
+
 ## Conclusion
 
 You can download the end result of this tutorial at https://github.com/phusion/traveling-ruby-gems-demo.
