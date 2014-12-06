@@ -1,7 +1,7 @@
-RESET=`perl -e 'print("\e[0m")'`
-BOLD=`perl -e 'print("\e[1m")'`
-YELLOW=`perl -e 'print("\e[33m")'`
-BLUE_BG=`perl -e 'print("\e[44m")'`
+RESET=`echo 'import sys; sys.stdout.print("\033[0m")'`
+BOLD=`echo 'import sys; sys.stdout.print("\033[1m")'`
+YELLOW=`echo 'import sys; sys.stdout.print("\033[33m")'`
+BLUE_BG=`echo 'import sys; sys.stdout.print("\033[44m")'`
 
 function header()
 {
