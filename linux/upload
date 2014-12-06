@@ -1,0 +1,57 @@
+#!/bin/bash
+set -e
+
+function cleanup()
+{
+	set +e
+	local pids=`jobs -p`
+	if [[ "$pids" != "" ]]; then
+		kill $pids >/dev/null
+	fi
+	if [[ "$TEMPDIR" != "" ]]; then
+		rm -rf "$TEMPDIR"
+	fi
+}
+
+trap cleanup EXIT
+
+TEMPDIR=
+
+if [[ $# == 0 ]]; then
+	echo "Usage: ./upload <FILES>"
+	echo "Uploads files to Amazon S3."
+	exit 1
+fi
+
+if [[ ! -e ~/.s3cfg ]]; then
+	TEMPDIR=`mktemp -d /tmp/traveling-ruby.XXXXXXXX`
+	touch "$TEMPDIR/s3cfg"
+	docker run --rm \
+		-v "$SELFDIR/internal:/system:ro" \
+		-v "$TEMPDIR:/work" \
+		phusion/ruby-traveler-builder \
+		/system/my_init --quiet --skip-runit --skip-startup-files -- \
+		/system/s3configure
+	cp "$TEMPDIR/s3cfg" ~/.s3cfg
+	rm -rf "$TEMPDIR"
+	TEMPDIR=
+fi
+
+MOUNTS=()
+BASENAMES=()
+for F in "$@"; do
+	DIR="`dirname \"$F\"`"
+	DIR="`cd \"$DIR\" && pwd`"
+	BASENAME="`basename \"$F\"`"
+	F="$DIR/$BASENAME"
+	
+	MOUNTS+=(-v "$F:/$BASENAME:ro")
+	BASENAMES+=("$BASENAME")
+done
+
+exec docker run --rm \
+	"${MOUNTS[@]}" \
+	-v "$SELFDIR/internal:/system:ro" \
+	phusion/ruby-traveler-builder \
+	/system/my_init --quiet --skip-runit --skip-startup-files -- \
+	s3cmd -P put "${BASENAMES[@]}" s3://traveling-ruby/releases/

@@ -33,4 +33,4 @@ output/x86_64/bin:
 	./build -j $(CONCURRENCY) -a x86_64 runtime/x86_64 output/x86_64
 
 upload: $(PACKAGE)-x86.tar.gz $(PACKAGE)-x86_64.tar.gz
-	s3cmd -P put $(PACKAGE)-x86.tar.gz $(PACKAGE)-x86_64.tar.gz s3://traveling-ruby/releases/
+	./upload $(PACKAGE)-x86.tar.gz $(PACKAGE)-x86_64.tar.gz
