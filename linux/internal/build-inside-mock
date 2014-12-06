@@ -1,9 +1,9 @@
 #!/bin/bash
 set -e
-source /system/config.sh
 NAME=`cat /system/NAME`
 APP_UID=`cat /system/APP_UID`
 APP_GID=`cat /system/APP_GID`
+RUBY_VERSION=`cat /system/RUBY_VERSION`
 CONCURRENCY=`cat /system/CONCURRENCY`
 SETUP_SOURCE=`cat /system/SETUP_SOURCE`
 COMPILE=`cat /system/COMPILE`

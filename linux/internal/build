@@ -15,6 +15,7 @@ function do_build()
 	echo $name > $root/system/NAME
 	echo $APP_UID > $root/system/APP_UID
 	echo $APP_GID > $root/system/APP_GID
+	echo $RUBY_VERSION > $root/system/RUBY_VERSION
 	echo $CONCURRENCY > $root/system/CONCURRENCY
 	echo $SETUP_SOURCE > $root/system/SETUP_SOURCE
 	echo $COMPILE > $root/system/COMPILE
