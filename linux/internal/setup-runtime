@@ -1,6 +1,13 @@
 #!/bin/bash
 set -e
-source /system/config.sh
+RUBY_MAJOR=`echo $RUBY_VERSION | cut -d . -f 1`
+RUBY_MINOR=`echo $RUBY_VERSION | cut -d . -f 2`
+RUBY_MAJOR_MINOR="$RUBY_MAJOR.$RUBY_MINOR"
+if [[ "$ARCHITECTURE" = x86 ]]; then
+	CHROOT_NAME=epel-5-i386
+else
+	CHROOT_NAME=epel-5-x86_64
+fi
 
 function list_db_files()
 {
@@ -9,17 +16,15 @@ function list_db_files()
 
 function setup_chroot()
 {
-	local name="$1"
-
 	if $INITIALIZE; then
-		/system/setuser app /usr/bin/mock -r $name --init
+		/system/setuser app /usr/bin/mock -r $CHROOT_NAME --init
 	fi
-	/system/setuser app /usr/bin/mock -r $name --install yum
+	/system/setuser app /usr/bin/mock -r $CHROOT_NAME --install yum
 
 	# CentOS 6's RPM generates database files which CentOS 5's RPM
 	# cannot read, so we fix this. See
 	# http://forums.fedoraforum.org/showthread.php?t=222988
-	pushd /var/lib/mock/$name/root/var/lib/rpm
+	pushd /var/lib/mock/$CHROOT_NAME/root/var/lib/rpm
 	rm -fv __db*
 	for F in $(list_db_files *); do
 		db_dump $F > $F.dump
@@ -29,9 +34,9 @@ function setup_chroot()
 	done
 	popd
 
-	cp /system/setup-runtime-inside-mock /var/lib/mock/$name/root/
-	/system/setuser app /usr/bin/mock -r $name --shell /setup-runtime-inside-mock
-	rm /var/lib/mock/$name/root/setup-runtime-inside-mock
+	cp /system/setup-runtime-inside-mock /var/lib/mock/$CHROOT_NAME/root/
+	/system/setuser app /usr/bin/mock -r $CHROOT_NAME --shell /setup-runtime-inside-mock
+	rm /var/lib/mock/$CHROOT_NAME/root/setup-runtime-inside-mock
 }
 
 echo "---------- Setting permissions -----------"
@@ -39,24 +44,13 @@ chown root:mock /var/lib/mock
 chmod g+ws /var/lib/mock
 
 echo
-echo "---------- Setting up i386 chroot -----------"
+echo "---------- Setting up chroot -----------"
 (
 	set -x
-	setup_chroot epel-5-i386
+	setup_chroot
 )
 if [[ $? != 0 ]]; then
-	echo "*** Failed setting up i386 chroot"
-	exit 1
-fi
-
-echo
-echo "---------- Setting up x86_64 chroot -----------"
-(
-	set -x
-	setup_chroot epel-5-x86_64
-)
-if [[ $? != 0 ]]; then
-	echo "*** Failed setting up x86_64 chroot"
+	echo "*** Failed setting up chroot"
 	exit 1
 fi
 
@@ -66,8 +60,7 @@ if $DOWNLOAD_RUBY; then
 	rm -f /tmp/ruby.tar.gz
 	wget -O /tmp/ruby.tar.gz \
 		http://cache.ruby-lang.org/pub/ruby/$RUBY_MAJOR_MINOR/ruby-$RUBY_VERSION.tar.gz
-	cp /tmp/ruby.tar.gz /var/lib/mock/epel-5-i386/root/ruby-$RUBY_VERSION.tar.gz
-	cp /tmp/ruby.tar.gz /var/lib/mock/epel-5-x86_64/root/ruby-$RUBY_VERSION.tar.gz
+	cp /tmp/ruby.tar.gz /var/lib/mock/$CHROOT_NAME/root/ruby-$RUBY_VERSION.tar.gz
 	rm /tmp/ruby.tar.gz
 fi
 

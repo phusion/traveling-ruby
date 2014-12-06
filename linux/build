@@ -6,8 +6,7 @@ SELFDIR=`cd "$SELFDIR" && pwd`
 
 RUNTIME_DIR=
 OUTPUT_DIR=
-X86_BINARIES=true
-X64_BINARIES=true
+ARCHITECTURE=
 CONCURRENCY=2
 SETUP_SOURCE=true
 COMPILE=true
@@ -20,10 +19,7 @@ function usage()
 	echo "Build Traveling Ruby binaries."
 	echo
 	echo "Options:"
-	echo "  -t         Only build 32-bit binaries"
-	echo "  -T         Do not build 32-bit binaries"
-	echo "  -s         Only build 64-bit binaries"
-	echo "  -S         Do not build 64-bit binaries"
+	echo "  -a NAME    Architecture to setup (x86, x86_64)"
 	echo
 	echo "  -E         Do not setup source"
 	echo "  -C         Do not compile Ruby"
@@ -37,21 +33,10 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "tTsSECGj:h" opt; do
+	while getopts "a:ECGj:h" opt; do
 		case "$opt" in
-		t)
-			X86_BINARIES=true
-			X64_BINARIES=false
-			;;
-		T)
-			X86_BINARIES=false
-			;;
-		s)
-			X86_BINARIES=false
-			X64_BINARIES=true
-			;;
-		S)
-			X64_BINARIES=false
+		a)
+			ARCHITECTURE=$OPTARG
 			;;
 		E)
 			SETUP_SOURCE=false
@@ -92,6 +77,10 @@ function parse_options()
 		echo "ERROR: $OUTPUT_DIR doesn't exist."
 		exit 1
 	fi
+	if [[ "$ARCHITECTURE" = "" ]]; then
+		echo "ERROR: please specify an architecture with -a."
+		exit 1
+	fi
 }
 
 
@@ -112,8 +101,8 @@ exec docker run \
 	-v "$OUTPUT_DIR:/output" \
 	-e "APP_UID=`id -u`" \
 	-e "APP_GID=`id -g`" \
-	-e "X86_BINARIES=$X86_BINARIES" \
-	-e "X64_BINARIES=$X64_BINARIES" \
+	-e "RUBY_VERSION=`cat \"$SELFDIR/../RUBY_VERSION.txt\"`" \
+	-e "ARCHITECTURE=$ARCHITECTURE" \
 	-e "CONCURRENCY=$CONCURRENCY" \
 	-e "SETUP_SOURCE=$SETUP_SOURCE" \
 	-e "COMPILE=$COMPILE" \

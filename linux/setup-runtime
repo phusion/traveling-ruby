@@ -5,6 +5,7 @@ SELFDIR=`dirname "$0"`
 SELFDIR=`cd "$SELFDIR" && pwd`
 
 RUNTIME_DIR=
+ARCHITECTURE=
 INITIALIZE=true
 DOWNLOAD_RUBY=true
 
@@ -14,19 +15,23 @@ function usage()
 	echo "Sets up the Traveling Ruby build system's runtime."
 	echo
 	echo "Options:"
-	echo "  -i      Only initialize chroot environment"
-	echo "  -I      Do not initialize chroot environments"
-	echo "  -r      Only download Ruby"
-	echo "  -R      Do not download Ruby"
-	echo "  -h      Show this help"
+	echo "  -a NAME  Architecture to setup (x86, x86_64)"
+	echo "  -i       Only initialize chroot environment"
+	echo "  -I       Do not initialize chroot environment"
+	echo "  -r       Only download Ruby"
+	echo "  -R       Do not download Ruby"
+	echo "  -h       Show this help"
 }
 
 function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "iIrRh" opt; do
+	while getopts "a:iIrRh" opt; do
 		case "$opt" in
+		a)
+			ARCHITECTURE=$OPTARG
+			;;
 		i)
 			INITIALIZE=true
 			DOWNLOAD_RUBY=false
@@ -63,6 +68,10 @@ function parse_options()
 		echo "ERROR: $RUNTIME_DIR doesn't exist."
 		exit 1
 	fi
+	if [[ "$ARCHITECTURE" = "" ]]; then
+		echo "ERROR: please specify an architecture with -a."
+		exit 1
+	fi
 }
 
 
@@ -76,6 +85,8 @@ exec docker run \
 	-v "$SELFDIR/internal:/system:ro" \
 	-v "$SELFDIR/../shared:/system_shared:ro" \
 	-v "$RUNTIME_DIR/mock:/var/lib/mock" \
+	-e "RUBY_VERSION=`cat \"$SELFDIR/../RUBY_VERSION.txt\"`" \
+	-e "ARCHITECTURE=$ARCHITECTURE" \
 	-e "INITIALIZE=$INITIALIZE" \
 	-e "DOWNLOAD_RUBY=$DOWNLOAD_RUBY" \
 	phusion/ruby-traveler-builder \

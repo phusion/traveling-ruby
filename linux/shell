@@ -50,9 +50,12 @@ parse_options "$@"
 RUNTIME_DIR=`cd "$RUNTIME_DIR" && pwd`
 mkdir -p "$RUNTIME_DIR/mock"
 
-echo "Within the shell, you can enter one of the mock environments with:"
-echo "  /usr/bin/mock -r epel-5-i386 --shell"
-echo "  /usr/bin/mock -r epel-5-x86_64 --shell"
+echo "Within the shell, you can the mock environment with:"
+if [[ -e "$RUNTIME_DIR/mock/epel-5-i386" ]]; then
+	echo "  /usr/bin/mock -r epel-5-i386 --shell"
+else
+	echo "  /usr/bin/mock -r epel-5-x86_64 --shell"
+fi
 
 exec docker run \
 	--rm -t -i \

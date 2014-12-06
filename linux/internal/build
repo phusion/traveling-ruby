@@ -34,24 +34,11 @@ function do_build()
 	rm -rf $root/system $root/output
 }
 
-if $X86_BINARIES; then
-	echo "------------ Building x86 binaries ------------"
-	(
-		set -x
-		do_build epel-5-i386 x86
-	)
-	if [[ $? != 0 ]]; then
-		exit 1
-	fi
-fi
-if $X64_BINARIES; then
-	echo
-	echo "------------ Building x86_64 binaries ------------"
-	(
-		set -x
-		do_build epel-5-x86_64 x86_64
-	)
-	if [[ $? != 0 ]]; then
-		exit 1
-	fi
+echo "------------ Building binaries ------------"
+(
+	set -x
+	do_build $CHROOT_NAME $ARCHITECTURE
+)
+if [[ $? != 0 ]]; then
+	exit 1
 fi
