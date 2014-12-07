@@ -15,3 +15,11 @@ function run()
 	echo "+ $@"
 	"$@"
 }
+
+function absolute_path()
+{
+	local dir="`dirname \"$1\"`"
+	local name="`basename \"$1\"`"
+	dir="`cd \"$dir\" && pwd`"
+	echo "$dir/$name"
+}

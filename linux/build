@@ -8,10 +8,19 @@ RUNTIME_DIR=
 OUTPUT_DIR=
 ARCHITECTURE=
 CONCURRENCY=2
+GEMFILE="$SELFDIR/../shared/Gemfile"
 SETUP_SOURCE=true
 COMPILE=true
-INSTALL_GEMS=true
 SANITY_CHECK_OUTPUT=true
+GEMFILE_MOUNT=()
+
+function absolute_path()
+{
+	local dir="`dirname \"$1\"`"
+	local name="`basename \"$1\"`"
+	dir="`cd \"$dir\" && pwd`"
+	echo "$dir/$name"
+}
 
 function usage()
 {
@@ -26,6 +35,7 @@ function usage()
 	echo "  -G         Do not install gems"
 	echo
 	echo "  -j NUMBER  Set build concurrency. Default: 2"
+	echo "  -g PATH    Build gems as specified by the given Gemfile"
 	echo "  -h         Show this help"
 }
 
@@ -33,7 +43,7 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "a:ECGj:h" opt; do
+	while getopts "a:ECGj:g:h" opt; do
 		case "$opt" in
 		a)
 			ARCHITECTURE=$OPTARG
@@ -45,10 +55,13 @@ function parse_options()
 			COMPILE=false
 			;;
 		G)
-			INSTALL_GEMS=false
+			GEMFILE=
 			;;
 		j)
 			CONCURRENCY=$OPTARG
+			;;
+		g)
+			GEMFILE="$OPTARG"
 			;;
 		h)
 			usage
@@ -91,6 +104,13 @@ if [[ ! -e "$RUNTIME_DIR/mock" ]]; then
 	echo "ERROR: runtime directory $RUNTIME_DIR not set up. Please run ./setup-runtime first."
 	exit 1
 fi
+if [[ "$GEMFILE" != "" ]]; then
+	GEMFILE="`absolute_path \"$GEMFILE\"`"
+	GEMFILE_MOUNT=(-v "$GEMFILE:/Gemfile:ro")
+	if [[ -e "$GEMFILE.lock" ]]; then
+		GEMFILE_MOUNT+=(-v "$GEMFILE.lock:/Gemfile.lock:ro")
+	fi
+fi
 
 exec docker run \
 	--rm \
@@ -99,6 +119,7 @@ exec docker run \
 	-v "$SELFDIR/../shared:/system_shared:ro" \
 	-v "$RUNTIME_DIR/mock:/var/lib/mock" \
 	-v "$OUTPUT_DIR:/output" \
+	"${GEMFILE_MOUNT[@]}" \
 	-e "APP_UID=`id -u`" \
 	-e "APP_GID=`id -g`" \
 	-e "RUBY_VERSION=`cat \"$SELFDIR/../RUBY_VERSION.txt\"`" \
@@ -106,7 +127,6 @@ exec docker run \
 	-e "CONCURRENCY=$CONCURRENCY" \
 	-e "SETUP_SOURCE=$SETUP_SOURCE" \
 	-e "COMPILE=$COMPILE" \
-	-e "INSTALL_GEMS=$INSTALL_GEMS" \
 	-e "SANITY_CHECK_OUTPUT=$SANITY_CHECK_OUTPUT" \
 	phusion/ruby-traveler-builder \
 	/system/my_init --quiet --skip-runit --skip-startup-files -- \

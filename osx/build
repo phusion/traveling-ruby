@@ -12,9 +12,9 @@ OWNS_WORKDIR=true
 RUNTIME_DIR=
 OUTPUT_DIR=
 CONCURRENCY=4
+GEMFILE="$SELFDIR/../shared/Gemfile"
 SETUP_SOURCE=true
 COMPILE=true
-INSTALL_GEMS=true
 
 function _cleanup()
 {
@@ -94,24 +94,25 @@ EOF
 
 function usage()
 {
-	echo "Usage: ./build [options] <RUNTIME DIR>"
+	echo "Usage: ./build [options] <RUNTIME DIR> <OUTPUT DIR>"
 	echo "Build Traveling Ruby binaries."
 	echo
 	echo "Options:"
-	echo "  -E      Do not setup source"
-	echo "  -C      Do not compile Ruby"
-	echo "  -G      Do not install gems"
+	echo "  -E       Do not setup source"
+	echo "  -C       Do not compile Ruby"
+	echo "  -G       Do not install gems"
 	echo
-	echo "  -w DIR  Use the given working directory instead of creating a temporary one"
-	echo "  -j NUM  Compilation concurrency. Default: 4"
-	echo "  -h      Show this help"
+	echo "  -w DIR   Use the given working directory instead of creating a temporary one"
+	echo "  -j NUM   Compilation concurrency. Default: 4"
+	echo "  -g PATH  Build gems as specified by the given Gemfile"
+	echo "  -h       Show this help"
 }
 
 function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "ECGw:j:h" opt; do
+	while getopts "ECGw:j:g:h" opt; do
 		case "$opt" in
 		E)
 			SETUP_SOURCE=false
@@ -120,7 +121,7 @@ function parse_options()
 			COMPILE=false
 			;;
 		G)
-			INSTALL_GEMS=false
+			GEMFILE=
 			;;
 		w)
 			WORKDIR="$OPTARG"
@@ -128,6 +129,9 @@ function parse_options()
 			;;
 		j)
 			CONCURRENCY=$OPTARG
+			;;
+		g)
+			GEMFILE="$OPTARG"
 			;;
 		h)
 			usage
@@ -168,6 +172,9 @@ elif [[ ! -e "$WORKDIR" ]]; then
 	exit 1
 else
 	WORKDIR="`cd \"$WORKDIR\" && pwd`"
+fi
+if [[ "$GEMFILE" != "" ]]; then
+	GEMFILE="`absolute_path \"$GEMFILE\"`"
 fi
 
 
@@ -234,7 +241,12 @@ run cp "$SELFDIR/internal/restore_environment.rb" /tmp/ruby/lib/
 run cp "$SELFDIR/../shared/ca-bundle.crt" /tmp/ruby/lib/
 export SSL_CERT_FILE=/tmp/ruby/lib/ca-bundle.crt
 
-if $INSTALL_GEMS; then
+# Remove some standard dummy gems. We must do this before
+# installing further gems in order to prevent accidentally
+# removing explicitly gems.
+run rm -rf /tmp/ruby/lib/ruby/gems/*/gems/{test-unit,rdoc}-*
+
+if [[ "$GEMFILE" != "" ]]; then
 	if [[ -e "$RUNTIME_DIR/vendor" ]]; then
 		run cp -pR "$RUNTIME_DIR/vendor" /tmp/ruby/vendor
 	fi
@@ -243,7 +255,10 @@ if $INSTALL_GEMS; then
 	else
 		run /tmp/ruby/bin/gem install bundler -v 1.7.3 --no-rdoc --no-ri
 	fi
-	run cp "$SELFDIR/../shared"/Gemfile* /tmp/ruby
+	run cp "$GEMFILE" /tmp/ruby/
+	if [[ -e "$GEMFILE.lock" ]]; then
+		run cp "$GEMFILE.lock" /tmp/ruby/
+	fi
 	echo "+ Entering /tmp/ruby"
 	pushd /tmp/ruby >/dev/null
 	run /tmp/ruby/bin/bundle config --local build.nokogiri ''
@@ -269,7 +284,6 @@ run rm -f /tmp/ruby/lib/ruby/gems/*/cache/*
 run rm -f /tmp/ruby/lib/ruby/gems/*/extensions/*/*/*/{gem_make.out,mkmf.log}
 run rm -rf /tmp/ruby/lib/ruby/gems/*/gems/*/{test,spec,*.md,*.rdoc}
 run rm -rf /tmp/ruby/lib/ruby/gems/*/gems/*/ext/*/*.{c,h}
-run rm -rf /tmp/ruby/lib/ruby/gems/*/gems/nokogiri*/ext/nokogiri/tmp
 
 # Create wrapper scripts.
 run mv /tmp/ruby/bin /tmp/ruby/bin.real

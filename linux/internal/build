@@ -13,6 +13,12 @@ function do_build()
 	mkdir $root/system $root/output
 	cp /system/* $root/system/
 	cp /system_shared/* $root/system/
+	if [[ -e /Gemfile ]]; then
+		cp /Gemfile $root/system/
+	fi
+	if [[ -e /Gemfile.lock ]]; then
+		cp /Gemfile.lock $root/system/
+	fi
 	echo $name > $root/system/NAME
 	echo $APP_UID > $root/system/APP_UID
 	echo $APP_GID > $root/system/APP_GID
@@ -20,7 +26,6 @@ function do_build()
 	echo $CONCURRENCY > $root/system/CONCURRENCY
 	echo $SETUP_SOURCE > $root/system/SETUP_SOURCE
 	echo $COMPILE > $root/system/COMPILE
-	echo $INSTALL_GEMS > $root/system/INSTALL_GEMS
 	echo $SANITY_CHECK_OUTPUT > $root/system/SANITY_CHECK_OUTPUT
 
 	# Build the binaries

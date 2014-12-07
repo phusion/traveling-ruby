@@ -7,7 +7,6 @@ RUBY_VERSION=`cat /system/RUBY_VERSION`
 CONCURRENCY=`cat /system/CONCURRENCY`
 SETUP_SOURCE=`cat /system/SETUP_SOURCE`
 COMPILE=`cat /system/COMPILE`
-INSTALL_GEMS=`cat /system/INSTALL_GEMS`
 SANITY_CHECK_OUTPUT=`cat /system/SANITY_CHECK_OUTPUT`
 
 # Ensure that our static libraries are used first.
@@ -171,7 +170,12 @@ export SSL_CERT_FILE=/tmp/ruby/lib/cert.pem
 	cp /etc/pki/tls/cert.pem /tmp/ruby/lib/
 	cp /system/restore_environment.rb /tmp/ruby/lib/
 
-	if $INSTALL_GEMS; then
+	# Remove some standard dummy gems. We must do this before
+	# installing further gems in order to prevent accidentally
+	# removing explicitly gems.
+	run rm -rf /tmp/ruby/lib/ruby/gems/*/gems/{test-unit,rdoc}-*
+
+	if [[ -e /system/Gemfile ]]; then
 		/tmp/ruby/bin/gem install bundler --no-rdoc --no-ri
 		(
 			cp /system/Gemfile* /tmp/ruby
@@ -194,7 +198,6 @@ export SSL_CERT_FILE=/tmp/ruby/lib/cert.pem
 	rm -f /tmp/ruby/lib/ruby/gems/*/extensions/*/*/*/{gem_make.out,mkmf.log}
 	rm -rf /tmp/ruby/lib/ruby/gems/*/gems/*/{test,spec,*.md,*.rdoc}
 	rm -rf /tmp/ruby/lib/ruby/gems/*/gems/*/ext/*/*.{c,h}
-	rm -rf /tmp/ruby/lib/ruby/gems/*/gems/nokogiri*/ext/nokogiri/tmp
 
 	# Create wrapper scripts
 	mv /tmp/ruby/bin /tmp/ruby/bin.real
@@ -204,7 +207,7 @@ export SSL_CERT_FILE=/tmp/ruby/lib/cert.pem
 	create_wrapper /tmp/ruby/bin/gem gem true
 	create_wrapper /tmp/ruby/bin/irb irb true
 	create_wrapper /tmp/ruby/bin/rake rake true
-	if $INSTALL_GEMS; then
+	if [[ -e /system/Gemfile ]]; then
 		create_wrapper /tmp/ruby/bin/bundle bundle true
 		create_wrapper /tmp/ruby/bin/bundler bundler true
 	fi
