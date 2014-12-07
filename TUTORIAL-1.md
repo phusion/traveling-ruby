@@ -30,15 +30,18 @@ The next step is to prepare packages for all the target platforms, by creating a
     $ mkdir -p hello-1.0.0-osx/lib/app/
     $ cp hello.rb hello-1.0.0-osx/lib/app/
 
-Next, download binaries for each platform, and to extract them into each directory. You can find a list of binaries at [the Traveling Ruby Amazon S3 bucket](http://traveling-ruby.s3-us-west-2.amazonaws.com/list.html). For faster download times, use the CloudFront domain "http://d6r77u77i8pq3.cloudfront.net". In this tutorial we're extracting version 20141206-2.1.5.
+Next, create a `packaging` directory and download Traveling Ruby binaries for each platform into that directory. Then extract these binaries into each packaging directory. You can find a list of binaries at [the Traveling Ruby Amazon S3 bucket](http://traveling-ruby.s3-us-west-2.amazonaws.com/list.html). For faster download times, use the CloudFront domain "http://d6r77u77i8pq3.cloudfront.net". In this tutorial we're extracting version 20141206-2.1.5.
 
+    $ mkdir packaging
+    $ cd packaging
     $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141206-2.1.5-linux-x86.tar.gz
     $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141206-2.1.5-linux-x86_64.tar.gz
     $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141206-2.1.5-osx.tar.gz
+    $ cd ..
 
-    $ mkdir hello-1.0.0-linux-x86/lib/ruby && tar -xzf traveling-ruby-20141206-2.1.5-linux-x86.tar.gz -C hello-1.0.0-linux-x86/lib/ruby
-    $ mkdir hello-1.0.0-linux-x86_64/lib/ruby && tar -xzf traveling-ruby-20141206-2.1.5-linux-x86_64.tar.gz -C hello-1.0.0-linux-x86_64/lib/ruby
-    $ mkdir hello-1.0.0-osx/lib/ruby && tar -xzf traveling-ruby-20141206-2.1.5-linux-x86.tar.gz -C hello-1.0.0-osx/lib/ruby
+    $ mkdir hello-1.0.0-linux-x86/lib/ruby && tar -xzf packaging/traveling-ruby-20141206-2.1.5-linux-x86.tar.gz -C hello-1.0.0-linux-x86/lib/ruby
+    $ mkdir hello-1.0.0-linux-x86_64/lib/ruby && tar -xzf packaging/traveling-ruby-20141206-2.1.5-linux-x86_64.tar.gz -C hello-1.0.0-linux-x86_64/lib/ruby
+    $ mkdir hello-1.0.0-osx/lib/ruby && tar -xzf packaging/traveling-ruby-20141206-2.1.5-osx.tar.gz -C hello-1.0.0-osx/lib/ruby
 
 Now, each package directory will have Ruby binaries included. It looks like this:
 Your directory structure will now look like this:
@@ -55,6 +58,7 @@ Your directory structure will now look like this:
      |       |   +-- hello.rb
      |       |
      |       +-- ruby/
+     |           |
      |           +-- bin/
      |           |   |
      |           |   +-- ruby
@@ -96,7 +100,6 @@ Here's what a wrapper script could look like:
 
 Save this file as `packaging/wrapper.sh` in your project's root directory. Then you can copy it to each of your package directories and name it `hello`:
 
-    $ mkdir packaging
     $ editor packaging/wrapper.sh
     ...edit the file as per above...
     $ chmod +x packaging/wrapper.sh
@@ -171,11 +174,10 @@ Going through all of the above steps on every release is a hassle, so you should
     def create_package(target)
       package_dir = "#{PACKAGE_NAME}-#{VERSION}-#{target}"
       sh "rm -rf #{package_dir}"
-      sh "mkdir #{package_dir}"
-      sh "mkdir #{package_dir}/app"
-      sh "cp hello.rb #{package_dir}/app/"
-      sh "mkdir #{package_dir}/runtime"
-      sh "tar -xzf packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz -C #{package_dir}/runtime"
+      sh "mkdir -p #{package_dir}/lib/app"
+      sh "cp hello.rb #{package_dir}/lib/app/"
+      sh "mkdir #{package_dir}/lib/ruby"
+      sh "tar -xzf packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz -C #{package_dir}/lib/ruby"
       sh "cp packaging/wrapper.sh #{package_dir}/hello"
       if !ENV['DIR_ONLY']
         sh "tar -czf #{package_dir}.tar.gz #{package_dir}"
