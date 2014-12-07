@@ -125,13 +125,8 @@ h6 {
 }
 
 .section-heading {
+    margin-top: 0;
     margin-bottom: 30px;
-}
-
-.section-heading-spacer {
-    float: left;
-    width: 200px;
-    border-top: 3px solid #e7e7e7;
 }
 
 .banner {
@@ -141,10 +136,23 @@ h6 {
     background-size: cover;
 }
 
+.banner .logo {
+    float: left;
+    margin-right: 2em;
+}
+
 .banner h2 {
     margin: 0;
     text-shadow: 2px 2px 3px rgba(0,0,0,0.6);
     font-size: 3em;
+}
+
+.banner h2 a {
+    color: white;
+}
+
+.banner h2 a:hover {
+    text-decoration: none;
 }
 
 .banner ul {
@@ -188,4 +196,9 @@ footer {
 
 p.copyright {
     margin: 15px 0 0;
+}
+
+.video-frame {
+    border: solid 1px #aaa;
+    padding: 3px;
 }
