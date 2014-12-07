@@ -67,15 +67,15 @@ Bundler also stores various cache files, which we also don't need to package, so
 
 Copy the Bundler gem bundle that you installed in the last step, into the package directories:
 
-    $ cp -pR packaging/vendor hello-1.0.0-linux-x86/
-    $ cp -pR packaging/vendor hello-1.0.0-linux-x86_64/
-    $ cp -pR packaging/vendor hello-1.0.0-osx/
+    $ cp -pR packaging/vendor hello-1.0.0-linux-x86/lib/
+    $ cp -pR packaging/vendor hello-1.0.0-linux-x86_64/lib/
+    $ cp -pR packaging/vendor hello-1.0.0-osx/lib/
 
 Copy over your Gemfile and Gemfile.lock into each gem directory inside the packages:
 
-    $ cp Gemfile Gemfile.lock hello-1.0.0-linux-x86/vendor/
-    $ cp Gemfile Gemfile.lock hello-1.0.0-linux-x86_64/vendor/
-    $ cp Gemfile Gemfile.lock hello-1.0.0-osx/vendor/
+    $ cp Gemfile Gemfile.lock hello-1.0.0-linux-x86/lib/vendor/
+    $ cp Gemfile Gemfile.lock hello-1.0.0-linux-x86_64/lib/vendor/
+    $ cp Gemfile Gemfile.lock hello-1.0.0-osx/lib/vendor/
 
 ## Bundler config file
 
@@ -89,13 +89,13 @@ First, create `packaging/bundler-config` which contains:
 
 Then copy the file into `.bundle` directories inside the gem directories inside the packages;
 
-    $ mkdir hello-1.0.0-linux-x86/vendor/.bundle
-    $ mkdir hello-1.0.0-linux-x86_64/vendor/.bundle
-    $ mkdir hello-1.0.0-osx/vendor/.bundle
+    $ mkdir hello-1.0.0-linux-x86/lib/vendor/.bundle
+    $ mkdir hello-1.0.0-linux-x86_64/lib/vendor/.bundle
+    $ mkdir hello-1.0.0-osx/lib/vendor/.bundle
 
-    $ cp packaging/bundler-config hello-1.0.0-linux-x86/vendor/.bundle/config
-    $ cp packaging/bundler-config hello-1.0.0-linux-x86_64/vendor/.bundle/config
-    $ cp packaging/bundler-config hello-1.0.0-osx/vendor/.bundle/config
+    $ cp packaging/bundler-config hello-1.0.0-linux-x86/lib/vendor/.bundle/config
+    $ cp packaging/bundler-config hello-1.0.0-linux-x86_64/lib/vendor/.bundle/config
+    $ cp packaging/bundler-config hello-1.0.0-osx/lib/vendor/.bundle/config
 
 ## Wrapper script
 
@@ -114,11 +114,11 @@ Here's how it looks like:
     SELFDIR="`cd \"$SELFDIR\" && pwd`"
 
     # Tell Bundler where the Gemfile and gems are.
-    export BUNDLE_GEMFILE="$SELFDIR/vendor/Gemfile"
+    export BUNDLE_GEMFILE="$SELFDIR/lib/vendor/Gemfile"
     unset BUNDLE_IGNORE_CONFIG
 
     # Run the actual app using the bundled Ruby interpreter, with Bundler activated.
-    exec "$SELFDIR/runtime/bin/ruby" -rbundler/setup "$SELFDIR/app/hello.rb"
+    exec "$SELFDIR/lib/ruby/bin/ruby" -rbundler/setup "$SELFDIR/lib/app/hello.rb"
 
 Copy over this wrapper script to each of your package directories and finalize the packages:
 
@@ -197,15 +197,15 @@ We update the Rakefile so that all of the above steps are automated by running `
       package_dir = "#{PACKAGE_NAME}-#{VERSION}-#{target}"
       sh "rm -rf #{package_dir}"
       sh "mkdir #{package_dir}"
-      sh "mkdir #{package_dir}/app"
-      sh "cp hello.rb #{package_dir}/app/"
-      sh "mkdir #{package_dir}/runtime"
-      sh "tar -xzf packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz -C #{package_dir}/runtime"
+      sh "mkdir -p #{package_dir}/lib/app"
+      sh "cp hello.rb #{package_dir}/lib/app/"
+      sh "mkdir #{package_dir}/lib/ruby"
+      sh "tar -xzf packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz -C #{package_dir}/lib/ruby"
       sh "cp packaging/wrapper.sh #{package_dir}/hello"
-      sh "cp -pR packaging/vendor #{package_dir}/"
-      sh "cp Gemfile Gemfile.lock #{package_dir}/vendor/"
-      sh "mkdir #{package_dir}/vendor/.bundle"
-      sh "cp packaging/bundler-config #{package_dir}/vendor/.bundle/config"
+      sh "cp -pR packaging/vendor #{package_dir}/lib/"
+      sh "cp Gemfile Gemfile.lock #{package_dir}/lib/vendor/"
+      sh "mkdir #{package_dir}/lib/vendor/.bundle"
+      sh "cp packaging/bundler-config #{package_dir}/lib/vendor/.bundle/config"
       if !ENV['DIR_ONLY']
         sh "tar -czf #{package_dir}.tar.gz #{package_dir}"
         sh "rm -rf #{package_dir}"

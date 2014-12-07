@@ -21,17 +21,14 @@ Let's begin by creating a hello world app:
 
 The next step is to prepare packages for all the target platforms, by creating a directory each platform, and by copying your app into each directory.
 
-    $ mkdir hello-1.0.0-linux-x86
-    $ mkdir hello-1.0.0-linux-x86/app
-    $ cp hello.rb hello-1.0.0-linux-x86/app/
+    $ mkdir -p hello-1.0.0-linux-x86/lib/app
+    $ cp hello.rb hello-1.0.0-linux-x86/lib/app/
 
-    $ mkdir hello-1.0.0-linux-x86_64
-    $ mkdir hello-1.0.0-linux-x86_64/app
-    $ cp hello.rb hello-1.0.0-linux-x86_64/app/
+    $ mkdir -p hello-1.0.0-linux-x86_64/lib/app
+    $ cp hello.rb hello-1.0.0-linux-x86_64/lib/app/
 
-    $ mkdir hello-1.0.0-osx
-    $ mkdir hello-1.0.0-osx/app
-    $ cp hello.rb hello-1.0.0-osx/app/
+    $ mkdir -p hello-1.0.0-osx/lib/app/
+    $ cp hello.rb hello-1.0.0-osx/lib/app/
 
 Next, download binaries for each platform, and to extract them into each directory. You can find a list of binaries at [the Traveling Ruby Amazon S3 bucket](http://traveling-ruby.s3-us-west-2.amazonaws.com/list.html). For faster download times, use the CloudFront domain "http://d6r77u77i8pq3.cloudfront.net". In this tutorial we're extracting version 20141206-2.1.5.
 
@@ -39,9 +36,9 @@ Next, download binaries for each platform, and to extract them into each directo
     $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141206-2.1.5-linux-x86_64.tar.gz
     $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141206-2.1.5-osx.tar.gz
 
-    $ mkdir hello-1.0.0-linux-x86/ruby && tar -xzf traveling-ruby-20141206-2.1.5-linux-x86.tar.gz -C hello-1.0.0-linux-x86/runtime
-    $ mkdir hello-1.0.0-linux-x86_64/ruby && tar -xzf traveling-ruby-20141206-2.1.5-linux-x86_64.tar.gz -C hello-1.0.0-linux-x86_64/runtime
-    $ mkdir hello-1.0.0-osx/ruby && tar -xzf traveling-ruby-20141206-2.1.5-linux-x86.tar.gz -C hello-1.0.0-osx/runtime
+    $ mkdir hello-1.0.0-linux-x86/lib/ruby && tar -xzf traveling-ruby-20141206-2.1.5-linux-x86.tar.gz -C hello-1.0.0-linux-x86/lib/ruby
+    $ mkdir hello-1.0.0-linux-x86_64/lib/ruby && tar -xzf traveling-ruby-20141206-2.1.5-linux-x86_64.tar.gz -C hello-1.0.0-linux-x86_64/lib/ruby
+    $ mkdir hello-1.0.0-osx/lib/ruby && tar -xzf traveling-ruby-20141206-2.1.5-linux-x86.tar.gz -C hello-1.0.0-osx/lib/ruby
 
 Now, each package directory will have Ruby binaries included. It looks like this:
 Your directory structure will now look like this:
@@ -52,17 +49,17 @@ Your directory structure will now look like this:
      |
      +-- hello-1.0.0-linux-x86/
      |   |
-     |   +-- app/
-     |   |   |
-     |   |   +-- hello.rb
-     |   |
-     |   +-- runtime/
-     |       |
-     |       +-- bin/
+     |   +-- lib/
+     |       +-- app/
      |       |   |
-     |       |   +-- ruby
-     |       |   +-- ...
-     |       +-- ...
+     |       |   +-- hello.rb
+     |       |
+     |       +-- ruby/
+     |           +-- bin/
+     |           |   |
+     |           |   +-- ruby
+     |           |   +-- ...
+     |           +-- ...
      |
      +-- hello-1.0.0-linux-x86_64/
      |   |
@@ -77,13 +74,13 @@ Your directory structure will now look like this:
 Let's do a basic sanity test by running your app with a bundled Ruby interpreter. Suppose that you are developing on OS X. Run this:
 
     $ cd hello-1.0.0-osx
-    $ ./runtime/bin/ruby app/hello.rb
+    $ ./lib/ruby/bin/ruby lib/app/hello.rb
     hello world
     $ cd ..
 
 ## Creating a wrapper script
 
-Now that you've verified that the bundled Ruby interpreter works, you'll want create a *wrapper script*. After all, you don't want your users to run `/path-to-your-app/runtime/bin/ruby /path-to-your-app/app/hello.rb`. You want them to run `/path-to-your-app/hello`.
+Now that you've verified that the bundled Ruby interpreter works, you'll want create a *wrapper script*. After all, you don't want your users to run `/path-to-your-app/lib/ruby/bin/ruby /path-to-your-app/lib/app/hello.rb`. You want them to run `/path-to-your-app/hello`.
 
 Here's what a wrapper script could look like:
 
@@ -95,7 +92,7 @@ Here's what a wrapper script could look like:
     SELFDIR="`cd \"$SELFDIR\" && pwd`"
 
     # Run the actual app using the bundled Ruby interpreter.
-    exec "$SELFDIR/runtime/bin/ruby" "$SELFDIR/app/hello.rb"
+    exec "$SELFDIR/lib/ruby/bin/ruby" "$SELFDIR/lib/app/hello.rb"
 
 Save this file as `packaging/wrapper.sh` in your project's root directory. Then you can copy it to each of your package directories and name it `hello`:
 
