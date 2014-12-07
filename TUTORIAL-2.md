@@ -54,7 +54,7 @@ Next, install the gem bundle for packaging. We do this by copying the Gemfile to
     $ cp Gemfile Gemfile.lock packaging/tmp/
     $ cd packaging/tmp
     $ BUNDLE_IGNORE_CONFIG=1 bundle install --path ../vendor --without development
-    $ cd ..
+    $ cd ../..
     $ rm -rf packaging/tmp
 
 Note that we passed `--without development` so that Rake isn't installed. In the final packages there is no need to include Rake.
