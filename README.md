@@ -127,3 +127,7 @@ Yes. These problems can put off your users from installing your app at all and c
 #### I target OS X, which already ships Ruby. Should I still bundle a Ruby interpreter?
 
 Yes. OS X versions up to 10.8 Mountain Lion ship Ruby 1.8. Only starting from 10.9 Mavericks does it ship Ruby 2.0. There are significant compatibility differences between Ruby 1.8 and 2.0. Future OS X versions might ship yet another Ruby version. Only by bundling Ruby can you be sure that OS upgrades won't break your app.
+
+## Why does Traveling Ruby not support Windows?
+
+We haven't spent the effort, and we're currently not creating any tools that should run on Windows. If Windows support is important to you, feel free to open a pull request.
