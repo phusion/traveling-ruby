@@ -202,3 +202,10 @@ p.copyright {
     border: solid 1px #aaa;
     padding: 3px;
 }
+
+.hn-button {
+    position: relative;
+    transform: scale(1.4);
+    left: 50px;
+    top: -4px;
+}
