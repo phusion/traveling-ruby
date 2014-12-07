@@ -11,7 +11,12 @@ You can find the end result of this tutorial at https://github.com/phusion/trave
 Suppose that we want our hello world app from tutorial 1 to print the message in red. We'll want to use [the paint gem](https://github.com/janlelis/paint) for that. Let's start by creating a Gemfile...
 
     source 'https://rubygems.org'
+    
     gem 'paint'
+    
+    group :development do
+      gem 'rake'
+    end
 
 ...and by modifying hello.rb as follows:
 
@@ -19,19 +24,48 @@ Suppose that we want our hello world app from tutorial 1 to print the message in
     require 'paint'
     puts Paint["hello world", :red]
 
-You must install your gem bundle into some local directory, because during the packaging phase we'll want to copy all the files into the package directories. **You must run Bundler with Ruby 2.1** because the Traveling Ruby binaries are Ruby 2.1, and because Bundler installs into a directory that contains the Ruby version number. If you run Bundler using any other Ruby version, things will fail in a later step.
+Then install your gem bundle:
 
-    $ ruby -v
-    ruby 2.1.x [...]
-    $ bundle install --path packaging/vendor
+    $ bundle install
+
+Verify that your hello world works:
+
+    $ bundle exec ruby hello.rb
+    hello world (in red)
 
 Then, using the Rakefile from tutorial 1, create package directories without creating tar.gz files:
 
     $ rake package DIR_ONLY=1
 
-## Copying over gems
+## Installing gems for packaging
 
-Copy over your Bundler gem directory into the package directories:
+In the previous step, we used Bundler to install gems so that you can run your app during development. But you *also* need to run Bundler a second time, to install the gems that you want to include in your package. During the packaging phase, the gems installed by this second Bundler invocation will be copied into the packages.
+
+But first, be aware that **you must run this Bundler instance with Ruby 2.1** because the Traveling Ruby binaries are Ruby 2.1, and because Bundler installs into a directory that contains the Ruby version number. If you run Bundler using any other Ruby version, things will fail in a later step.
+
+So first verify your Ruby version:
+
+    $ ruby -v
+    ruby 2.1.x [...]
+
+Next, install the gem bundle for packaging. We do this by copying the Gemfile to a temporary directory and running Bundler there, because passing `--path` and `--without` to Bundler will change its configuration file. We don't want to persist such changes in our development Bundler config.
+
+    $ mkdir packaging/tmp
+    $ cp Gemfile Gemfile.lock packaging/tmp/
+    $ cd packaging/tmp
+    $ BUNDLE_IGNORE_CONFIG=1 bundle install --path ../vendor --without development
+    $ cd ..
+    $ rm -rf packaging/tmp
+
+Note that we passed `--without development` so that Rake isn't installed. In the final packages there is no need to include Rake.
+
+Bundler also stores various cache files, which we also don't need to package, so we remove them:
+
+    $ rm -f packaging/vendor/*/*/cache/*
+
+## Copying gems into package directories
+
+Copy the Bundler gem bundle that you installed in the last step, into the package directories:
 
     $ cp -pR packaging/vendor hello-1.0.0-linux-x86/
     $ cp -pR packaging/vendor hello-1.0.0-linux-x86_64/
@@ -45,11 +79,12 @@ Copy over your Gemfile and Gemfile.lock into each gem directory inside the packa
 
 ## Bundler config file
 
-Create a Bundler config file in each of the gem directories inside the packages. This Bundler config file tells Bundler that gems are to be found in the same directory that the Gemfile resides in.
+We must create a Bundler config file for each of the gem directories inside the packages. This Bundler config file tells Bundler that gems are to be found in the same directory that the Gemfile resides in, and that gems in the "development" group should not be loaded.
 
-Create `packaging/bundler-config` whih contains:
+First, create `packaging/bundler-config` which contains:
 
     BUNDLE_PATH: .
+    BUNDLE_WITHOUT: development
     BUNDLE_DISABLE_SHARED_GEMS: '1'
 
 Then copy the file into `.bundle` directories inside the gem directories inside the packages;
@@ -102,6 +137,9 @@ Copy over this wrapper script to each of your package directories and finalize t
 
 We update the Rakefile so that all of the above steps are automated by running `rake package`. The various `package` tasks have been updated to run `package:bundle_install` which installs the gem bundle, and the `create_package` function has been updated to package the Gemfile and Bundler config file.
 
+    # For Bundler.with_clean_env
+    require 'bundler/setup'
+
     PACKAGE_NAME = "hello"
     VERSION = "1.0.0"
     TRAVELING_RUBY_VERSION = "20141206-2.1.5"
@@ -132,7 +170,14 @@ We update the Rakefile so that all of the above steps are automated by running `
         if RUBY_VERSION !~ /^2\.1\./
           abort "You can only 'bundle install' using Ruby 2.1, because that's what Traveling Ruby uses."
         end
-        sh "env BUNDLE_IGNORE_CONFIG=1 bundle install --path packaging/vendor"
+        sh "rm -rf packaging/tmp"
+        sh "mkdir packaging/tmp"
+        sh "cp Gemfile Gemfile.lock packaging/tmp/"
+        Bundler.with_clean_env do
+          sh "cd packaging/tmp && env BUNDLE_IGNORE_CONFIG=1 bundle install --path ../vendor --without development"
+        end
+        sh "rm -rf packaging/tmp"
+        sh "rm -f packaging/vendor/*/*/cache/*"
       end
     end
 
