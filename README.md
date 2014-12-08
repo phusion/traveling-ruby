@@ -10,7 +10,7 @@ _Introduction in 2 minutes_
 
 ## Motivation
 
-Ruby is one of our favorite programming langugages. Most people use it for web development, but Ruby is so much more. We at Phusion have been using Ruby for years for writing sysadmin automation scripts, developer command line tools and more. [Heroku's Toolbelt](https://toolbelt.heroku.com/) and [Chef](https://www.chef.io/) have also demonstrated that Ruby is an excellent language for these sorts of things.
+Ruby is one of our favorite programming languages. Most people use it for web development, but Ruby is so much more. We at Phusion have been using Ruby for years for writing sysadmin automation scripts, developer command line tools and more. [Heroku's Toolbelt](https://toolbelt.heroku.com/) and [Chef](https://www.chef.io/) have also demonstrated that Ruby is an excellent language for these sorts of things.
 
 However, distributing such Ruby apps to inexperienced end users or non-Ruby-programmer end users is problematic. If users have to install Ruby first, or if they have to use RubyGems, [they can easily run into problems](#end_user_problems). Even if they already have Ruby installed, they [can still run into problems](#end_user_problems), e.g. by having the wrong Ruby version installed. The point is, it's a very real problem that [could harm your reputation](#end_user_problems).
 
