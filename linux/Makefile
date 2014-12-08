@@ -43,7 +43,7 @@ upload: $(PACKAGE)-x86.tar.gz $(PACKAGE)-x86_64.tar.gz
 	./upload $(PACKAGE)-x86.tar.gz $(PACKAGE)-x86_64.tar.gz $(GEM_DIR)-x86 $(GEM_DIR)-x86_64
 
 clean:
-	rm -rf $(PACKAGE)-x86.tar.gz $(PACKAGE)-x86_64.tar.gz $(GEM_DIR)-x86 $(GEM_DIR)-x86_64
+	rm -rf $(PACKAGE)-x86.tar.gz $(PACKAGE)-x86_64.tar.gz $(GEM_DIR)-x86 $(GEM_DIR)-x86_64 output
 
 clean-all: clean
 	sudo rm -rf runtime
