@@ -51,7 +51,7 @@ for F in "$@"; do
 	fi
 done
 
-header "Uploading ${FILE_BASENAMES[@]} to Amazon S3..."
+header "Uploading `echo ${FILE_BASENAMES[@]}` to Amazon S3..."
 S3CFG="`echo ~/.s3cfg`"
 
 docker run --rm -t -i \
@@ -64,7 +64,8 @@ docker run --rm -t -i \
 	s3cmd -P put "${FILE_BASENAMES[@]}" s3://traveling-ruby/releases/
 
 for DIR_BASENAME in "${DIR_BASENAMES[@]}"; do
-	header "Uploading $DIR_BASNEMAE to Amazon S3..."
+	echo
+	header "Uploading $DIR_BASENAME to Amazon S3..."
 	docker run --rm -t -i \
 		"${MOUNTS[@]}" \
 		-v "$S3CFG:/s3cfg:ro" \
@@ -72,5 +73,5 @@ for DIR_BASENAME in "${DIR_BASENAMES[@]}"; do
 		phusion/ruby-traveler-builder \
 		/system/my_init --quiet --skip-runit --skip-startup-files -- \
 		/system/s3init \
-		s3cmd -P --delete-removed sync "$DIR_BASENAME" "s3://traveling-ruby/releases/$DIR_BASENAME"
+		s3cmd -P --delete-removed sync "$DIR_BASENAME" "s3://traveling-ruby/releases/$DIR_BASENAME/"
 done
