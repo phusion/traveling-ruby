@@ -22,7 +22,7 @@ output:
 
 upload: $(PACKAGE)
 	s3cmd -P put $(PACKAGE) s3://traveling-ruby/releases/
-	s3cmd -P --delete-removed sync $(GEM_DIR) s3://traveling-ruby/releases/$(GEM_DIR)/
+	s3cmd -P --delete-removed --no-preserve sync $(GEM_DIR) s3://traveling-ruby/releases/$(GEM_DIR)/
 
 clean:
 	rm -rf $(PACKAGE) $(GEM_DIR)
