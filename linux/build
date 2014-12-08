@@ -5,10 +5,12 @@ SELFDIR=`dirname "$0"`
 SELFDIR=`cd "$SELFDIR" && pwd`
 source "$SELFDIR/../shared/library.sh"
 
+CPUCOUNT=`"$SELFDIR/internal/cpucount"`
+
 RUNTIME_DIR=
 OUTPUT_DIR=
 ARCHITECTURE=
-CONCURRENCY=2
+CONCURRENCY=$CPUCOUNT
 GEMFILE="$SELFDIR/../shared/Gemfile"
 SETUP_SOURCE=true
 COMPILE=true
@@ -27,7 +29,7 @@ function usage()
 	echo "  -C         Do not compile Ruby"
 	echo "  -G         Do not install gems"
 	echo
-	echo "  -j NUMBER  Set build concurrency. Default: 2"
+	echo "  -j NUMBER  Set build concurrency. Default: $CPUCOUNT"
 	echo "  -g PATH    Build gems as specified by the given Gemfile"
 	echo "  -h         Show this help"
 }

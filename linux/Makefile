@@ -3,7 +3,7 @@ RUBY_VERSION := $(shell cat ../RUBY_VERSION.txt)
 
 PACKAGE := traveling-ruby-$(VERSION)-$(RUBY_VERSION)-linux
 GEM_DIR := traveling-ruby-gems-$(VERSION)-$(RUBY_VERSION)-linux
-CONCURRENCY := 2
+CONCURRENCY := $(shell ./internal/cpucount)
 
 .PHONY: package upload clean clean-all
 
