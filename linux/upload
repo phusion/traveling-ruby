@@ -61,7 +61,7 @@ docker run --rm -t -i \
 	phusion/ruby-traveler-builder \
 	/system/my_init --quiet --skip-runit --skip-startup-files -- \
 	/system/s3init \
-	s3cmd -P put "${FILE_BASENAMES[@]}" s3://traveling-ruby/releases/
+	s3cmd -P sync --no-preserve "${FILE_BASENAMES[@]}" s3://traveling-ruby/releases/
 
 for DIR_BASENAME in "${DIR_BASENAMES[@]}"; do
 	echo

@@ -21,7 +21,7 @@ output:
 	./build runtime output
 
 upload: $(PACKAGE)
-	s3cmd -P put $(PACKAGE) s3://traveling-ruby/releases/
+	s3cmd -P sync --no-preserve $(PACKAGE) s3://traveling-ruby/releases/
 	s3cmd -P --delete-removed --no-preserve sync $(GEM_DIR) s3://traveling-ruby/releases/$(GEM_DIR)/
 
 clean:
