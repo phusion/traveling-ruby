@@ -53,9 +53,28 @@ Traveling Ruby aims to solve the problem of supplying precompiled **Ruby 2.1** b
 
 You cannot yet use gems with native extensions. We are still working on a mechanism to make this possible.
 
-## The Traveling Ruby build system
+## The build system
 
-To be written.
+The Traveling Ruby binaries are built using the build system in this repository.
+
+### Linux
+
+The build system requires Docker and `make`. To build binaries, run:
+
+    cd linux
+    make
+
+### OS X
+
+The build system requires the Developer Tools to be installed. It has only been tested in 10.9 Mavericks. It *should* work on all OS X versions >= 10.8 Mountain Lion, but that has not been tested. To build binaries, run:
+
+    cd osx
+    make
+
+## Future work
+
+ * Document how the build system works.
+ * Provide a Rails example. This is only possible after we've gotten a good system in place for compiling native extensions.
 
 ## FAQ
 
