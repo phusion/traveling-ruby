@@ -35,9 +35,11 @@ pushd /var/lib/mock/$CHROOT_NAME/root/var/lib/rpm >/dev/null
 run rm -fv __db*
 for F in $(list_db_files *); do
 	echo "Fixing $F"
-	run db_dump $F > $F.dump
+	echo "+ db_dump $F > $F.dump"
+	db_dump $F > $F.dump
 	run rm $F
-	run db43_load $F < $F.dump
+	echo "+ db43_load $F < $F.dump"
+	db43_load $F < $F.dump
 	run rm $F.dump
 done
 echo "+ Leaving RPM database directory"
