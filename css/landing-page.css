@@ -203,9 +203,31 @@ p.copyright {
     padding: 3px;
 }
 
+.social-media-3 {
+    margin-top: 2em;
+    margin-left: -4em;
+}
+
 .hn-button {
     position: relative;
     transform: scale(1.4);
     left: 50px;
     top: -4px;
+}
+
+@media(max-width:767px) {
+    .social-media-3 {
+        margin-left: auto;
+        margin-right: auto;
+    }
+
+    .social-media-3 iframe {
+        display: block;
+        margin-bottom: 1em;
+    }
+
+    .social-media-3 iframe.hn-button {
+        left: 1.2em;
+        top: 4px;
+    }
 }

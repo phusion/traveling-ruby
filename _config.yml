@@ -1,7 +1,7 @@
 # Site settings
 title: Traveling Ruby
 email: info@phusion.nl
-baseurl: "" # the subpath of your site, e.g. /blog/
+baseurl: "/traveling-ruby" # the subpath of your site, e.g. /blog/
 
 # Build settings
 markdown: kramdown
