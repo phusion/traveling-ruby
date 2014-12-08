@@ -4,10 +4,10 @@ if perl -v >/dev/null 2>/dev/null; then
 	YELLOW=`perl -e 'print("\e[33m")'`
 	BLUE_BG=`perl -e 'print("\e[44m")'`
 elif python -V >/dev/null 2>/dev/null; then
-	RESET=`echo 'import sys; sys.stdout.print("\033[0m")' | python`
-	BOLD=`echo 'import sys; sys.stdout.print("\033[1m")' | python`
-	YELLOW=`echo 'import sys; sys.stdout.print("\033[33m")' | python`
-	BLUE_BG=`echo 'import sys; sys.stdout.print("\033[44m")' | python`
+	RESET=`echo 'import sys; sys.stdout.write("\033[0m")' | python`
+	BOLD=`echo 'import sys; sys.stdout.write("\033[1m")' | python`
+	YELLOW=`echo 'import sys; sys.stdout.write("\033[33m")' | python`
+	BLUE_BG=`echo 'import sys; sys.stdout.write("\033[44m")' | python`
 else
 	RESET=
 	BOLD=
