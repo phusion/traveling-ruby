@@ -4,7 +4,7 @@
 
 Traveling Ruby is a project which supplies self-contained, "portable" Ruby binaries: Ruby binaries that can run on any Linux distribution and any OS X machine. This allows Ruby app developers to bundle these binaries with their Ruby app, so that they can distribute a single package to end users, without needing end users to first install Ruby or gems.
 
-[![](https://raw.githubusercontent.com/phusion/traveling-ruby/master/doc/video.png)](https://vimeo.com/113827942)
+[![](https://raw.githubusercontent.com/phusion/traveling-ruby/master/doc/video.png)](https://vimeo.com/phusionnl/review/113827942/ceca7e70da)
 
 _Introduction in 2 minutes_
 
