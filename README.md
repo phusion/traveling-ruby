@@ -51,7 +51,7 @@ Traveling Ruby aims to solve the problem of supplying precompiled **Ruby 2.1** b
 
 ## Limitations
 
-You cannot yet use gems with native extensions. We are still working on a mechanism to make this possible.
+You cannot yet use gems with native extensions. [We are still working on a mechanism to make this possible.](https://github.com/phusion/traveling-ruby/issues/3)
 
 ## The build system
 
