@@ -216,6 +216,10 @@ p.copyright {
 }
 
 @media(max-width:767px) {
+    .navbar-collapse {
+        background: #146979;
+    }
+    
     .social-media-3 {
         margin-left: auto;
         margin-right: auto;
