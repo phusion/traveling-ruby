@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    json (1.8.1)
     mini_portile (0.6.1)
     nokogiri (1.6.5)
       mini_portile (~> 0.6.0)
@@ -10,5 +11,6 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  json
   nokogiri
   sqlite3
