@@ -3,8 +3,8 @@ set -e
 
 SELFDIR=`dirname "$0"`
 SELFDIR=`cd "$SELFDIR" && pwd`
-source "$SELFDIR/internal/essentials.sh"
-source "$SELFDIR/internal/library.sh"
+source "$SELFDIR/internal/reset_environment.sh"
+source "$SELFDIR/../shared/library.sh"
 
 TEMPDIR=
 

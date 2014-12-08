@@ -3,6 +3,7 @@ set -e
 
 SELFDIR=`dirname "$0"`
 SELFDIR=`cd "$SELFDIR" && pwd`
+source "$SELFDIR/../shared/library.sh"
 
 RUNTIME_DIR=
 OUTPUT_DIR=
@@ -13,14 +14,6 @@ SETUP_SOURCE=true
 COMPILE=true
 SANITY_CHECK_OUTPUT=true
 GEMFILE_MOUNT=()
-
-function absolute_path()
-{
-	local dir="`dirname \"$1\"`"
-	local name="`basename \"$1\"`"
-	dir="`cd \"$dir\" && pwd`"
-	echo "$dir/$name"
-}
 
 function usage()
 {

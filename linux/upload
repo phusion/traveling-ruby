@@ -1,23 +1,18 @@
 #!/bin/bash
 set -e
 
+SELFDIR=`dirname "$0"`
+SELFDIR=`cd "$SELFDIR" && pwd`
+source "$SELFDIR/../shared/library.sh"
+
+TEMPDIR=
+
 function cleanup()
 {
-	set +e
-	local pids=`jobs -p`
-	if [[ "$pids" != "" ]]; then
-		kill $pids >/dev/null
-	fi
 	if [[ "$TEMPDIR" != "" ]]; then
 		rm -rf "$TEMPDIR"
 	fi
 }
-
-trap cleanup EXIT
-
-SELFDIR=`dirname "$0"`
-SELFDIR=`cd "$SELFDIR" && pwd`
-TEMPDIR=
 
 if [[ $# == 0 ]]; then
 	echo "Usage: ./upload <FILES>"
@@ -38,27 +33,44 @@ if [[ ! -e ~/.s3cfg ]]; then
 	cp "$TEMPDIR/s3cfg" ~/.s3cfg
 	rm -rf "$TEMPDIR"
 	TEMPDIR=
+	echo
 fi
 
 MOUNTS=()
-BASENAMES=()
+FILE_BASENAMES=()
+DIR_BASENAMES=()
 for F in "$@"; do
-	DIR="`dirname \"$F\"`"
-	DIR="`cd \"$DIR\" && pwd`"
 	BASENAME="`basename \"$F\"`"
-	F="$DIR/$BASENAME"
+	F="`absolute_path \"$F\"`"
 	
 	MOUNTS+=(-v "$F:/$BASENAME:ro")
-	BASENAMES+=("$BASENAME")
+	if [[ -f "$F" ]]; then
+		FILE_BASENAMES+=("$BASENAME")
+	else
+		DIR_BASENAMES+=("$BASENAME")
+	fi
 done
 
-echo "Uploading ${BASENAMES[@]} to Amazon S3..."
+header "Uploading ${FILE_BASENAMES[@]} to Amazon S3..."
 S3CFG="`echo ~/.s3cfg`"
-exec docker run --rm -t -i \
+
+docker run --rm -t -i \
 	"${MOUNTS[@]}" \
 	-v "$S3CFG:/s3cfg:ro" \
 	-v "$SELFDIR/internal:/system:ro" \
 	phusion/ruby-traveler-builder \
 	/system/my_init --quiet --skip-runit --skip-startup-files -- \
 	/system/s3init \
-	s3cmd -P put "${BASENAMES[@]}" s3://traveling-ruby/releases/
+	s3cmd -P put "${FILE_BASENAMES[@]}" s3://traveling-ruby/releases/
+
+for DIR_BASENAME in "${DIR_BASENAMES[@]}"; do
+	header "Uploading $DIR_BASNEMAE to Amazon S3..."
+	docker run --rm -t -i \
+		"${MOUNTS[@]}" \
+		-v "$S3CFG:/s3cfg:ro" \
+		-v "$SELFDIR/internal:/system:ro" \
+		phusion/ruby-traveler-builder \
+		/system/my_init --quiet --skip-runit --skip-startup-files -- \
+		/system/s3init \
+		s3cmd -P --delete-removed sync "$DIR_BASENAME" "s3://traveling-ruby/releases/$DIR_BASENAME"
+done

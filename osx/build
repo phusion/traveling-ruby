@@ -3,8 +3,8 @@ set -e
 
 SELFDIR=`dirname "$0"`
 SELFDIR=`cd "$SELFDIR" && pwd`
-source "$SELFDIR/internal/essentials.sh"
-source "$SELFDIR/internal/library.sh"
+source "$SELFDIR/internal/reset_environment.sh"
+source "$SELFDIR/../shared/library.sh"
 
 WORKDIR=
 OWNS_WORKDIR=true
@@ -241,20 +241,35 @@ run cp "$SELFDIR/internal/restore_environment.rb" /tmp/ruby/lib/
 run cp "$SELFDIR/../shared/ca-bundle.crt" /tmp/ruby/lib/
 export SSL_CERT_FILE=/tmp/ruby/lib/ca-bundle.crt
 
+# Dump various information about the Ruby binaries.
+RUBY_COMPAT_VERSION=`/tmp/ruby/bin/ruby -rrbconfig -e 'puts RbConfig::CONFIG["ruby_version"]'`
+GEM_PLATFORM=`/tmp/ruby/bin/ruby -e 'puts Gem::Platform.local.to_s'`
+GEM_EXTENSION_API_VERSION=`/tmp/ruby/bin/ruby -e 'puts Gem.extension_api_version'`
+run mkdir /tmp/ruby/info
+echo "+ Dumping information about the Ruby binaries into /tmp/ruby/info"
+echo $RUBY_COMPAT_VERSION > /tmp/ruby/info/RUBY_COMPAT_VERSION
+echo $GEM_PLATFORM > /tmp/ruby/info/GEM_PLATFORM
+echo $GEM_EXTENSION_API_VERSION > /tmp/ruby/info/GEM_EXTENSION_API_VERSION
+
 # Remove some standard dummy gems. We must do this before
 # installing further gems in order to prevent accidentally
 # removing explicitly gems.
-run rm -rf /tmp/ruby/lib/ruby/gems/*/gems/{test-unit,rdoc}-*
+run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/{test-unit,rdoc}-*
 
 if [[ "$GEMFILE" != "" ]]; then
+	# Restore cached gems.
 	if [[ -e "$RUNTIME_DIR/vendor" ]]; then
 		run cp -pR "$RUNTIME_DIR/vendor" /tmp/ruby/vendor
 	fi
+
+	# Install Bundler, either from cache or directly.
 	if [[ -e "$RUNTIME_DIR/vendor/cache/bundler-1.7.3.gem" ]]; then
 		run /tmp/ruby/bin/gem install "$RUNTIME_DIR/vendor/cache/bundler-1.7.3.gem" --no-rdoc --no-ri
 	else
 		run /tmp/ruby/bin/gem install bundler -v 1.7.3 --no-rdoc --no-ri
 	fi
+
+	# Run bundle install.
 	run cp "$GEMFILE" /tmp/ruby/
 	if [[ -e "$GEMFILE.lock" ]]; then
 		run cp "$GEMFILE.lock" /tmp/ruby/
@@ -266,7 +281,7 @@ if [[ "$GEMFILE" != "" ]]; then
 	run /tmp/ruby/bin/bundle package
 	run rm -rf "$RUNTIME_DIR/vendor"
 	run mv vendor "$RUNTIME_DIR/"
-	run cp /tmp/ruby/lib/ruby/gems/2.1.0/cache/bundler-1.7.3.gem "$RUNTIME_DIR/vendor/cache/"
+	run cp /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/bundler-1.7.3.gem "$RUNTIME_DIR/vendor/cache/"
 	run rm -rf Gemfile* .bundle
 	echo "+ Leaving /tmp/ruby"
 	popd >/dev/null
@@ -275,15 +290,21 @@ fi
 # Strip binaries and remove unnecessary files.
 run strip -S /tmp/ruby/bin/ruby
 echo "+ Stripping libraries..."
-find /tmp/ruby -name '*.bundle' | xargs strip -S
-find /tmp/ruby -name '*.dylib' | xargs strip -S
+(
+	set -o pipefail
+	find /tmp/ruby -name '*.bundle' | xargs strip -S
+	find /tmp/ruby -name '*.dylib' | xargs strip -S
+)
+if [[ $? != 0 ]]; then
+	exit
+fi
 run rm /tmp/ruby/bin/{erb,rdoc,ri,testrb}
 run rm -rf /tmp/ruby/share
 run rm -rf /tmp/ruby/lib/{libruby-static.a,pkgconfig}
-run rm -f /tmp/ruby/lib/ruby/gems/*/cache/*
-run rm -f /tmp/ruby/lib/ruby/gems/*/extensions/*/*/*/{gem_make.out,mkmf.log}
-run rm -rf /tmp/ruby/lib/ruby/gems/*/gems/*/{test,spec,*.md,*.rdoc}
-run rm -rf /tmp/ruby/lib/ruby/gems/*/gems/*/ext/*/*.{c,h}
+run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
+run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out,mkmf.log}
+run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
+run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/*.{c,h}
 
 # Create wrapper scripts.
 run mv /tmp/ruby/bin /tmp/ruby/bin.real

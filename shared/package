@@ -1,0 +1,129 @@
+#!/bin/bash
+set -e
+
+SELFDIR=`dirname "$0"`
+SELFDIR=`cd "$SELFDIR" && pwd`
+source "$SELFDIR/library.sh"
+
+BUILD_OUTPUT_DIR=
+RUBY_PACKAGE=
+GEM_NATIVE_EXTENSIONS_PACKAGE=
+GEM_NATIVE_EXTENSIONS_DIR=
+
+function load_ruby_info()
+{
+	local BUILD_OUTPUT_DIR="$1"
+	RUBY_COMPAT_VERSION=`cat "$BUILD_OUTPUT_DIR/info/RUBY_COMPAT_VERSION"`
+	GEM_PLATFORM=`cat "$BUILD_OUTPUT_DIR/info/GEM_PLATFORM"`
+	GEM_EXTENSION_API_VERSION=`cat "$BUILD_OUTPUT_DIR/info/GEM_EXTENSION_API_VERSION"`
+}
+
+function find_gems_containing_native_extensions()
+{
+	local BUILD_OUTPUT_DIR="$1"
+	(
+		shopt -s nullglob
+		GEMS=("$BUILD_OUTPUT_DIR"/lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*)
+		GEM_NAMES=()
+		for GEM in "${GEMS[@]}"; do
+			GEM_NAME="`basename \"$GEM\"`"
+			GEM_NAMES+=("$GEM_NAME")
+		done
+		echo "${GEM_NAMES[@]}"
+	)
+	[[ $? = 0 ]]
+}
+
+function usage()
+{
+	echo "Usage: ./package [options] <BUILD OUTPUT DIR>"
+	echo "Package built Traveling Ruby binaries."
+	echo
+	echo "Options:"
+	echo "  -r PATH    Package Ruby into given file"
+	echo "  -e PATH    Package gem native extensions into a single file"
+	echo "  -E DIR     Package gem native extensions into separate files in the given directory"
+	echo "  -h         Show this help"
+}
+
+function parse_options()
+{
+	local OPTIND=1
+	local opt
+	while getopts "r:e:E:h" opt; do
+		case "$opt" in
+		r)
+			RUBY_PACKAGE="$OPTARG"
+			;;
+		e)
+			GEM_NATIVE_EXTENSIONS_PACKAGE="$OPTARG"
+			;;
+		E)
+			GEM_NATIVE_EXTENSIONS_DIR="$OPTARG"
+			;;
+		h)
+			usage
+			exit
+			;;
+		*)
+			return 1
+			;;
+		esac
+	done
+
+	(( OPTIND -= 1 )) || true
+	shift $OPTIND || true
+	BUILD_OUTPUT_DIR="$1"
+
+	if [[ "$BUILD_OUTPUT_DIR" = "" ]]; then
+		usage
+		exit 1
+	fi
+	if [[ "$RUBY_PACKAGE" = "" && "$GEM_NATIVE_EXTENSIONS_PACKAGE" = "" && "$GEM_NATIVE_EXTENSIONS_DIR" = "" ]]; then
+		echo "ERROR: you must specify either a Ruby package path (-r), a gem native extensions package (-e) or a gem native extensions directory (-E)."
+		exit 1
+	fi
+	if [[ ! -e "$BUILD_OUTPUT_DIR" ]]; then
+		echo "ERROR: $BUILD_OUTPUT_DIR doesn't exist."
+		exit 1
+	fi
+}
+
+
+parse_options "$@"
+
+
+##########
+
+
+export GZIP=--best
+load_ruby_info "$BUILD_OUTPUT_DIR"
+NATIVE_GEMS=(`find_gems_containing_native_extensions "$BUILD_OUTPUT_DIR"`)
+
+if [[ "$RUBY_PACKAGE" != "" ]]; then
+	header "Packaging Ruby..."
+	run tar -czf "$RUBY_PACKAGE" -C "$BUILD_OUTPUT_DIR" --exclude lib/ruby/gems/ .
+fi
+
+if [[ "$GEM_NATIVE_EXTENSIONS_PACKAGE" != "" ]]; then
+	echo
+	header "Packaging gem native extensions..."
+	if [[ ${#NATIVE_GEMS[@]} -eq 0 ]]; then
+		echo "There are no gems with native extensions."
+	else
+		run tar -czf "$GEM_NATIVE_EXTENSIONS_PACKAGE" -C "$BUILD_OUTPUT_DIR/lib/ruby/gems" "$RUBY_COMPAT_VERSION/extensions"
+	fi
+elif [[ "$GEM_NATIVE_EXTENSIONS_DIR" != "" ]]; then
+	echo
+	header "Packaging gem native extensions..."
+	if [[ ${#NATIVE_GEMS[@]} -eq 0 ]]; then
+		echo "There are no gems with native extensions."
+	else
+		run mkdir -p "$GEM_NATIVE_EXTENSIONS_DIR"
+		for GEM_NAME in "${NATIVE_GEMS[@]}"; do
+			run tar -czf "$GEM_NATIVE_EXTENSIONS_DIR/$GEM_NAME.tar.gz" \
+				-C "$BUILD_OUTPUT_DIR/lib/ruby/gems" \
+				"$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/$GEM_NAME"
+		done
+	fi
+fi

@@ -3,6 +3,7 @@ set -e
 
 SELFDIR=`dirname "$0"`
 SELFDIR=`cd "$SELFDIR" && pwd`
+source "$SELFDIR/../shared/library.sh"
 
 RUNTIME_DIR=
 ARCHITECTURE=
@@ -77,7 +78,9 @@ function parse_options()
 
 parse_options "$@"
 RUNTIME_DIR=`cd "$RUNTIME_DIR" && pwd`
-mkdir -p "$RUNTIME_DIR/mock"
+
+header "Preparing"
+run mkdir -p "$RUNTIME_DIR/mock"
 
 exec docker run \
 	--rm \

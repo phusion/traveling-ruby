@@ -1,5 +1,8 @@
 #!/bin/bash
 set -e
+
+source /system/library.sh
+
 NAME=`cat /system/NAME`
 APP_UID=`cat /system/APP_UID`
 APP_GID=`cat /system/APP_GID`
@@ -90,135 +93,127 @@ EOF
 }
 
 cd /tmp
+echo
+
 
 if $SETUP_SOURCE; then
-	echo "--------- Extracting source code ---------"
-	(
-		set -x
-		rm -rf /tmp/ruby-$RUBY_VERSION
-		tar xzf /ruby-$RUBY_VERSION.tar.gz
-	)
-	if [[ $? != 0 ]]; then
-		exit 1
-	fi
-	echo "+ cd ruby-$RUBY_VERSION"
+	header "Extracting source code"
+	run rm -rf /tmp/ruby-$RUBY_VERSION
+	run tar xzf /ruby-$RUBY_VERSION.tar.gz
+	echo "Entering ruby-$RUBY_VERSION"
 	cd ruby-$RUBY_VERSION
-
 	echo
-	echo "--------- Configuring ---------"
-	(
-		set -x
-		./configure \
-			--prefix /tmp/ruby \
-			--disable-install-doc \
-			--disable-install-rdoc \
-			--disable-install-capi \
-			--with-out-ext=tk,gdbm,dbm,dl,coverage \
-			--with-openssl-dir=/usr/local/override
-	)
-	if [[ $? != 0 ]]; then
-		exit 1
-	fi
+
+	header "Configuring"
+	run ./configure \
+		--prefix /tmp/ruby \
+		--disable-install-doc \
+		--disable-install-rdoc \
+		--disable-install-capi \
+		--with-out-ext=tk,gdbm,dbm,dl,coverage \
+		--with-openssl-dir=/usr/local/override
+	echo
 else
-	echo "+ cd ruby-$RUBY_VERSION"
+	echo "Entering ruby-$RUBY_VERSION"
 	cd ruby-$RUBY_VERSION
+	echo
 fi
+
 
 if $COMPILE; then
+	header "Compiling"
+	run sed -i 's|dir_config("openssl")|$libs << " -lz "; dir_config("openssl")|' ext/openssl/extconf.rb
+	run make -j$CONCURRENCY exts.mk
+	run make -j$CONCURRENCY
 	echo
-	echo "--------- Compiling ---------"
-	(
-		set -x
-		sed -i 's|dir_config("openssl")|$libs << " -lz "; dir_config("openssl")|' ext/openssl/extconf.rb
-		make -j$CONCURRENCY exts.mk
-		make -j$CONCURRENCY
-	)
-	if [[ $? != 0 ]]; then
-		exit 1
-	fi
 fi
 
-echo
-echo "--------- Installing into temporary prefix ---------"
-(
-	set -x
-	rm -rf /tmp/ruby
-	make install-nodoc
-)
 
+header "Installing into temporary prefix"
+run rm -rf /tmp/ruby
+run make install-nodoc
 echo
-echo "--------- Postprocessing build output ---------"
+
+
+header "Postprocessing build output"
+
+# Copy over non-statically linked third-party libraries and other files.
+if [[ "$NAME" = x86 ]]; then
+	LIBDIR=/lib
+	USRLIBDIR=/usr/lib
+else
+	LIBDIR=/lib64
+	USRLIBDIR=/usr/lib64
+fi
+run cp $LIBDIR/libz.so.1 /tmp/ruby/lib/
+run cp $LIBDIR/libtermcap.so.2 /tmp/ruby/lib/
+run cp $USRLIBDIR/libxslt.so.1 /tmp/ruby/lib/
+run cp $USRLIBDIR/libxml2.so.2 /tmp/ruby/lib/
+run cp $USRLIBDIR/libreadline.so.5 /tmp/ruby/lib/
+run cp $USRLIBDIR/libsqlite3.so.0 /tmp/ruby/lib/
+run cp /etc/pki/tls/cert.pem /tmp/ruby/lib/
+run cp /system/restore_environment.rb /tmp/ruby/lib/
 export SSL_CERT_FILE=/tmp/ruby/lib/cert.pem
+
+# Dump various information about the Ruby binaries.
+RUBY_COMPAT_VERSION=`/tmp/ruby/bin/ruby -rrbconfig -e 'puts RbConfig::CONFIG["ruby_version"]'`
+GEM_PLATFORM=`/tmp/ruby/bin/ruby -e 'puts Gem::Platform.local.to_s'`
+GEM_EXTENSION_API_VERSION=`/tmp/ruby/bin/ruby -e 'puts Gem.extension_api_version'`
+run mkdir /tmp/ruby/info
+echo "+ Dumping information about the Ruby binaries into /tmp/ruby/info"
+echo $RUBY_COMPAT_VERSION > /tmp/ruby/info/RUBY_COMPAT_VERSION
+echo $GEM_PLATFORM > /tmp/ruby/info/GEM_PLATFORM
+echo $GEM_EXTENSION_API_VERSION > /tmp/ruby/info/GEM_EXTENSION_API_VERSION
+
+# Remove some standard dummy gems. We must do this before
+# installing further gems in order to prevent accidentally
+# removing explicitly gems.
+run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/{test-unit,rdoc}-*
+
+if [[ -e /system/Gemfile ]]; then
+	run /tmp/ruby/bin/gem install bundler --no-rdoc --no-ri
+	run cp /system/Gemfile* /tmp/ruby
+	echo "+ Entering /tmp/ruby"
+	pushd /tmp/ruby >/dev/null
+	run /tmp/ruby/bin/bundle install --system --retry 3
+	run rm Gemfile*
+	echo "+ Leaving /tmp/ruby"
+	popd >/dev/null
+fi
+
+# Strip binaries and remove unnecessary files.
+run strip --strip-all /tmp/ruby/bin/ruby
 (
 	set -o pipefail
-	set -x
-
-	# Copy over non-statically linked third-party libraries and other files.
-	if [[ "$NAME" = x86 ]]; then
-		LIBDIR=/lib
-		USRLIBDIR=/usr/lib
-	else
-		LIBDIR=/lib64
-		USRLIBDIR=/usr/lib64
-	fi
-	cp $LIBDIR/libz.so.1 /tmp/ruby/lib/
-	cp $LIBDIR/libtermcap.so.2 /tmp/ruby/lib/
-	cp $USRLIBDIR/libxslt.so.1 /tmp/ruby/lib/
-	cp $USRLIBDIR/libxml2.so.2 /tmp/ruby/lib/
-	cp $USRLIBDIR/libreadline.so.5 /tmp/ruby/lib/
-	cp $USRLIBDIR/libsqlite3.so.0 /tmp/ruby/lib/
-	cp /etc/pki/tls/cert.pem /tmp/ruby/lib/
-	cp /system/restore_environment.rb /tmp/ruby/lib/
-
-	# Remove some standard dummy gems. We must do this before
-	# installing further gems in order to prevent accidentally
-	# removing explicitly gems.
-	run rm -rf /tmp/ruby/lib/ruby/gems/*/gems/{test-unit,rdoc}-*
-
-	if [[ -e /system/Gemfile ]]; then
-		/tmp/ruby/bin/gem install bundler --no-rdoc --no-ri
-		(
-			cp /system/Gemfile* /tmp/ruby
-			cd /tmp/ruby
-			/tmp/ruby/bin/bundle install --system --retry 3
-			rm Gemfile*
-		)
-		if [[ $? != 0 ]]; then
-			exit 1
-		fi
-	fi
-
-	# Strip binaries and remove unnecessary files.
-	strip --strip-all /tmp/ruby/bin/ruby
 	find /tmp/ruby -name '*.so' | xargs strip --strip-debug
-	rm /tmp/ruby/bin/{erb,rdoc,ri,testrb}
-	rm -rf /tmp/ruby/share
-	rm -rf /tmp/ruby/lib/{libruby-static.a,pkgconfig}
-	rm -f /tmp/ruby/lib/ruby/gems/*/cache/*
-	rm -f /tmp/ruby/lib/ruby/gems/*/extensions/*/*/*/{gem_make.out,mkmf.log}
-	rm -rf /tmp/ruby/lib/ruby/gems/*/gems/*/{test,spec,*.md,*.rdoc}
-	rm -rf /tmp/ruby/lib/ruby/gems/*/gems/*/ext/*/*.{c,h}
-
-	# Create wrapper scripts
-	mv /tmp/ruby/bin /tmp/ruby/bin.real
-	mkdir /tmp/ruby/bin
-	create_environment_file /tmp/ruby/bin/ruby_environment
-	create_wrapper /tmp/ruby/bin/ruby ruby false
-	create_wrapper /tmp/ruby/bin/gem gem true
-	create_wrapper /tmp/ruby/bin/irb irb true
-	create_wrapper /tmp/ruby/bin/rake rake true
-	if [[ -e /system/Gemfile ]]; then
-		create_wrapper /tmp/ruby/bin/bundle bundle true
-		create_wrapper /tmp/ruby/bin/bundler bundler true
-	fi
 )
 if [[ $? != 0 ]]; then
-	exit 1
+	exit
 fi
+run rm /tmp/ruby/bin/{erb,rdoc,ri,testrb}
+run rm -rf /tmp/ruby/share
+run rm -rf /tmp/ruby/lib/{libruby-static.a,pkgconfig}
+run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
+run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out,mkmf.log}
+run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
+run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/*.{c,h}
+
+# Create wrapper scripts
+mv /tmp/ruby/bin /tmp/ruby/bin.real
+mkdir /tmp/ruby/bin
+create_environment_file /tmp/ruby/bin/ruby_environment
+create_wrapper /tmp/ruby/bin/ruby ruby false
+create_wrapper /tmp/ruby/bin/gem gem true
+create_wrapper /tmp/ruby/bin/irb irb true
+create_wrapper /tmp/ruby/bin/rake rake true
+if [[ -e /system/Gemfile ]]; then
+	create_wrapper /tmp/ruby/bin/bundle bundle true
+	create_wrapper /tmp/ruby/bin/bundler bundler true
+fi
+echo
 
 if $SANITY_CHECK_OUTPUT; then
-	echo
-	echo "--------- Sanity checking build output ---------"
+	header "Sanity checking build output"
 	(
 		SYSTEM_LIBRARIES="(linux-gate|linux-vdso|libpthread|librt|libdl|libcrypt|libm|libc"
 		SYSTEM_LIBRARIES="$SYSTEM_LIBRARIES|ld-linux.*|libutil|libz|libxslt|libxml2|libreadline"
@@ -245,15 +240,9 @@ if $SANITY_CHECK_OUTPUT; then
 	if [[ $? != 0 ]]; then
 		exit 1
 	fi
+	echo
 fi
 
-echo
-echo "--------- Committing build output ---------"
-(
-	set -x
-	chown -R $APP_UID:$APP_GID /tmp/ruby
-	mv /tmp/ruby/* /output/
-)
-if [[ $? != 0 ]]; then
-	exit 1
-fi
+header "Committing build output"
+run chown -R $APP_UID:$APP_GID /tmp/ruby
+run mv /tmp/ruby/* /output/

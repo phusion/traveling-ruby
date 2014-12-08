@@ -1,54 +1,39 @@
 #!/bin/bash
 set -e
-source /system/library.sh
+source /system_shared/library.sh
 
-function do_build()
-{
-	local chroot_name="$1"
-	local name="$2"
-	local root=/var/lib/mock/$chroot_name/root
-
-	# Initialize parameters
-	rm -rf $root/system $root/output
-	mkdir $root/system $root/output
-	cp /system/* $root/system/
-	cp /system_shared/* $root/system/
-	if [[ -e /Gemfile ]]; then
-		cp /Gemfile $root/system/
-	fi
-	if [[ -e /Gemfile.lock ]]; then
-		cp /Gemfile.lock $root/system/
-	fi
-	echo $name > $root/system/NAME
-	echo $APP_UID > $root/system/APP_UID
-	echo $APP_GID > $root/system/APP_GID
-	echo $RUBY_VERSION > $root/system/RUBY_VERSION
-	echo $CONCURRENCY > $root/system/CONCURRENCY
-	echo $SETUP_SOURCE > $root/system/SETUP_SOURCE
-	echo $COMPILE > $root/system/COMPILE
-	echo $SANITY_CHECK_OUTPUT > $root/system/SANITY_CHECK_OUTPUT
-
-	# Build the binaries
-	/system/setuser app /usr/bin/mock -r $chroot_name --quiet --shell /system/build-inside-mock
-
-	# Move build result to proper output directory
-	chown $APP_UID:$APP_GID /output
-	cp -dpR $root/output/* /output/
-
-	# Cleanup
-	rm -rf $root/system $root/output
-}
-
-header "Building binaries"
+header "Preparing"
 if [[ "$ARCHITECTURE" = x86 ]]; then
 	CHROOT_NAME=epel-5-i386
 else
 	CHROOT_NAME=epel-5-x86_64
 fi
-(
-	set -x
-	do_build $CHROOT_NAME $ARCHITECTURE
-)
-if [[ $? != 0 ]]; then
-	exit 1
+ROOT=/var/lib/mock/$CHROOT_NAME/root
+run rm -rf $ROOT/system $ROOT/output
+run mkdir $ROOT/system $ROOT/output
+run cp /system/* $ROOT/system/
+run cp /system_shared/* $ROOT/system/
+if [[ -e /Gemfile ]]; then
+	run cp /Gemfile $ROOT/system/
 fi
+if [[ -e /Gemfile.lock ]]; then
+	run cp /Gemfile.lock $ROOT/system/
+fi
+echo "Dumping parameters"
+echo $ARCHITECTURE > $ROOT/system/NAME
+echo $APP_UID > $ROOT/system/APP_UID
+echo $APP_GID > $ROOT/system/APP_GID
+echo $RUBY_VERSION > $ROOT/system/RUBY_VERSION
+echo $CONCURRENCY > $ROOT/system/CONCURRENCY
+echo $SETUP_SOURCE > $ROOT/system/SETUP_SOURCE
+echo $COMPILE > $ROOT/system/COMPILE
+echo $SANITY_CHECK_OUTPUT > $ROOT/system/SANITY_CHECK_OUTPUT
+echo "Entering mock chroot"
+run /system/setuser app /usr/bin/mock -r $CHROOT_NAME --quiet --shell /system/build-inside-mock
+echo "Left mock chroot"
+echo
+
+header "Finalizing"
+run chown $APP_UID:$APP_GID /output
+run cp -dpR $ROOT/output/* /output/
+run rm -rf $ROOT/system $ROOT/output
