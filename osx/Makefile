@@ -8,24 +8,26 @@ GEM_DIR := traveling-ruby-gems-$(VERSION)-$(RUBY_VERSION)-osx
 
 package: $(PACKAGE) $(GEM_DIR)
 
-$(PACKAGE).tar.gz: runtime output
+$(PACKAGE): runtime/ok output/bin
 	./package -r $(PACKAGE) output
 
-$(GEM_DIR): runtime output
+$(GEM_DIR): runtime/ok output/bin
 	./package -E $(GEM_DIR) output
 
-runtime:
+runtime/ok:
 	./setup-runtime runtime
+	touch runtime/ok
 
-output:
+output/bin:
+	mkdir -p output
 	./build runtime output
 
-upload: $(PACKAGE)
+upload: $(PACKAGE) $(GEM_DIR)
 	s3cmd -P sync --no-preserve $(PACKAGE) s3://traveling-ruby/releases/
 	s3cmd -P --delete-removed --no-preserve sync $(GEM_DIR) s3://traveling-ruby/releases/$(GEM_DIR)/
 
 clean:
-	rm -rf $(PACKAGE) $(GEM_DIR)
+	rm -rf $(PACKAGE) $(GEM_DIR) output
 
 clean-all: clean
 	rm -rf runtime output
