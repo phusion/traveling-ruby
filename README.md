@@ -36,7 +36,7 @@ This makes the release process much simpler. Instead of having to create more th
  * Linux x86_64.
  * OS X.
 
-(Note: Traveling Ruby doesn't bother with supporting Windows yet. Sorry.)
+(Note: Traveling Ruby [doesn't bother with supporting Windows yet](#windows_support). Sorry.)
 
 However, distributing a precompiled Ruby interpreter that works for all end users, is more easily said than done. [Read this section](#why_precompiled_binary_difficult) to learn why it's difficult.
 
@@ -75,6 +75,7 @@ The build system requires the Developer Tools to be installed. It has only been 
 
  * Document how the build system works.
  * Provide a Rails example. This is only possible after we've gotten a good system in place for compiling native extensions.
+ * Windows support. We (Phusion) have no interest in providing Windows support for the time being, but we will welcome any pull requests for this.
 
 ## FAQ
 
@@ -144,6 +145,8 @@ Yes. These problems can put off your users from installing your app at all and c
 #### I target OS X, which already ships Ruby. Should I still bundle a Ruby interpreter?
 
 Yes. OS X versions up to 10.8 Mountain Lion ship Ruby 1.8. Only starting from 10.9 Mavericks does it ship Ruby 2.0. There are significant compatibility differences between Ruby 1.8 and 2.0. Future OS X versions might ship yet another Ruby version. Only by bundling Ruby can you be sure that OS upgrades won't break your app.
+
+<a name="windows_support"></a>
 
 ### Why does Traveling Ruby not support Windows?
 
