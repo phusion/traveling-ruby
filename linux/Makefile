@@ -46,4 +46,5 @@ clean:
 	rm -rf $(PACKAGE)-x86.tar.gz $(PACKAGE)-x86_64.tar.gz $(GEM_DIR)-x86 $(GEM_DIR)-x86_64
 
 clean-all: clean
-	rm -rf runtime output
+	sudo rm -rf runtime
+	rm -rf output
