@@ -3,6 +3,8 @@
 
 require 'rbconfig'
 
+IN_TRAVELING_RUBY = true
+
 restorable_envs = ['LD_LIBRARY_PATH', 'RUBYOPT', 'RUBYLIB'].freeze
 restorable_envs.each do |name|
   ENV[name] = ENV["ORIG_#{name}"]
