@@ -1,6 +1,6 @@
 # Tutorial 1: hello world
 
-This tutorial teaches you, in 5 minutes, how to use Traveling Ruby to create self-contained packages of a hello world app. This app has no gem dependencies; dependeny management is covered in tutorial 2. We will be creating three packages, namely for Linux x86, Linux x86_64 and OS X.
+This tutorial teaches you, in 5 minutes, how to use Traveling Ruby to create self-contained packages of a hello world app. This app has no gem dependencies; dependency management is covered in tutorial 2. We will be creating three packages, namely for Linux x86, Linux x86_64 and OS X.
 
 The process is as follows. First, you create several package directories (one for each target platform) and copy your app into the directory. Then you extract Traveling Ruby binaries into each directory, appropriate for that platform. Then you write a wrapper script so that users can conveniently start your app. Finally, you package everything up in tar.gz files, and automate the process.
 
