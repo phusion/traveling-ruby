@@ -73,5 +73,5 @@ for DIR_BASENAME in "${DIR_BASENAMES[@]}"; do
 		phusion/ruby-traveler-builder \
 		/system/my_init --quiet --skip-runit --skip-startup-files -- \
 		/system/s3init \
-		s3cmd -P --delete-removed --no-preserve sync "$DIR_BASENAME" "s3://traveling-ruby/releases/$DIR_BASENAME"
+		s3cmd -P --delete-removed --no-preserve sync "$DIR_BASENAME/" "s3://traveling-ruby/releases/$DIR_BASENAME/"
 done
