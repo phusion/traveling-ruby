@@ -4,6 +4,7 @@ set -e
 SELFDIR=`dirname "$0"`
 SELFDIR=`cd "$SELFDIR" && pwd`
 source "$SELFDIR/library.sh"
+BUNDLER_VERSION=`cat "$SELFDIR/../BUNDLER_VERSION.txt"`
 
 BUILD_OUTPUT_DIR=
 RUBY_PACKAGE=
@@ -108,7 +109,9 @@ if [[ "$RUBY_PACKAGE" != "" ]]; then
 		--exclude "lib/ruby/gems/$RUBY_COMPAT_VERSION/specifications/" \
 		.
 	run tar -rf "$RUBY_PACKAGE.tmp" -C "$BUILD_OUTPUT_DIR" \
-		"./lib/ruby/gems/$RUBY_COMPAT_VERSION/specifications/default/"
+		"./lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/bundler-$BUNDLER_VERSION" \
+		"./lib/ruby/gems/$RUBY_COMPAT_VERSION/specifications/bundler-$BUNDLER_VERSION.gemspec" \
+		"./lib/ruby/gems/$RUBY_COMPAT_VERSION/specifications/default"
 	echo "+ gzip --best --no-name -c $RUBY_PACKAGE.tmp > $RUBY_PACKAGE"
 	gzip --best --no-name -c "$RUBY_PACKAGE.tmp" > "$RUBY_PACKAGE"
 	run rm "$RUBY_PACKAGE.tmp"

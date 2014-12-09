@@ -118,6 +118,7 @@ exec docker run \
 	-e "APP_UID=`id -u`" \
 	-e "APP_GID=`id -g`" \
 	-e "RUBY_VERSION=`cat \"$SELFDIR/../RUBY_VERSION.txt\"`" \
+	-e "BUNDLER_VERSION=`cat \"$SELFDIR/../BUNDLER_VERSION.txt\"`" \
 	-e "ARCHITECTURE=$ARCHITECTURE" \
 	-e "CONCURRENCY=$CONCURRENCY" \
 	-e "SETUP_SOURCE=$SETUP_SOURCE" \

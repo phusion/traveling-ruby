@@ -5,6 +5,7 @@ SELFDIR=`dirname "$0"`
 SELFDIR=`cd "$SELFDIR" && pwd`
 source "$SELFDIR/internal/reset_environment.sh"
 source "$SELFDIR/../shared/library.sh"
+BUNDLER_VERSION=`cat "$SELFDIR/../BUNDLER_VERSION.txt"`
 
 WORKDIR=
 OWNS_WORKDIR=true
@@ -263,10 +264,10 @@ if [[ "$GEMFILE" != "" ]]; then
 	fi
 
 	# Install Bundler, either from cache or directly.
-	if [[ -e "$RUNTIME_DIR/vendor/cache/bundler-1.7.3.gem" ]]; then
-		run /tmp/ruby/bin/gem install "$RUNTIME_DIR/vendor/cache/bundler-1.7.3.gem" --no-rdoc --no-ri
+	if [[ -e "$RUNTIME_DIR/vendor/cache/bundler-$BUNDLER_VERSION.gem" ]]; then
+		run /tmp/ruby/bin/gem install "$RUNTIME_DIR/vendor/cache/bundler-$BUNDLER_VERSION.gem" --no-rdoc --no-ri
 	else
-		run /tmp/ruby/bin/gem install bundler -v 1.7.3 --no-rdoc --no-ri
+		run /tmp/ruby/bin/gem install bundler -v $BUNDLER_VERSION --no-rdoc --no-ri
 	fi
 
 	# Run bundle install.
@@ -281,7 +282,7 @@ if [[ "$GEMFILE" != "" ]]; then
 	run /tmp/ruby/bin/bundle package
 	run rm -rf "$RUNTIME_DIR/vendor"
 	run mv vendor "$RUNTIME_DIR/"
-	run cp /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/bundler-1.7.3.gem "$RUNTIME_DIR/vendor/cache/"
+	run cp /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/bundler-$BUNDLER_VERSION.gem "$RUNTIME_DIR/vendor/cache/"
 	run rm -rf Gemfile* .bundle
 	echo "+ Leaving /tmp/ruby"
 	popd >/dev/null
