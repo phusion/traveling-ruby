@@ -12,6 +12,8 @@ RUNTIME_DIR=
 CONCURRENCY=4
 FORCE_RUBY=false
 SKIP_RUBY=false
+FORCE_CMAKE=false
+SKIP_CMAKE=false
 FORCE_OPENSSL=false
 SKIP_OPENSSL=false
 FORCE_NCURSES=false
@@ -28,6 +30,8 @@ FORCE_SQLITE3=false
 SKIP_SQLITE3=false
 FORCE_LIBLZMA=false
 SKIP_LIBLZMA=false
+FORCE_MYSQL=false
+SKIP_MYSQL=false
 
 function _cleanup()
 {
@@ -164,8 +168,10 @@ RUNTIME_DIR="`cd \"$RUNTIME_DIR\" && pwd`"
 #######################################
 
 
+TOTAL_LIBS=9
 RUBY_MAJOR_MINOR=2.1
 RUBY_VERSION=2.1.5
+CMAKE_VERSION=3.0.2
 OPENSSL_VERSION=1.0.1j
 NCURSES_VERSION=5.9
 LIBEDIT_VERSION=20141030-3.1
@@ -176,6 +182,7 @@ LIBFFI_VERSION=3.2.1
 LIBYAML_VERSION=0.1.5
 SQLITE3_VERSION=3080702
 XZ_VERSION=5.0.7
+MYSQL_LIB_VERSION=6.1.5
 export PATH="$RUNTIME_DIR/bin:$PATH"
 export LIBRARY_PATH="$RUNTIME_DIR/lib"
 export DYLD_FALLBACK_LIBRARY_PATH="$RUNTIME_DIR/lib"
@@ -202,7 +209,26 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 1/8: OpenSSL..."
+header "Installing CMake..."
+if $SKIP_CMAKE; then
+	echo "Skipped."
+elif [[ ! -e "$RUNTIME_DIR/bin/cmake" ]] || $FORCE_CMAKE; then
+	download_and_extract cmake-$CMAKE_VERSION.tar.gz \
+		http://www.cmake.org/files/v3.0/cmake-$CMAKE_VERSION.tar.gz
+	echo "Entering $RUNTIME_DIR/cmake-$CMAKE_VERSION"
+	pushd cmake-$CMAKE_VERSION >/dev/null
+
+	run ./configure --prefix="$RUNTIME_DIR" --no-qt-gui --parallel=$CONCURRENCY
+	run make -j$CONCURRENCY
+	run make install
+	echo "Entering $RUNTIME_DIR"
+	popd >/dev/null
+	run rm -rf cmake-$CMAKE_VERSION
+else
+	echo "Already installed."
+fi
+
+header "Compiling runtime libraries 1/$TOTAL_LIBS: OpenSSL..."
 if $SKIP_OPENSSL; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/bin/openssl" ]] || $FORCE_OPENSSL; then
@@ -239,7 +265,7 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 2/8: ncurses..."
+header "Compiling runtime libraries 2/$TOTAL_LIBS: ncurses..."
 if $SKIP_NCURSES; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libncurses.5.dylib" ]] || $FORCE_NCURSES; then
@@ -272,7 +298,7 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 3/8: libedit..."
+header "Compiling runtime libraries 3/$TOTAL_LIBS: libedit..."
 if $SKIP_LIBEDIT; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libedit.0.dylib" ]] || $FORCE_LIBEDIT; then
@@ -300,7 +326,7 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 4/8: gmp..."
+header "Compiling runtime libraries 4/$TOTAL_LIBS: gmp..."
 if $SKIP_GMP; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libgmp.10.dylib" ]] || $FORCE_GMP; then
@@ -325,7 +351,7 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 5/8: libffi..."
+header "Compiling runtime libraries 5/$TOTAL_LIBS: libffi..."
 if $SKIP_LIBFFI; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libffi.6.dylib" ]] || $FORCE_LIBFFI; then
@@ -351,7 +377,7 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 6/8: libyaml..."
+header "Compiling runtime libraries 6/$TOTAL_LIBS: libyaml..."
 if $SKIP_LIBYAML; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libyaml-0.2.dylib" ]] || $FORCE_LIBYAML; then
@@ -374,30 +400,28 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 7/8: sqlite3..."
+header "Compiling runtime libraries 7/$TOTAL_LIBS: sqlite3..."
 if $SKIP_SQLITE3; then
 	echo "Skipped."
-elif [[ ! -e "$RUNTIME_DIR/lib/libsqlite3.0.dylib" ]] || $FORCE_SQLITE3; then
+elif [[ ! -e "$RUNTIME_DIR/lib/libsqlite3.a" ]] || $FORCE_SQLITE3; then
 	download_and_extract sqlite-autoconf-$SQLITE3_VERSION.tar.gz \
 		http://www.sqlite.org/2014/sqlite-autoconf-$SQLITE3_VERSION.tar.gz
 	echo "Entering $RUNTIME_DIR/sqlite-autoconf-$SQLITE3_VERSION"
 	pushd sqlite-autoconf-$SQLITE3_VERSION >/dev/null
 
-	run ./configure --prefix="$RUNTIME_DIR" --disable-static --disable-dynamic-extensions
+	run ./configure --prefix="$RUNTIME_DIR" --disable-shared \
+		--disable-dynamic-extensions CFLAGS='-fPIC -fvisibility=hidden'
 	run make -j$CONCURRENCY
 	run make install-strip
 	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf sqlite-autoconf-$SQLITE3_VERSION
-
-	run install_name_tool -id "@executable_path/../lib/libsqlite3.0.dylib" \
-		"$RUNTIME_DIR/lib/libsqlite3.0.dylib"
 else
 	echo "Already installed."
 fi
 echo
 
-header "Compiling runtime libraries 8/8: liblzma..."
+header "Compiling runtime libraries 8/$TOTAL_LIBS: liblzma..."
 if $SKIP_LIBLZMA; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/liblzma.5.dylib" ]] || $FORCE_LIBLZMA; then
@@ -417,6 +441,31 @@ elif [[ ! -e "$RUNTIME_DIR/lib/liblzma.5.dylib" ]] || $FORCE_LIBLZMA; then
 
 	run install_name_tool -id "@executable_path/../lib/liblzma.5.dylib" \
 		"$RUNTIME_DIR/lib/liblzma.5.dylib"
+else
+	echo "Already installed."
+fi
+echo
+
+header "Compiling runtime libraries 9/$TOTAL_LIBS: MySQL..."
+if $SKIP_MYSQL; then
+	echo "Skipped."
+elif [[ ! -e "$RUNTIME_DIR/lib/libmysqlclient.a" ]] || $FORCE_MYSQL; then
+	download_and_extract mysql-connector-c-$MYSQL_LIB_VERSION-src.tar.gz \
+		http://dev.mysql.com/get/Downloads/Connector-C/mysql-connector-c-$MYSQL_LIB_VERSION-src.tar.gz
+	echo "Entering $RUNTIME_DIR/mysql-connector-c-$MYSQL_LIB_VERSION-src"
+	pushd mysql-connector-c-$MYSQL_LIB_VERSION-src >/dev/null
+
+	run cmake -DCMAKE_INSTALL_PREFIX="$RUNTIME_DIR" \
+		-DCMAKE_C_FLAGS="-fPIC -fvisibility=hidden" \
+		-DCMAKE_CXX_FLAGS="-fPIC -fvisibility=hidden" . \
+		-DDISABLE_SHARED=1
+	run make -j$CONCURRENCY libmysql
+	pushd libmysql
+	run make install
+	popd
+	echo "Entering $RUNTIME_DIR"
+	popd >/dev/null
+	run rm -rf mysql-connector-c-$MYSQL_LIB_VERSION-src
 else
 	echo "Already installed."
 fi

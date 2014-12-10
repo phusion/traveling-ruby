@@ -278,6 +278,7 @@ if [[ "$GEMFILE" != "" ]]; then
 	echo "+ Entering /tmp/ruby"
 	pushd /tmp/ruby >/dev/null
 	run /tmp/ruby/bin/bundle config --local build.nokogiri ''
+	run /tmp/ruby/bin/bundle config --local build.mysql2 '--with-mysql_config'
 	run /tmp/ruby/bin/bundle install --system --retry 3
 	run /tmp/ruby/bin/bundle package
 	run rm -rf "$RUNTIME_DIR/vendor"
