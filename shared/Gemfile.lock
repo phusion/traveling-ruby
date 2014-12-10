@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    bcrypt (3.1.9)
     ffi (1.9.6)
     json (1.8.1)
     mini_portile (0.6.1)
@@ -14,6 +15,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  bcrypt
   ffi
   json
   mysql2
