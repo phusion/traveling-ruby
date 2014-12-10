@@ -32,6 +32,8 @@ FORCE_LIBLZMA=false
 SKIP_LIBLZMA=false
 FORCE_MYSQL=false
 SKIP_MYSQL=false
+FORCE_POSTGRESQL=false
+SKIP_POSTGRESQL=false
 
 function _cleanup()
 {
@@ -87,7 +89,7 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "oOnNeEgGfFyYsSzZj:h" opt; do
+	while getopts "oOnNeEgGfFyYsSzZpPj:h" opt; do
 		case "$opt" in
 		o)
 			FORCE_OPENSSL=true
@@ -137,6 +139,12 @@ function parse_options()
 		Z)
 			SKIP_LIBLZMA=true
 			;;
+		p)
+			FORCE_POSTGRESQL=true
+			;;
+		P)
+			SKIP_POSTGRESQL=true
+			;;
 		j)
 			CONCURRENCY=$OPTARG
 			;;
@@ -168,7 +176,7 @@ RUNTIME_DIR="`cd \"$RUNTIME_DIR\" && pwd`"
 #######################################
 
 
-TOTAL_LIBS=9
+TOTAL_LIBS=10
 RUBY_MAJOR_MINOR=2.1
 RUBY_VERSION=2.1.5
 CMAKE_VERSION=3.0.2
@@ -183,6 +191,7 @@ LIBYAML_VERSION=0.1.5
 SQLITE3_VERSION=3080702
 XZ_VERSION=5.0.7
 MYSQL_LIB_VERSION=6.1.5
+POSTGRESQL_VERSION=9.3.5
 export PATH="$RUNTIME_DIR/bin:$PATH"
 export LIBRARY_PATH="$RUNTIME_DIR/lib"
 export DYLD_FALLBACK_LIBRARY_PATH="$RUNTIME_DIR/lib"
@@ -466,6 +475,34 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libmysqlclient.a" ]] || $FORCE_MYSQL; then
 	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf mysql-connector-c-$MYSQL_LIB_VERSION-src
+else
+	echo "Already installed."
+fi
+echo
+
+header "Compiling runtime libraries 10/$TOTAL_LIBS: PostgreSQL..."
+if $SKIP_POSTGRESQL; then
+	echo "Skipped."
+elif [[ ! -e "$RUNTIME_DIR/lib/libpq.a" ]] || $FORCE_POSTGRESQL; then
+	download_and_extract postgresql-$POSTGRESQL_VERSION.tar.bz2 \
+		http://ftp.postgresql.org/pub/source/v9.3.5/postgresql-$POSTGRESQL_VERSION.tar.bz2
+	echo "Entering $RUNTIME_DIR/postgresql-$POSTGRESQL_VERSION"
+	pushd postgresql-$POSTGRESQL_VERSION >/dev/null
+
+	run ./configure --prefix="$RUNTIME_DIR" CFLAGS="-fPIC -fvisibility=hidden"
+	run make -j$CONCURRENCY -C src/common
+	run make -j$CONCURRENCY -C src/backend
+	run make -j$CONCURRENCY -C src/interfaces/libpq
+	run make -C src/interfaces/libpq install-strip
+	run make -j$CONCURRENCY -C src/include
+	run make -C src/include install-strip
+	run make -j$CONCURRENCY -C src/bin/pg_config
+	run make -C src/bin/pg_config install-strip
+	echo "Entering $RUNTIME_DIR"
+	popd >/dev/null
+	run rm -rf postgresql-$POSTGRESQL_VERSION
+
+	run rm "$RUNTIME_DIR"/lib/libpq.*dylib
 else
 	echo "Already installed."
 fi

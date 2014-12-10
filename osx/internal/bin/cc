@@ -8,7 +8,7 @@ if [[ "$DEAD_STRIP" != "" ]] && $DEAD_STRIP; then
 fi
 if [[ "$@" =~ $REGEX ]]; then
 	if [[ "$RUNTIME_DIR" != "" ]]; then
-		ARGS+=("-I$RUNTIME_DIR/lib")
+		ARGS+=("-I$RUNTIME_DIR/include")
 	fi
 	exec /usr/bin/cc "${ARGS[@]}" "$@"
 else
