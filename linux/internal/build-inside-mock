@@ -22,6 +22,7 @@ export C_INCLUDE_PATH=/usr/local/override/include
 export CPLUS_INCLUDE_PATH=/usr/local/override/include
 export LIBRARY_PATH=/usr/local/override/lib
 export PKG_CONFIG_PATH=/usr/local/override/lib/pkgconfig:/usr/lib/pkgconfig
+export PATH=/usr/local/override/bin:$PATH
 
 function grep_without_fail()
 {
@@ -148,10 +149,7 @@ else
 fi
 run cp $LIBDIR/libz.so.1 /tmp/ruby/lib/
 run cp $LIBDIR/libtermcap.so.2 /tmp/ruby/lib/
-run cp $USRLIBDIR/libxslt.so.1 /tmp/ruby/lib/
-run cp $USRLIBDIR/libxml2.so.2 /tmp/ruby/lib/
 run cp $USRLIBDIR/libreadline.so.5 /tmp/ruby/lib/
-run cp $USRLIBDIR/libsqlite3.so.0 /tmp/ruby/lib/
 run cp /etc/pki/tls/cert.pem /tmp/ruby/lib/
 run cp /system/restore_environment.rb /tmp/ruby/lib/
 export SSL_CERT_FILE=/tmp/ruby/lib/cert.pem
@@ -186,6 +184,7 @@ fi
 run strip --strip-all /tmp/ruby/bin/ruby
 (
 	set -o pipefail
+	echo "+ Stripping .so files"
 	find /tmp/ruby -name '*.so' | xargs strip --strip-debug
 )
 if [[ $? != 0 ]]; then
@@ -195,7 +194,7 @@ run rm /tmp/ruby/bin/{erb,rdoc,ri,testrb}
 run rm -rf /tmp/ruby/share
 run rm -rf /tmp/ruby/lib/{libruby-static.a,pkgconfig}
 run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
-run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out,mkmf.log}
+run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out}
 run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
 run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/*.{c,h}
 
@@ -218,7 +217,7 @@ if $SANITY_CHECK_OUTPUT; then
 	(
 		SYSTEM_LIBRARIES="(linux-gate|linux-vdso|libpthread|librt|libdl|libcrypt|libm|libc"
 		SYSTEM_LIBRARIES="$SYSTEM_LIBRARIES|ld-linux.*|libutil|libz|libxslt|libxml2|libreadline"
-		SYSTEM_LIBRARIES="$SYSTEM_LIBRARIES|libtermcap|sqlite3)\.so"
+		SYSTEM_LIBRARIES="$SYSTEM_LIBRARIES|libtermcap|libffi|libnsl)\.so"
 		ERROR=false
 		set -o pipefail
 		for F in /tmp/ruby/bin.real/ruby `find /tmp/ruby -name '*.so'`; do

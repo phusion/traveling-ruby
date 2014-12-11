@@ -469,9 +469,9 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libmysqlclient.a" ]] || $FORCE_MYSQL; then
 		-DCMAKE_CXX_FLAGS="-fPIC -fvisibility=hidden" . \
 		-DDISABLE_SHARED=1
 	run make -j$CONCURRENCY libmysql
-	pushd libmysql
-	run make install
-	popd
+	run make -C libmysql install
+	run make -C include install
+	run make -C scripts install
 	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf mysql-connector-c-$MYSQL_LIB_VERSION-src

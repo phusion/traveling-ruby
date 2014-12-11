@@ -46,10 +46,15 @@ echo "+ Leaving RPM database directory"
 popd >/dev/null
 echo
 
-echo "Installing additional software inside chroot"
-run cp /system/setup-runtime-inside-mock /var/lib/mock/$CHROOT_NAME/root/
-run /system/setuser app /usr/bin/mock -r $CHROOT_NAME --shell /setup-runtime-inside-mock
-run rm /var/lib/mock/$CHROOT_NAME/root/setup-runtime-inside-mock
+header "Installing additional software inside chroot"
+run rm -rf /var/lib/mock/$CHROOT_NAME/root/system
+run mkdir /var/lib/mock/$CHROOT_NAME/root/system
+run cp /system/* /var/lib/mock/$CHROOT_NAME/root/system/
+run cp /system_shared/* /var/lib/mock/$CHROOT_NAME/root/system/
+echo $ARCHITECTURE > /var/lib/mock/$CHROOT_NAME/root/system/ARCHITECTURE
+run /system/setuser app /usr/bin/mock -r $CHROOT_NAME --shell /system/setup-runtime-inside-mock
+run rm -rf /var/lib/mock/$CHROOT_NAME/root/system
+echo "----- chroot left -----"
 echo
 
 if $DOWNLOAD_RUBY; then
