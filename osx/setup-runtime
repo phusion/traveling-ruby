@@ -444,6 +444,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/liblzma.5.dylib" ]] || $FORCE_LIBLZMA; then
 		--disable-scripts --disable-doc
 	run make -j$CONCURRENCY
 	run make install-strip
+
 	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf xz-$XZ_VERSION
@@ -464,14 +465,21 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libmysqlclient.a" ]] || $FORCE_MYSQL; then
 	echo "Entering $RUNTIME_DIR/mysql-connector-c-$MYSQL_LIB_VERSION-src"
 	pushd mysql-connector-c-$MYSQL_LIB_VERSION-src >/dev/null
 
+	# We do not use internal/bin/cc and c++ because MySQL includes
+	# yassl, which has an OpenSSL compatibility layer. We want the
+	# yassl headers to be used, not the OpenSSL headers in the runtime.
 	run cmake -DCMAKE_INSTALL_PREFIX="$RUNTIME_DIR" \
+		-DCMAKE_C_COMPILER=/usr/bin/cc \
+		-DCMAKE_CXX_COMPILER=/usr/bin/c++ \
 		-DCMAKE_C_FLAGS="-fPIC -fvisibility=hidden" \
 		-DCMAKE_CXX_FLAGS="-fPIC -fvisibility=hidden" . \
-		-DDISABLE_SHARED=1
+		-DDISABLE_SHARED=1 \
+		-DCMAKE_VERBOSE_MAKEFILE=1
 	run make -j$CONCURRENCY libmysql
 	run make -C libmysql install
 	run make -C include install
 	run make -C scripts install
+
 	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf mysql-connector-c-$MYSQL_LIB_VERSION-src
@@ -498,6 +506,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libpq.a" ]] || $FORCE_POSTGRESQL; then
 	run make -C src/include install-strip
 	run make -j$CONCURRENCY -C src/bin/pg_config
 	run make -C src/bin/pg_config install-strip
+
 	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf postgresql-$POSTGRESQL_VERSION
