@@ -32,18 +32,18 @@ The next step is to prepare packages for all the target platforms, by creating a
     $ mkdir -p hello-1.0.0-osx/lib/app/
     $ cp hello.rb hello-1.0.0-osx/lib/app/
 
-Next, create a `packaging` directory and download Traveling Ruby binaries for each platform into that directory. Then extract these binaries into each packaging directory. You can find a list of binaries at [the Traveling Ruby Amazon S3 bucket](http://traveling-ruby.s3-us-west-2.amazonaws.com/list.html). For faster download times, use the CloudFront domain "http://d6r77u77i8pq3.cloudfront.net". In this tutorial we're extracting version 20141209.
+Next, create a `packaging` directory and download Traveling Ruby binaries for each platform into that directory. Then extract these binaries into each packaging directory. You can find a list of binaries at [the Traveling Ruby Amazon S3 bucket](http://traveling-ruby.s3-us-west-2.amazonaws.com/list.html). For faster download times, use the CloudFront domain "http://d6r77u77i8pq3.cloudfront.net". In this tutorial we're extracting version 20141213-2.1.5.
 
     $ mkdir packaging
     $ cd packaging
-    $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141209-2.1.5-linux-x86.tar.gz
-    $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141209-2.1.5-linux-x86_64.tar.gz
-    $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141209-2.1.5-osx.tar.gz
+    $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141213-2.1.5-linux-x86.tar.gz
+    $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141213-2.1.5-linux-x86_64.tar.gz
+    $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141213-2.1.5-osx.tar.gz
     $ cd ..
 
-    $ mkdir hello-1.0.0-linux-x86/lib/ruby && tar -xzf packaging/traveling-ruby-20141209-2.1.5-linux-x86.tar.gz -C hello-1.0.0-linux-x86/lib/ruby
-    $ mkdir hello-1.0.0-linux-x86_64/lib/ruby && tar -xzf packaging/traveling-ruby-20141209-2.1.5-linux-x86_64.tar.gz -C hello-1.0.0-linux-x86_64/lib/ruby
-    $ mkdir hello-1.0.0-osx/lib/ruby && tar -xzf packaging/traveling-ruby-20141209-2.1.5-osx.tar.gz -C hello-1.0.0-osx/lib/ruby
+    $ mkdir hello-1.0.0-linux-x86/lib/ruby && tar -xzf packaging/traveling-ruby-20141213-2.1.5-linux-x86.tar.gz -C hello-1.0.0-linux-x86/lib/ruby
+    $ mkdir hello-1.0.0-linux-x86_64/lib/ruby && tar -xzf packaging/traveling-ruby-20141213-2.1.5-linux-x86_64.tar.gz -C hello-1.0.0-linux-x86_64/lib/ruby
+    $ mkdir hello-1.0.0-osx/lib/ruby && tar -xzf packaging/traveling-ruby-20141213-2.1.5-osx.tar.gz -C hello-1.0.0-osx/lib/ruby
 
 Now, each package directory will have Ruby binaries included. It looks like this:
 Your directory structure will now look like this:
@@ -137,7 +137,7 @@ Going through all of the above steps on every release is a hassle, so you should
 
     PACKAGE_NAME = "hello"
     VERSION = "1.0.0"
-    TRAVELING_RUBY_VERSION = "20141209-2.1.5"
+    TRAVELING_RUBY_VERSION = "20141213-2.1.5"
 
     desc "Package your app"
     task :package => ['package:linux:x86', 'package:linux:x86_64', 'package:osx']

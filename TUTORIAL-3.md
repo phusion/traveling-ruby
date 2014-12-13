@@ -10,7 +10,7 @@ So instead, the Traveling Ruby project supplies a number of precompiled native e
 
 Suppose that we want our hello world app from tutorial 2 to insert a row into an SQLite database file. We'll want to use the sqlite3 gem for that.
 
-Traveling Ruby provides a specific version of the sqlite3 gem. See [the Traveling Ruby Amazon S3 bucket](http://traveling-ruby.s3-us-west-2.amazonaws.com/list.html). For version 20141209, version 1.3.9 is supplied. So we add the following to our Gemfile:
+Traveling Ruby provides a specific version of the sqlite3 gem. See [the Traveling Ruby Amazon S3 bucket](http://traveling-ruby.s3-us-west-2.amazonaws.com/list.html). For version 20141213-2.1.5, version 1.3.9 is supplied. So we add the following to our Gemfile:
 
     gem 'sqlite3', '1.3.9'
 
@@ -60,22 +60,22 @@ Now you are ready to drop platform-specific native extensions inside the package
 
     $ rake package DIR_ONLY=1
 
-Next you must download the necessary native extensions, and extract them into `<PACKAGE DIR>/lib/vendor`. You can find native extensions at [the Traveling Ruby Amazon S3 bucket](http://traveling-ruby.s3-us-west-2.amazonaws.com/list.html). Suppose that you're using Traveling Ruby version 20141209, which supplies sqlite3 version 1.3.9. Download and extract the precompiled binaries as follows. Remember that we're using CloudFront domain "http://d6r77u77i8pq3.cloudfront.net" to speed up downloads.
+Next you must download the necessary native extensions, and extract them into `<PACKAGE DIR>/lib/vendor`. You can find native extensions at [the Traveling Ruby Amazon S3 bucket](http://traveling-ruby.s3-us-west-2.amazonaws.com/list.html). Suppose that you're using Traveling Ruby version 20141213-2.1.5, which supplies sqlite3 version 1.3.9. Download and extract the precompiled binaries as follows. Remember that we're using CloudFront domain "http://d6r77u77i8pq3.cloudfront.net" to speed up downloads.
 
     $ cd hello-1.0.0-linux-x86/lib/vendor/ruby
-    $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-gems-20141209-2.1.5-linux-x86/sqlite3-1.3.9.tar.gz
+    $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-gems-20141213-2.1.5-linux-x86/sqlite3-1.3.9.tar.gz
     $ tar xzf sqlite3-1.3.9.tar.gz
     $ rm sqlite3-1.3.9.tar.gz
     $ cd ../../../..
 
     $ cd hello-1.0.0-linux-x86_64/lib/vendor/ruby
-    $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-gems-20141209-2.1.5-linux-x86_64/sqlite3-1.3.9.tar.gz
+    $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-gems-20141213-2.1.5-linux-x86_64/sqlite3-1.3.9.tar.gz
     $ tar xzf sqlite3-1.3.9.tar.gz
     $ rm sqlite3-1.3.9.tar.gz
     $ cd ../../../..
 
     $ cd hello-1.0.0-osx/lib/vendor/ruby
-    $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-gems-20141209-2.1.5-osx/sqlite3-1.3.9.tar.gz
+    $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-gems-20141213-2.1.5-osx/sqlite3-1.3.9.tar.gz
     $ tar xzf sqlite3-1.3.9.tar.gz
     $ rm sqlite3-1.3.9.tar.gz
     $ cd ../../../..
@@ -112,7 +112,7 @@ We update the Rakefile so that all of the above steps are automated by running `
 
 	PACKAGE_NAME = "hello"
 	VERSION = "1.0.0"
-	TRAVELING_RUBY_VERSION = "20141209-2.1.5"
+	TRAVELING_RUBY_VERSION = "20141213-2.1.5"
 	SQLITE3_VERSION = "1.3.9"  # Must match Gemfile
 
 	desc "Package your app"
