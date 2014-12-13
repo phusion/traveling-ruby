@@ -63,6 +63,7 @@ The Traveling Ruby binaries are built using the build system in this repository.
 The build system requires Docker and `make`. To build binaries, run:
 
     cd linux
+    ./setup-docker-image
     make
 
 ### OS X
@@ -152,3 +153,7 @@ Yes. OS X versions up to 10.8 Mountain Lion ship Ruby 1.8. Only starting from 10
 ### Why does Traveling Ruby not support Windows?
 
 We haven't spent the effort, and we're currently not creating any tools that should run on Windows. If Windows support is important to you, feel free to open a pull request.
+
+### How big is a hello world packaged with Traveling Ruby?
+
+It's about 6 MB compressed.

@@ -6,6 +6,8 @@ The process is as follows. First, you create several package directories (one fo
 
 You can find the end result of this tutorial at https://github.com/phusion/traveling-ruby-hello-demo.
 
+The final hello world package weights 6 MB compressed.
+
 ## Preparation
 
 Let's begin by creating a hello world app:
