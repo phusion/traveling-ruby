@@ -30,7 +30,7 @@ The next step is to prepare packages for all the target platforms, by creating a
     $ mkdir -p hello-1.0.0-osx/lib/app/
     $ cp hello.rb hello-1.0.0-osx/lib/app/
 
-Next, create a `packaging` directory and download Traveling Ruby binaries for each platform into that directory. Then extract these binaries into each packaging directory. You can find a list of binaries at [the Traveling Ruby Amazon S3 bucket](http://traveling-ruby.s3-us-west-2.amazonaws.com/list.html). For faster download times, use the CloudFront domain "http://d6r77u77i8pq3.cloudfront.net". In this tutorial we're extracting version 20141209-2.1.5.
+Next, create a `packaging` directory and download Traveling Ruby binaries for each platform into that directory. Then extract these binaries into each packaging directory. You can find a list of binaries at [the Traveling Ruby Amazon S3 bucket](http://traveling-ruby.s3-us-west-2.amazonaws.com/list.html). For faster download times, use the CloudFront domain "http://d6r77u77i8pq3.cloudfront.net". In this tutorial we're extracting version 20141209.
 
     $ mkdir packaging
     $ cd packaging

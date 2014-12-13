@@ -4,6 +4,8 @@ In [tutorial 1](TUTORIAL-1.md), we've packaged a hello world app and automated t
 
 Your app can depend on any gem you wish, subject to the [limitations described in README.md](README.md#limitations). You must include the gems in your packages, and your wrapper script must pass the right parameters to the Ruby interpreter in order for your gems to be found. In this tutorial, we'll teach you how to manage gems using Bundler.
 
+Gems with native extensions are not covered in this second tutorial. They're covered in [tutorial 3](TUTORIAL-3.md).
+
 You can find the end result of this tutorial at https://github.com/phusion/traveling-ruby-gems-demo.
 
 ## Preparation
@@ -219,4 +221,6 @@ We update the Rakefile so that all of the above steps are automated by running `
 
 ## Conclusion
 
-You can download the end result of this tutorial at https://github.com/phusion/traveling-ruby-gems-demo.
+In this tutorial you've learned how to work with gem dependencies. You can download the end result of this tutorial at https://github.com/phusion/traveling-ruby-gems-demo.
+
+But this tutorial does not cover native extensions. To learn how to deal with native extensions, go to [tutorial 3](TUTORIAL-3.md).

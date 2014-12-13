@@ -46,12 +46,13 @@ Traveling Ruby aims to solve the problem of supplying precompiled **Ruby 2.1** b
 
  * [Tutorial 1: hello world](TUTORIAL-1.md) - Learn in 5 minutes how to create self-contained packages of a hello world app without gem dependencies.
  * [Tutorial 2: gem dependencies](TUTORIAL-2.md) - Managing and packaging gem dependencies using Bundler.
+ * [Tutorial 3: native extensions](TUTORIAL-3.md) - Managing and packaging native extension gems.
 
 <a name="limitations"></a>
 
 ## Limitations
 
-You cannot yet use gems with native extensions. [We are still working on a mechanism to make this possible.](https://github.com/phusion/traveling-ruby/issues/3)
+Traveling Ruby only supports a number of popular native extension gems, and only in some specific versions. You cannot use just any native extension gem. Native extensions are covered in [tutorial 3](TUTORIAL-3.md).
 
 ## The build system
 
