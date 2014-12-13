@@ -12,32 +12,42 @@ You can find the end result of this tutorial at https://github.com/phusion/trave
 
 Suppose that we want our hello world app from tutorial 1 to print the message in red. We'll want to use [the paint gem](https://github.com/janlelis/paint) for that. Let's start by creating a Gemfile...
 
-    source 'https://rubygems.org'
-    
-    gem 'paint'
-    
-    group :development do
-      gem 'rake'
-    end
+```Ruby
+source 'https://rubygems.org'
+
+gem 'paint'
+
+group :development do
+  gem 'rake'
+end
+```
 
 ...and by modifying hello.rb as follows:
 
-    #!/usr/bin/env ruby
-    require 'paint'
-    puts Paint["hello world", :red]
+```Ruby
+#!/usr/bin/env ruby
+require 'paint'
+puts Paint["hello world", :red]
+```
 
 Then install your gem bundle:
 
-    $ bundle install
+```Bash
+bundle install
+```
 
 Verify that your hello world works:
 
-    $ bundle exec ruby hello.rb
-    hello world (in red)
+```Bash
+bundle exec ruby hello.rb
+# => hello world (in red)
+```
 
 Then, using the Rakefile from tutorial 1, create package directories without creating tar.gz files:
 
-    $ rake package DIR_ONLY=1
+```Bash
+rake package DIR_ONLY=1
+```
 
 ## Installing gems for packaging
 
@@ -47,37 +57,47 @@ But first, be aware that **you must run this Bundler instance with Ruby 2.1** be
 
 So first verify your Ruby version:
 
-    $ ruby -v
-    ruby 2.1.x [...]
+```Bash
+ruby -v
+# => ruby 2.1.x [...]
+```
 
 Next, install the gem bundle for packaging. We do this by copying the Gemfile to a temporary directory and running Bundler there, because passing `--path` and `--without` to Bundler will change its configuration file. We don't want to persist such changes in our development Bundler config.
 
-    $ mkdir packaging/tmp
-    $ cp Gemfile Gemfile.lock packaging/tmp/
-    $ cd packaging/tmp
-    $ BUNDLE_IGNORE_CONFIG=1 bundle install --path ../vendor --without development
-    $ cd ../..
-    $ rm -rf packaging/tmp
+```Bash
+mkdir packaging/tmp
+cp Gemfile Gemfile.lock packaging/tmp/
+cd packaging/tmp
+BUNDLE_IGNORE_CONFIG=1 bundle install --path ../vendor --without development
+cd ../..
+rm -rf packaging/tmp
+```
 
 Note that we passed `--without development` so that Rake isn't installed. In the final packages there is no need to include Rake.
 
 Bundler also stores various cache files, which we also don't need to package, so we remove them:
 
-    $ rm -f packaging/vendor/*/*/cache/*
+```Bash
+rm -f packaging/vendor/*/*/cache/*
+```
 
 ## Copying gems into package directories
 
 Copy the Bundler gem bundle that you installed in the last step, into the package directories:
 
-    $ cp -pR packaging/vendor hello-1.0.0-linux-x86/lib/
-    $ cp -pR packaging/vendor hello-1.0.0-linux-x86_64/lib/
-    $ cp -pR packaging/vendor hello-1.0.0-osx/lib/
+```Bash
+cp -pR packaging/vendor hello-1.0.0-linux-x86/lib/
+cp -pR packaging/vendor hello-1.0.0-linux-x86_64/lib/
+cp -pR packaging/vendor hello-1.0.0-osx/lib/
+```
 
 Copy over your Gemfile and Gemfile.lock into each gem directory inside the packages:
 
-    $ cp Gemfile Gemfile.lock hello-1.0.0-linux-x86/lib/vendor/
-    $ cp Gemfile Gemfile.lock hello-1.0.0-linux-x86_64/lib/vendor/
-    $ cp Gemfile Gemfile.lock hello-1.0.0-osx/lib/vendor/
+```Bash
+cp Gemfile Gemfile.lock hello-1.0.0-linux-x86/lib/vendor/
+cp Gemfile Gemfile.lock hello-1.0.0-linux-x86_64/lib/vendor/
+cp Gemfile Gemfile.lock hello-1.0.0-osx/lib/vendor/
+```
 
 ## Bundler config file
 
@@ -85,19 +105,23 @@ We must create a Bundler config file for each of the gem directories inside the 
 
 First, create `packaging/bundler-config` which contains:
 
-    BUNDLE_PATH: .
-    BUNDLE_WITHOUT: development
-    BUNDLE_DISABLE_SHARED_GEMS: '1'
+```Bash
+BUNDLE_PATH: .
+BUNDLE_WITHOUT: development
+BUNDLE_DISABLE_SHARED_GEMS: '1'
+```
 
 Then copy the file into `.bundle` directories inside the gem directories inside the packages;
 
-    $ mkdir hello-1.0.0-linux-x86/lib/vendor/.bundle
-    $ mkdir hello-1.0.0-linux-x86_64/lib/vendor/.bundle
-    $ mkdir hello-1.0.0-osx/lib/vendor/.bundle
+```Bash
+mkdir hello-1.0.0-linux-x86/lib/vendor/.bundle
+mkdir hello-1.0.0-linux-x86_64/lib/vendor/.bundle
+mkdir hello-1.0.0-osx/lib/vendor/.bundle
 
-    $ cp packaging/bundler-config hello-1.0.0-linux-x86/lib/vendor/.bundle/config
-    $ cp packaging/bundler-config hello-1.0.0-linux-x86_64/lib/vendor/.bundle/config
-    $ cp packaging/bundler-config hello-1.0.0-osx/lib/vendor/.bundle/config
+cp packaging/bundler-config hello-1.0.0-linux-x86/lib/vendor/.bundle/config
+cp packaging/bundler-config hello-1.0.0-linux-x86_64/lib/vendor/.bundle/config
+cp packaging/bundler-config hello-1.0.0-osx/lib/vendor/.bundle/config
+```
 
 ## Wrapper script
 
@@ -108,116 +132,122 @@ Modify the wrapper script `packaging/wrapper.sh`, which we originally created in
 
 Here's how it looks like:
 
-    #!/bin/bash
-    set -e
+```Bash
+#!/bin/bash
+set -e
 
-    # Figure out where this script is located.
-    SELFDIR="`dirname \"$0\"`"
-    SELFDIR="`cd \"$SELFDIR\" && pwd`"
+# Figure out where this script is located.
+SELFDIR="`dirname \"$0\"`"
+SELFDIR="`cd \"$SELFDIR\" && pwd`"
 
-    # Tell Bundler where the Gemfile and gems are.
-    export BUNDLE_GEMFILE="$SELFDIR/lib/vendor/Gemfile"
-    unset BUNDLE_IGNORE_CONFIG
+# Tell Bundler where the Gemfile and gems are.
+export BUNDLE_GEMFILE="$SELFDIR/lib/vendor/Gemfile"
+unset BUNDLE_IGNORE_CONFIG
 
-    # Run the actual app using the bundled Ruby interpreter, with Bundler activated.
-    exec "$SELFDIR/lib/ruby/bin/ruby" -rbundler/setup "$SELFDIR/lib/app/hello.rb"
+# Run the actual app using the bundled Ruby interpreter, with Bundler activated.
+exec "$SELFDIR/lib/ruby/bin/ruby" -rbundler/setup "$SELFDIR/lib/app/hello.rb"
+```
 
 Copy over this wrapper script to each of your package directories and finalize the packages:
 
-    $ cp packaging/wrapper.sh hello-1.0.0-linux-x86/hello
-    $ cp packaging/wrapper.sh hello-1.0.0-linux-x86_64/hello
-    $ cp packaging/wrapper.sh hello-1.0.0-osx/hello
+```Bash
+cp packaging/wrapper.sh hello-1.0.0-linux-x86/hello
+cp packaging/wrapper.sh hello-1.0.0-linux-x86_64/hello
+cp packaging/wrapper.sh hello-1.0.0-osx/hello
 
-    $ tar -czf hello-1.0.0-linux-x86.tar.gz hello-1.0.0-linux-x86
-    $ tar -czf hello-1.0.0-linux-x86_64.tar.gz hello-1.0.0-linux-x86_64
-    $ tar -czf hello-1.0.0-osx.tar.gz hello-1.0.0-osx
-    $ rm -rf hello-1.0.0-linux-x86
-    $ rm -rf hello-1.0.0-linux-x86_64
-    $ rm -rf hello-1.0.0-osx
+tar -czf hello-1.0.0-linux-x86.tar.gz hello-1.0.0-linux-x86
+tar -czf hello-1.0.0-linux-x86_64.tar.gz hello-1.0.0-linux-x86_64
+tar -czf hello-1.0.0-osx.tar.gz hello-1.0.0-osx
+rm -rf hello-1.0.0-linux-x86
+rm -rf hello-1.0.0-linux-x86_64
+rm -rf hello-1.0.0-osx
+```
 
 ## Automating the process using Rake
 
 We update the Rakefile so that all of the above steps are automated by running `rake package`. The various `package` tasks have been updated to run `package:bundle_install` which installs the gem bundle, and the `create_package` function has been updated to package the Gemfile and Bundler config file.
 
-    # For Bundler.with_clean_env
-    require 'bundler/setup'
+```Ruby
+# For Bundler.with_clean_env
+require 'bundler/setup'
 
-    PACKAGE_NAME = "hello"
-    VERSION = "1.0.0"
-    TRAVELING_RUBY_VERSION = "20141213-2.1.5"
+PACKAGE_NAME = "hello"
+VERSION = "1.0.0"
+TRAVELING_RUBY_VERSION = "20141213-2.1.5"
 
-    desc "Package your app"
-    task :package => ['package:linux:x86', 'package:linux:x86_64', 'package:osx']
+desc "Package your app"
+task :package => ['package:linux:x86', 'package:linux:x86_64', 'package:osx']
 
-    namespace :package do
-      namespace :linux do
-        desc "Package your app for Linux x86"
-        task :x86 => [:bundle_install, "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86.tar.gz"] do
-          create_package("linux-x86")
-        end
-
-        desc "Package your app for Linux x86_64"
-        task :x86_64 => [:bundle_install, "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86_64.tar.gz"] do
-          create_package("linux-x86_64")
-        end
-      end
-
-      desc "Package your app for OS X"
-      task :osx => [:bundle_install, "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz"] do
-        create_package("osx")
-      end
-
-      desc "Install gems to local directory"
-      task :bundle_install do
-        if RUBY_VERSION !~ /^2\.1\./
-          abort "You can only 'bundle install' using Ruby 2.1, because that's what Traveling Ruby uses."
-        end
-        sh "rm -rf packaging/tmp"
-        sh "mkdir packaging/tmp"
-        sh "cp Gemfile Gemfile.lock packaging/tmp/"
-        Bundler.with_clean_env do
-          sh "cd packaging/tmp && env BUNDLE_IGNORE_CONFIG=1 bundle install --path ../vendor --without development"
-        end
-        sh "rm -rf packaging/tmp"
-        sh "rm -f packaging/vendor/*/*/cache/*"
-      end
+namespace :package do
+  namespace :linux do
+    desc "Package your app for Linux x86"
+    task :x86 => [:bundle_install, "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86.tar.gz"] do
+      create_package("linux-x86")
     end
 
-    file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86.tar.gz" do
-      download_runtime("linux-x86")
+    desc "Package your app for Linux x86_64"
+    task :x86_64 => [:bundle_install, "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86_64.tar.gz"] do
+      create_package("linux-x86_64")
     end
+  end
 
-    file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86_64.tar.gz" do
-      download_runtime("linux-x86_64")
-    end
+  desc "Package your app for OS X"
+  task :osx => [:bundle_install, "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz"] do
+    create_package("osx")
+  end
 
-    file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz" do
-      download_runtime("osx")
+  desc "Install gems to local directory"
+  task :bundle_install do
+    if RUBY_VERSION !~ /^2\.1\./
+      abort "You can only 'bundle install' using Ruby 2.1, because that's what Traveling Ruby uses."
     end
+    sh "rm -rf packaging/tmp"
+    sh "mkdir packaging/tmp"
+    sh "cp Gemfile Gemfile.lock packaging/tmp/"
+    Bundler.with_clean_env do
+      sh "cd packaging/tmp && env BUNDLE_IGNORE_CONFIG=1 bundle install --path ../vendor --without development"
+    end
+    sh "rm -rf packaging/tmp"
+    sh "rm -f packaging/vendor/*/*/cache/*"
+  end
+end
 
-    def create_package(target)
-      package_dir = "#{PACKAGE_NAME}-#{VERSION}-#{target}"
-      sh "rm -rf #{package_dir}"
-      sh "mkdir #{package_dir}"
-      sh "mkdir -p #{package_dir}/lib/app"
-      sh "cp hello.rb #{package_dir}/lib/app/"
-      sh "mkdir #{package_dir}/lib/ruby"
-      sh "tar -xzf packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz -C #{package_dir}/lib/ruby"
-      sh "cp packaging/wrapper.sh #{package_dir}/hello"
-      sh "cp -pR packaging/vendor #{package_dir}/lib/"
-      sh "cp Gemfile Gemfile.lock #{package_dir}/lib/vendor/"
-      sh "mkdir #{package_dir}/lib/vendor/.bundle"
-      sh "cp packaging/bundler-config #{package_dir}/lib/vendor/.bundle/config"
-      if !ENV['DIR_ONLY']
-        sh "tar -czf #{package_dir}.tar.gz #{package_dir}"
-        sh "rm -rf #{package_dir}"
-      end
-    end
+file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86.tar.gz" do
+  download_runtime("linux-x86")
+end
 
-    def download_runtime(target)
-      sh "cd packaging && curl -L -O --fail " +
-        "http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz"
-    end
+file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86_64.tar.gz" do
+  download_runtime("linux-x86_64")
+end
+
+file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz" do
+  download_runtime("osx")
+end
+
+def create_package(target)
+  package_dir = "#{PACKAGE_NAME}-#{VERSION}-#{target}"
+  sh "rm -rf #{package_dir}"
+  sh "mkdir #{package_dir}"
+  sh "mkdir -p #{package_dir}/lib/app"
+  sh "cp hello.rb #{package_dir}/lib/app/"
+  sh "mkdir #{package_dir}/lib/ruby"
+  sh "tar -xzf packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz -C #{package_dir}/lib/ruby"
+  sh "cp packaging/wrapper.sh #{package_dir}/hello"
+  sh "cp -pR packaging/vendor #{package_dir}/lib/"
+  sh "cp Gemfile Gemfile.lock #{package_dir}/lib/vendor/"
+  sh "mkdir #{package_dir}/lib/vendor/.bundle"
+  sh "cp packaging/bundler-config #{package_dir}/lib/vendor/.bundle/config"
+  if !ENV['DIR_ONLY']
+    sh "tar -czf #{package_dir}.tar.gz #{package_dir}"
+    sh "rm -rf #{package_dir}"
+  end
+end
+
+def download_runtime(target)
+  sh "cd packaging && curl -L -O --fail " +
+    "http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz"
+end
+```
 
 ## Conclusion
 

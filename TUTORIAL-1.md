@@ -12,38 +12,44 @@ The final hello world package weights 6 MB compressed.
 
 Let's begin by creating a hello world app:
 
-    $ mkdir hello_app
-    $ cd hello_app
-    $ echo '#!/usr/bin/env ruby' > hello.rb
-    $ echo 'puts "hello world"' >> hello.rb
-    $ ruby hello.rb
-    hello world
+```Bash
+mkdir hello_app
+cd hello_app
+echo '#!/usr/bin/env ruby' > hello.rb
+echo 'puts "hello world"' >> hello.rb
+ruby hello.rb
+# => hello world
+```
 
 ## Creating package directories
 
 The next step is to prepare packages for all the target platforms, by creating a directory each platform, and by copying your app into each directory.
 
-    $ mkdir -p hello-1.0.0-linux-x86/lib/app
-    $ cp hello.rb hello-1.0.0-linux-x86/lib/app/
+```Bash
+mkdir -p hello-1.0.0-linux-x86/lib/app
+cp hello.rb hello-1.0.0-linux-x86/lib/app/
 
-    $ mkdir -p hello-1.0.0-linux-x86_64/lib/app
-    $ cp hello.rb hello-1.0.0-linux-x86_64/lib/app/
+mkdir -p hello-1.0.0-linux-x86_64/lib/app
+cp hello.rb hello-1.0.0-linux-x86_64/lib/app/
 
-    $ mkdir -p hello-1.0.0-osx/lib/app/
-    $ cp hello.rb hello-1.0.0-osx/lib/app/
+mkdir -p hello-1.0.0-osx/lib/app/
+cp hello.rb hello-1.0.0-osx/lib/app/
+```
 
 Next, create a `packaging` directory and download Traveling Ruby binaries for each platform into that directory. Then extract these binaries into each packaging directory. You can find a list of binaries at [the Traveling Ruby Amazon S3 bucket](http://traveling-ruby.s3-us-west-2.amazonaws.com/list.html). For faster download times, use the CloudFront domain "http://d6r77u77i8pq3.cloudfront.net". In this tutorial we're extracting version 20141213-2.1.5.
 
-    $ mkdir packaging
-    $ cd packaging
-    $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141213-2.1.5-linux-x86.tar.gz
-    $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141213-2.1.5-linux-x86_64.tar.gz
-    $ curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141213-2.1.5-osx.tar.gz
-    $ cd ..
+```Bash
+mkdir packaging
+cd packaging
+curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141213-2.1.5-linux-x86.tar.gz
+curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141213-2.1.5-linux-x86_64.tar.gz
+curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141213-2.1.5-osx.tar.gz
+cd ..
 
-    $ mkdir hello-1.0.0-linux-x86/lib/ruby && tar -xzf packaging/traveling-ruby-20141213-2.1.5-linux-x86.tar.gz -C hello-1.0.0-linux-x86/lib/ruby
-    $ mkdir hello-1.0.0-linux-x86_64/lib/ruby && tar -xzf packaging/traveling-ruby-20141213-2.1.5-linux-x86_64.tar.gz -C hello-1.0.0-linux-x86_64/lib/ruby
-    $ mkdir hello-1.0.0-osx/lib/ruby && tar -xzf packaging/traveling-ruby-20141213-2.1.5-osx.tar.gz -C hello-1.0.0-osx/lib/ruby
+mkdir hello-1.0.0-linux-x86/lib/ruby && tar -xzf packaging/traveling-ruby-20141213-2.1.5-linux-x86.tar.gz -C hello-1.0.0-linux-x86/lib/ruby
+mkdir hello-1.0.0-linux-x86_64/lib/ruby && tar -xzf packaging/traveling-ruby-20141213-2.1.5-linux-x86_64.tar.gz -C hello-1.0.0-linux-x86_64/lib/ruby
+mkdir hello-1.0.0-osx/lib/ruby && tar -xzf packaging/traveling-ruby-20141213-2.1.5-osx.tar.gz -C hello-1.0.0-osx/lib/ruby
+```
 
 Now, each package directory will have Ruby binaries included. It looks like this:
 Your directory structure will now look like this:
@@ -79,10 +85,12 @@ Your directory structure will now look like this:
 
 Let's do a basic sanity test by running your app with a bundled Ruby interpreter. Suppose that you are developing on OS X. Run this:
 
-    $ cd hello-1.0.0-osx
-    $ ./lib/ruby/bin/ruby lib/app/hello.rb
-    hello world
-    $ cd ..
+```Bash
+cd hello-1.0.0-osx
+./lib/ruby/bin/ruby lib/app/hello.rb
+# => hello world
+cd ..
+```
 
 ## Creating a wrapper script
 
@@ -90,35 +98,41 @@ Now that you've verified that the bundled Ruby interpreter works, you'll want cr
 
 Here's what a wrapper script could look like:
 
-    #!/bin/bash
-    set -e
+```Bash
+#!/bin/bash
+set -e
 
-    # Figure out where this script is located.
-    SELFDIR="`dirname \"$0\"`"
-    SELFDIR="`cd \"$SELFDIR\" && pwd`"
+# Figure out where this script is located.
+SELFDIR="`dirname \"$0\"`"
+SELFDIR="`cd \"$SELFDIR\" && pwd`"
 
-    # Run the actual app using the bundled Ruby interpreter.
-    exec "$SELFDIR/lib/ruby/bin/ruby" "$SELFDIR/lib/app/hello.rb"
+# Run the actual app using the bundled Ruby interpreter.
+exec "$SELFDIR/lib/ruby/bin/ruby" "$SELFDIR/lib/app/hello.rb"
+```
 
 Save this file as `packaging/wrapper.sh` in your project's root directory. Then you can copy it to each of your package directories and name it `hello`:
 
-    $ editor packaging/wrapper.sh
-    ...edit the file as per above...
-    $ chmod +x packaging/wrapper.sh
-    $ cp packaging/wrapper.sh hello-1.0.0-linux-x86/hello
-    $ cp packaging/wrapper.sh hello-1.0.0-linux-x86_64/hello
-    $ cp packaging/wrapper.sh hello-1.0.0-osx/hello
+```Bash
+editor packaging/wrapper.sh
+...edit the file as per above...
+chmod +x packaging/wrapper.sh
+cp packaging/wrapper.sh hello-1.0.0-linux-x86/hello
+cp packaging/wrapper.sh hello-1.0.0-linux-x86_64/hello
+cp packaging/wrapper.sh hello-1.0.0-osx/hello
+```
 
 ## Finalizing packages
 
 Your package directories are now ready. You can finalize the packages by packaging up all these directories using tar:
 
-    $ tar -czf hello-1.0.0-linux-x86.tar.gz hello-1.0.0-linux-x86
-    $ tar -czf hello-1.0.0-linux-x86_64.tar.gz hello-1.0.0-linux-x86_64
-    $ tar -czf hello-1.0.0-osx.tar.gz hello-1.0.0-osx
-    $ rm -rf hello-1.0.0-linux-x86
-    $ rm -rf hello-1.0.0-linux-x86_64
-    $ rm -rf hello-1.0.0-osx
+```Bash
+tar -czf hello-1.0.0-linux-x86.tar.gz hello-1.0.0-linux-x86
+tar -czf hello-1.0.0-linux-x86_64.tar.gz hello-1.0.0-linux-x86_64
+tar -czf hello-1.0.0-osx.tar.gz hello-1.0.0-osx
+rm -rf hello-1.0.0-linux-x86
+rm -rf hello-1.0.0-linux-x86_64
+rm -rf hello-1.0.0-osx
+```
 
 Congratulations, you have created packages using Traveling Ruby!
 
@@ -128,86 +142,96 @@ An x86 Linux user could now use your app like this:
  2. The user extracts this file.
  3. The user runs your app:
 
-         $ /path-to/hello-1.0.0-linux-x86/hello
-         hello world
+```Bash
+/path-to/hello-1.0.0-linux-x86/hello
+# => hello world
+```
 
 ## Automating the process using Rake
 
 Going through all of the above steps on every release is a hassle, so you should automate the packaging process, for example by using Rake. Here's how the Rakefile could look like:
 
-    PACKAGE_NAME = "hello"
-    VERSION = "1.0.0"
-    TRAVELING_RUBY_VERSION = "20141213-2.1.5"
+```Ruby
+PACKAGE_NAME = "hello"
+VERSION = "1.0.0"
+TRAVELING_RUBY_VERSION = "20141213-2.1.5"
 
-    desc "Package your app"
-    task :package => ['package:linux:x86', 'package:linux:x86_64', 'package:osx']
+desc "Package your app"
+task :package => ['package:linux:x86', 'package:linux:x86_64', 'package:osx']
 
-    namespace :package do
-      namespace :linux do
-        desc "Package your app for Linux x86"
-        task :x86 => "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86.tar.gz" do
-          create_package("linux-x86")
-        end
-
-        desc "Package your app for Linux x86_64"
-        task :x86_64 => "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86_64.tar.gz" do
-          create_package("linux-x86_64")
-        end
-      end
-
-      desc "Package your app for OS X"
-      task :osx => "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz" do
-        create_package("osx")
-      end
+namespace :package do
+  namespace :linux do
+    desc "Package your app for Linux x86"
+    task :x86 => "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86.tar.gz" do
+      create_package("linux-x86")
     end
 
-    file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86.tar.gz" do
-      download_runtime("linux-x86")
+    desc "Package your app for Linux x86_64"
+    task :x86_64 => "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86_64.tar.gz" do
+      create_package("linux-x86_64")
     end
+  end
 
-    file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86_64.tar.gz" do
-      download_runtime("linux-x86_64")
-    end
+  desc "Package your app for OS X"
+  task :osx => "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz" do
+    create_package("osx")
+  end
+end
 
-    file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz" do
-      download_runtime("osx")
-    end
+file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86.tar.gz" do
+  download_runtime("linux-x86")
+end
 
-    def create_package(target)
-      package_dir = "#{PACKAGE_NAME}-#{VERSION}-#{target}"
-      sh "rm -rf #{package_dir}"
-      sh "mkdir -p #{package_dir}/lib/app"
-      sh "cp hello.rb #{package_dir}/lib/app/"
-      sh "mkdir #{package_dir}/lib/ruby"
-      sh "tar -xzf packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz -C #{package_dir}/lib/ruby"
-      sh "cp packaging/wrapper.sh #{package_dir}/hello"
-      if !ENV['DIR_ONLY']
-        sh "tar -czf #{package_dir}.tar.gz #{package_dir}"
-        sh "rm -rf #{package_dir}"
-      end
-    end
+file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86_64.tar.gz" do
+  download_runtime("linux-x86_64")
+end
 
-    def download_runtime(target)
-      sh "cd packaging && curl -L -O --fail " +
-        "http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz"
-    end
+file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz" do
+  download_runtime("osx")
+end
+
+def create_package(target)
+  package_dir = "#{PACKAGE_NAME}-#{VERSION}-#{target}"
+  sh "rm -rf #{package_dir}"
+  sh "mkdir -p #{package_dir}/lib/app"
+  sh "cp hello.rb #{package_dir}/lib/app/"
+  sh "mkdir #{package_dir}/lib/ruby"
+  sh "tar -xzf packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz -C #{package_dir}/lib/ruby"
+  sh "cp packaging/wrapper.sh #{package_dir}/hello"
+  if !ENV['DIR_ONLY']
+    sh "tar -czf #{package_dir}.tar.gz #{package_dir}"
+    sh "rm -rf #{package_dir}"
+  end
+end
+
+def download_runtime(target)
+  sh "cd packaging && curl -L -O --fail " +
+    "http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz"
+end
+```
 
 You can then create all 3 packages by running:
 
-    $ rake package
+```Bash
+rake package
+```
 
 You can also create a package for a specific platform by running one of:
 
-    $ rake package:linux:x86
-    $ rake package:linux:x86_64
-    $ rake package:osx
+```Bash
+rake package:linux:x86
+rake package:linux:x86_64
+rake package:osx
+```
 
 You can also just create package directories, without creating the .tar.gz files, by passing DIR_ONLY=1:
 
-    $ rake package DIR_ONLY=1
-    $ rake package:linux:x86 DIR_ONLY=1
-    $ rake package:linux:x86_64 DIR_ONLY=1
-    $ rake package:osx DIR_ONLY=1
+```Bash
+rake package DIR_ONLY=1
+rake package:linux:x86 DIR_ONLY=1
+rake package:linux:x86_64 DIR_ONLY=1
+rake package:osx DIR_ONLY=1
+```
 
 ## End users
 
@@ -219,12 +243,14 @@ You now have three files which you can distribute to end users.
 
 Suppose the end user is on Linux x86_64. S/he uses your app by downloading `hello-1.0.0-linux-x86_64.tar.gz`, extracting it and running it:
 
-    user$ wget hello-1.0.0-linux-x86_64.tar.gz
-    ...
-    user$ tar xzf hello-1.0.0-linux-x86_64.tar.gz
-    user$ cd hello-1.0.0-linux-x86_64
-    user$ ./hello
-    hello world
+```Bash
+wget hello-1.0.0-linux-x86_64.tar.gz
+...
+tar xzf hello-1.0.0-linux-x86_64.tar.gz
+cd hello-1.0.0-linux-x86_64
+./hello
+# => hello world
+```
 
 ## Conclusion
 
