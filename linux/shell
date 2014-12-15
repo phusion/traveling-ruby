@@ -62,6 +62,7 @@ exec docker run \
 	--cap-add SYS_ADMIN --cap-add SYS_CHROOT \
 	-v "$SELFDIR/internal:/system:ro" \
 	-v "$RUNTIME_DIR/mock:/var/lib/mock" \
+	-v "`pwd`:/host" \
 	phusion/ruby-traveler-builder \
 	/system/my_init --quiet --skip-runit --skip-startup-files -- \
 	/bin/bash -l
