@@ -21,7 +21,7 @@ One solution is to build OS-specific installation packages, e.g. DEBs, RPMs, .pk
 
 This is exactly the approach that Chef has chosen. They built [Omnibus](https://github.com/opscode/omnibus), an automation system which spawns an army of VMs for building platform-specific packages. It works, but it's heavyweight and a big hassle. You need a big build machine for that if you want to have reasonable build time. And be prepared to make 20 cups of coffee.
 
-But there is another -- much simpler -- solution.
+But there is another &mdash; much simpler &mdash; solution.
 
 ### Way of the Traveling Ruby
 
