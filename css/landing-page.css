@@ -189,7 +189,31 @@ h6 {
     }
 }
 
-footer {
+.testimonial-header {
+    text-align: center;
+}
+
+.testimonial-header a {
+    color: black;
+}
+
+.testimonial-header a:hover {
+    text-decoration: none;
+}
+
+.testimonial-header img {
+    margin-top: 1.5em;
+    margin-bottom: 1.5em;
+}
+
+.testimonials blockquote p {
+    font-family: Times, 'Times New Roman', sans-serif;
+    font-style: italic;
+    font-size: 110%;
+    text-align: justify;
+}
+
+.page-footer {
     padding: 50px 0;
     background-color: #f8f8f8;
 }
