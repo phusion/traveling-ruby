@@ -104,6 +104,7 @@ NATIVE_GEMS=(`find_gems_containing_native_extensions "$BUILD_OUTPUT_DIR"`)
 if [[ "$RUBY_PACKAGE" != "" ]]; then
 	header "Packaging Ruby..."
 	run tar -cf "$RUBY_PACKAGE.tmp" -C "$BUILD_OUTPUT_DIR" \
+		--exclude "include/*" \
 		--exclude "lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/*" \
 		--exclude "lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*" \
 		--exclude "lib/ruby/gems/$RUBY_COMPAT_VERSION/specifications/*" \

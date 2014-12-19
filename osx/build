@@ -214,7 +214,7 @@ if $SETUP_SOURCE; then
 		--disable-install-doc \
 		--disable-install-rdoc \
 		--disable-install-capi \
-		--with-out-ext=tk,gdbm,dbm,dl,coverage \
+		--with-out-ext=tk,sdbm,gdbm,dbm,dl,coverage \
 		--with-openssl-dir="$RUNTIME_DIR"
 	echo
 fi
