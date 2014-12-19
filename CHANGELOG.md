@@ -1,3 +1,9 @@
+## Next version
+
+ * Removed header files. This makes the package 100 KB smaller.
+ * Removed the sdbm extension because almost nobody uses it. The sqlite3 gem is almost always a better choice anyway.
+ * Added the yajl-ruby native extension gem.
+
 ## Version 20141215
 
  * The Linux packages now include libffi.so.6, which was forgotten in the previous release. Closes GH-16.
