@@ -1,4 +1,4 @@
-## Next version
+## Version 20141219
 
  * Removed header files. This makes the package 100 KB smaller.
  * Removed the sdbm extension because almost nobody uses it. The sqlite3 gem is almost always a better choice anyway.
