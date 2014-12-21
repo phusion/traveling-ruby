@@ -1,6 +1,7 @@
 ## Next version
 
  * We now support multiple versions of native extension gems. For example, we now supply Nokogiri 1.5 and 1.6.
+ * Fixed the mysql2 native extension not working on Linux. This is done by dynamically linking against libstdc++. Closes GH-21.
 
 ## Version 20141219
 

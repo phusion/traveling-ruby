@@ -185,7 +185,7 @@ if [[ ! -e /usr/local/override/lib/libmysqlclient.aa ]]; then
 	run make -C libmysql install
 	run make -C include install
 	run make -C scripts install
-	run sed -i "s|^ldflags=''|ldflags='-static-libgcc'|"  /usr/local/override/bin/mysql_config
+	run sed -i "s|^ldflags=''|ldflags='-lstdc++'|"  /usr/local/override/bin/mysql_config
 
 	echo "Leaving source directory"
 	popd >/dev/null

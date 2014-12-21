@@ -226,7 +226,7 @@ if $SANITY_CHECK_OUTPUT; then
 	(
 		SYSTEM_LIBRARIES="(linux-gate|linux-vdso|libpthread|librt|libdl|libcrypt|libm|libc"
 		SYSTEM_LIBRARIES="$SYSTEM_LIBRARIES|ld-linux.*|libutil|libz|libxslt|libxml2|libreadline"
-		SYSTEM_LIBRARIES="$SYSTEM_LIBRARIES|libtermcap|libffi|libnsl)\.so"
+		SYSTEM_LIBRARIES="$SYSTEM_LIBRARIES|libtermcap|libffi|libnsl|libgcc_s|libstdc\+\+)\.so"
 		ERROR=false
 		set -o pipefail
 		for F in /tmp/ruby/bin.real/ruby `find /tmp/ruby -name '*.so'`; do
