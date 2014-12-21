@@ -1,4 +1,0 @@
-#source 'http://production.cf.rubygems.org/'
-source 'https://rubygems.org'
-
-gem 'nokogiri', '~> 1.5.0'

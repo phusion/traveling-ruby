@@ -26,8 +26,6 @@ export PATH=/usr/local/override/bin:$PATH
 CMAKE_VERSION=3.0.2
 OPENSSL_VERSION=1.0.1j
 FFI_VERSION=3.2.1
-LIBXML2_VERSION=2.9.2
-LIBXSLT_VERSION=1.1.28
 SQLITE3_VERSION=3080702
 MYSQL_LIB_VERSION=6.1.5
 POSTGRESQL_VERSION=9.3.5
@@ -104,48 +102,6 @@ if [[ ! -e /usr/local/override/lib/libffi.so.6 ]]; then
 fi
 echo
 
-header "Installing libxml2"
-if [[ ! -e /usr/local/override/lib/libxml2.a ]]; then
-	download_and_extract libxml2-$LIBXML2_VERSION.tar.gz \
-		ftp://xmlsoft.org/libxml2/libxml2-$LIBXML2_VERSION.tar.gz
-	echo "Entering libxml2-$LIBXML2_VERSION"
-	pushd libxml2-$LIBXML2_VERSION >/dev/null
-
-	run ./configure --prefix=/usr/local/override --disable-shared \
-		--without-debug --without-docbook --without-fexceptions \
-		--without-ftp --without-http --without-history --without-mem-debug \
-		--without-python --without-readline --with-c14n \
-		--with-threads CFLAGS='-fPIC -fvisibility=hidden'
-	run make -j$CONCURRENCY
-	run make install-strip
-
-	echo "Leaving source directory"
-	popd >/dev/null
-	run rm -rf libxml2-$LIBXML2_VERSION
-fi
-echo
-
-header "Installing libxslt"
-if [[ ! -e /usr/local/override/lib/libxslt.a ]]; then
-	download_and_extract libxslt-$LIBXSLT_VERSION.tar.gz \
-		ftp://xmlsoft.org/libxml2/libxslt-$LIBXSLT_VERSION.tar.gz
-	echo "Entering libxslt-$LIBXSLT_VERSION"
-	pushd libxslt-$LIBXSLT_VERSION >/dev/null
-
-	run ./configure --prefix=/usr/local/override --disable-shared \
-		--without-python --without-crypto --without-debug \
-		--without-mem-debug --without-debugger \
-		CFLAGS='-fPIC -fvisibility=hidden'
-	run make -j$CONCURRENCY
-	run make install-strip
-
-	echo "Leaving source directory"
-	popd >/dev/null
-	run rm -rf libxslt-$LIBXSLT_VERSION
-fi
-echo
-
-header "Installing SQLite3"
 if [[ ! -e /usr/local/override/lib/libsqlite3.a ]]; then
 	download_and_extract sqlite-autoconf-$SQLITE3_VERSION.tar.gz \
 		http://www.sqlite.org/2014/sqlite-autoconf-$SQLITE3_VERSION.tar.gz

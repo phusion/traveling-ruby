@@ -172,21 +172,15 @@ echo $GEM_EXTENSION_API_VERSION > /tmp/ruby/info/GEM_EXTENSION_API_VERSION
 # removing explicitly gems.
 run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/{test-unit,rdoc}-*
 
-if [[ -e /system/gemfiles ]]; then
+if [[ -e /system/Gemfile ]]; then
 	run /tmp/ruby/bin/gem install bundler -v $BUNDLER_VERSION --no-rdoc --no-ri
-	
-	for GEMFILE in /system/gemfiles/*/Gemfile; do
-		run cp "$GEMFILE" /tmp/ruby/
-		if [[ -e "$GEMFILE.lock" ]]; then
-			run cp "$GEMFILE.lock" /tmp/ruby/
-		fi
-		echo "+ Entering /tmp/ruby"
-		pushd /tmp/ruby >/dev/null
-		run /tmp/ruby/bin/bundle install --system --retry 3
-		run rm Gemfile*
-		echo "+ Leaving /tmp/ruby"
-		popd >/dev/null
-	done
+	run cp /system/Gemfile* /tmp/ruby
+	echo "+ Entering /tmp/ruby"
+	pushd /tmp/ruby >/dev/null
+	run /tmp/ruby/bin/bundle install --system --retry 3
+	run rm Gemfile*
+	echo "+ Leaving /tmp/ruby"
+	popd >/dev/null
 fi
 
 # Strip binaries and remove unnecessary files.

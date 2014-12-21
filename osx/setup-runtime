@@ -26,10 +26,6 @@ FORCE_LIBFFI=false
 SKIP_LIBFFI=false
 FORCE_LIBYAML=false
 SKIP_LIBYAML=false
-FORCE_LIBXML2=false
-SKIP_LIBXML2=false
-FORCE_LIBXSLT=false
-SKIP_LIBXSL=false
 FORCE_SQLITE3=false
 SKIP_SQLITE3=false
 FORCE_LIBLZMA=false
@@ -180,7 +176,7 @@ RUNTIME_DIR="`cd \"$RUNTIME_DIR\" && pwd`"
 #######################################
 
 
-TOTAL_LIBS=12
+TOTAL_LIBS=10
 RUBY_MAJOR_MINOR=2.1
 RUBY_VERSION=2.1.5
 CMAKE_VERSION=3.0.2
@@ -192,8 +188,6 @@ GMP_VERSION=6.0.0a
 GMP_DIR_VERSION=6.0.0
 LIBFFI_VERSION=3.2.1
 LIBYAML_VERSION=0.1.5
-LIBXML2_VERSION=2.9.2
-LIBXSLT_VERSION=1.1.28
 SQLITE3_VERSION=3080702
 XZ_VERSION=5.0.7
 MYSQL_LIB_VERSION=6.1.5
@@ -236,8 +230,7 @@ elif [[ ! -e "$RUNTIME_DIR/bin/cmake" ]] || $FORCE_CMAKE; then
 	run ./configure --prefix="$RUNTIME_DIR" --no-qt-gui --parallel=$CONCURRENCY
 	run make -j$CONCURRENCY
 	run make install
-
-	echo "Leaving source directory"
+	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf cmake-$CMAKE_VERSION
 else
@@ -259,8 +252,7 @@ elif [[ ! -e "$RUNTIME_DIR/bin/openssl" ]] || $FORCE_OPENSSL; then
 		threads zlib shared no-sse2
 	run make
 	run make install_sw
-
-	echo "Leaving source directory"
+	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf openssl-$OPENSSL_VERSION
 
@@ -298,8 +290,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libncurses.5.dylib" ]] || $FORCE_NCURSES; then
 		--without-develop
 	run make -j$CONCURRENCY
 	run make install
-	
-	echo "Leaving source directory"
+	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf ncurses-$NCURSES_VERSION
 
@@ -330,8 +321,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libedit.0.dylib" ]] || $FORCE_LIBEDIT; then
 	run ./configure --prefix="$RUNTIME_DIR" --disable-static --enable-widec
 	run make -j$CONCURRENCY
 	run make install-strip
-	
-	echo "Leaving source directory"
+	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf libedit-$LIBEDIT_DIR_VERSION
 
@@ -359,8 +349,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libgmp.10.dylib" ]] || $FORCE_GMP; then
 	run ./configure --prefix="$RUNTIME_DIR" --disable-static --without-readline
 	run make -j$CONCURRENCY
 	run make install-strip
-	
-	echo "Leaving source directory"
+	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf gmp-$GMP_DIR_VERSION
 
@@ -386,8 +375,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libffi.6.dylib" ]] || $FORCE_LIBFFI; then
 		./configure --prefix="$RUNTIME_DIR" --disable-static --enable-portable-binary
 	run make -j$CONCURRENCY
 	run make install-strip
-	
-	echo "Leaving source directory"
+	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf libffi-$LIBFFI_VERSION
 
@@ -410,8 +398,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libyaml-0.2.dylib" ]] || $FORCE_LIBYAML; then
 	run ./configure --prefix="$RUNTIME_DIR" --disable-static
 	run make -j$CONCURRENCY
 	run make install-strip
-	
-	echo "Leaving source directory"
+	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf yaml-$LIBYAML_VERSION
 
@@ -422,56 +409,7 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 7/$TOTAL_LIBS: libxml2..."
-if $SKIP_LIBXML2; then
-	echo "Skipped."
-elif [[ ! -e "$RUNTIME_DIR/lib/libxml2.a" ]] || $FORCE_LIBXML2; then
-	download_and_extract libxml2-$LIBXML2_VERSION.tar.gz \
-		ftp://xmlsoft.org/libxml2/libxml2-$LIBXML2_VERSION.tar.gz
-	echo "Entering $RUNTIME_DIR/libxml2-$LIBXML2_VERSION"
-	pushd libxml2-$LIBXML2_VERSION >/dev/null
-
-	run ./configure --prefix="$RUNTIME_DIR" --disable-shared \
-		--without-debug --without-docbook --without-fexceptions \
-		--without-ftp --without-http --without-history --without-mem-debug \
-		--without-python --without-readline --with-c14n \
-		--with-threads CFLAGS='-fPIC -fvisibility=hidden'
-	run make -j$CONCURRENCY
-	run make install-strip
-
-	echo "Leaving source directory"
-	popd >/dev/null
-	run rm -rf libxml2-$LIBXML2_VERSION
-else
-	echo "Already installed."
-fi
-echo
-
-header "Compiling runtime libraries 8/$TOTAL_LIBS: libxslt..."
-if $SKIP_LIBXSLT; then
-	echo "Skipped."
-elif [[ ! -e "$RUNTIME_DIR/lib/libxslt.a" ]] || $FORCE_LIBXSLT; then
-	download_and_extract libxslt-$LIBXSLT_VERSION.tar.gz \
-		ftp://xmlsoft.org/libxml2/libxslt-$LIBXSLT_VERSION.tar.gz
-	echo "Entering libxslt-$LIBXSLT_VERSION"
-	pushd libxslt-$LIBXSLT_VERSION >/dev/null
-
-	run ./configure --prefix=/usr/local/override --disable-shared \
-		--without-python --without-crypto --without-debug \
-		--without-mem-debug --without-debugger \
-		CFLAGS='-fPIC -fvisibility=hidden'
-	run make -j$CONCURRENCY
-	run make install-strip
-
-	echo "Leaving source directory"
-	popd >/dev/null
-	run rm -rf libxslt-$LIBXSLT_VERSION
-else
-	echo "Already installed."
-fi
-echo
-
-header "Compiling runtime libraries 9/$TOTAL_LIBS: sqlite3..."
+header "Compiling runtime libraries 7/$TOTAL_LIBS: sqlite3..."
 if $SKIP_SQLITE3; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libsqlite3.a" ]] || $FORCE_SQLITE3; then
@@ -492,7 +430,7 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 10/$TOTAL_LIBS: liblzma..."
+header "Compiling runtime libraries 8/$TOTAL_LIBS: liblzma..."
 if $SKIP_LIBLZMA; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/liblzma.5.dylib" ]] || $FORCE_LIBLZMA; then
@@ -507,7 +445,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/liblzma.5.dylib" ]] || $FORCE_LIBLZMA; then
 	run make -j$CONCURRENCY
 	run make install-strip
 
-	echo "Leaving source directory"
+	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf xz-$XZ_VERSION
 
@@ -518,7 +456,7 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 11/$TOTAL_LIBS: MySQL..."
+header "Compiling runtime libraries 9/$TOTAL_LIBS: MySQL..."
 if $SKIP_MYSQL; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libmysqlclient.a" ]] || $FORCE_MYSQL; then
@@ -542,7 +480,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libmysqlclient.a" ]] || $FORCE_MYSQL; then
 	run make -C include install
 	run make -C scripts install
 
-	echo "Leaving source directory"
+	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf mysql-connector-c-$MYSQL_LIB_VERSION-src
 else
@@ -550,7 +488,7 @@ else
 fi
 echo
 
-header "Compiling runtime libraries 12/$TOTAL_LIBS: PostgreSQL..."
+header "Compiling runtime libraries 10/$TOTAL_LIBS: PostgreSQL..."
 if $SKIP_POSTGRESQL; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libpq.a" ]] || $FORCE_POSTGRESQL; then
@@ -569,7 +507,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libpq.a" ]] || $FORCE_POSTGRESQL; then
 	run make -j$CONCURRENCY -C src/bin/pg_config
 	run make -C src/bin/pg_config install-strip
 
-	echo "Leaving source directory"
+	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf postgresql-$POSTGRESQL_VERSION
 

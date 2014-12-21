@@ -12,9 +12,12 @@ ROOT=/var/lib/mock/$CHROOT_NAME/root
 run rm -rf $ROOT/system $ROOT/output
 run mkdir $ROOT/system $ROOT/output
 run cp /system/* $ROOT/system/
-run cp -R /system_shared/* $ROOT/system/
-if [[ -e /gemfiles ]]; then
-	run cp -R /gemfiles $ROOT/system/
+run cp /system_shared/* $ROOT/system/
+if [[ -e /Gemfile ]]; then
+	run cp /Gemfile $ROOT/system/
+fi
+if [[ -e /Gemfile.lock ]]; then
+	run cp /Gemfile.lock $ROOT/system/
 fi
 echo "Dumping parameters"
 echo $ARCHITECTURE > $ROOT/system/NAME
