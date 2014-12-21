@@ -50,7 +50,7 @@ header "Installing additional software inside chroot"
 run rm -rf /var/lib/mock/$CHROOT_NAME/root/system
 run mkdir /var/lib/mock/$CHROOT_NAME/root/system
 run cp /system/* /var/lib/mock/$CHROOT_NAME/root/system/
-run cp /system_shared/* /var/lib/mock/$CHROOT_NAME/root/system/
+run cp -R /system_shared/* /var/lib/mock/$CHROOT_NAME/root/system/
 echo $ARCHITECTURE > /var/lib/mock/$CHROOT_NAME/root/system/ARCHITECTURE
 run /system/setuser app /usr/bin/mock -r $CHROOT_NAME --shell /system/setup-runtime-inside-mock
 run rm -rf /var/lib/mock/$CHROOT_NAME/root/system

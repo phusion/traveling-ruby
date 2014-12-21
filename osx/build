@@ -9,11 +9,12 @@ BUNDLER_VERSION=`cat "$SELFDIR/../BUNDLER_VERSION.txt"`
 
 WORKDIR=
 OWNS_WORKDIR=true
+GEMFILES=()
 
 RUNTIME_DIR=
 OUTPUT_DIR=
 CONCURRENCY=4
-GEMFILE="$SELFDIR/../shared/Gemfile"
+GEMFILE="$SELFDIR/../shared/gemfiles"
 SETUP_SOURCE=true
 COMPILE=true
 
@@ -176,6 +177,11 @@ else
 fi
 if [[ "$GEMFILE" != "" ]]; then
 	GEMFILE="`absolute_path \"$GEMFILE\"`"
+	if [[ -d "$GEMFILE" ]]; then
+		GEMFILES=("$GEMFILE"/*/Gemfile)
+	else
+		GEMFILES=("$GEMFILE")
+	fi
 fi
 
 
@@ -268,25 +274,29 @@ if [[ "$GEMFILE" != "" ]]; then
 		run /tmp/ruby/bin/gem install "$RUNTIME_DIR/vendor/cache/bundler-$BUNDLER_VERSION.gem" --no-rdoc --no-ri
 	else
 		run /tmp/ruby/bin/gem install bundler -v $BUNDLER_VERSION --no-rdoc --no-ri
+		run mkdir -p "$RUNTIME_DIR/vendor/cache"
+		run cp /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/bundler-$BUNDLER_VERSION.gem "$RUNTIME_DIR/vendor/cache/"
 	fi
 
 	# Run bundle install.
-	run cp "$GEMFILE" /tmp/ruby/
-	if [[ -e "$GEMFILE.lock" ]]; then
-		run cp "$GEMFILE.lock" /tmp/ruby/
-	fi
-	echo "+ Entering /tmp/ruby"
-	pushd /tmp/ruby >/dev/null
-	run /tmp/ruby/bin/bundle config --local build.nokogiri ""
-	run /tmp/ruby/bin/bundle config --local build.mysql2 "--with-mysql_config"
-	run /tmp/ruby/bin/bundle install --system --retry 3
-	run /tmp/ruby/bin/bundle package
-	run rm -rf "$RUNTIME_DIR/vendor"
-	run mv vendor "$RUNTIME_DIR/"
-	run cp /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/bundler-$BUNDLER_VERSION.gem "$RUNTIME_DIR/vendor/cache/"
-	run rm -rf Gemfile* .bundle
-	echo "+ Leaving /tmp/ruby"
-	popd >/dev/null
+	for GEMFILE in "${GEMFILES[@]}"; do
+		run cp "$GEMFILE" /tmp/ruby/
+		if [[ -e "$GEMFILE.lock" ]]; then
+			run cp "$GEMFILE.lock" /tmp/ruby/
+		fi
+		echo "+ Entering /tmp/ruby"
+		pushd /tmp/ruby >/dev/null
+		run /tmp/ruby/bin/bundle config --local build.nokogiri ""
+		run /tmp/ruby/bin/bundle config --local build.mysql2 "--with-mysql_config"
+		run /tmp/ruby/bin/bundle install --system --retry 3
+		run /tmp/ruby/bin/bundle package
+		run rm -rf "$RUNTIME_DIR/vendor"
+		run mv vendor "$RUNTIME_DIR/"
+		
+		run rm -rf Gemfile* .bundle
+		echo "+ Leaving /tmp/ruby"
+		popd >/dev/null
+	done
 fi
 
 # Strip binaries and remove unnecessary files.

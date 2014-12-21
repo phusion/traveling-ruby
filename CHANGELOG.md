@@ -1,3 +1,7 @@
+## Next version
+
+ * We now support multiple versions of native extension gems. For example, we now supply Nokogiri 1.5 and 1.6.
+
 ## Version 20141219
 
  * Removed header files. This makes the package 100 KB smaller.
