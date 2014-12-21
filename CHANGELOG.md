@@ -1,6 +1,7 @@
 ## Next version
 
  * Fixed the mysql2 native extension not working on Linux. This is done by dynamically linking against libstdc++. Closes GH-21.
+ * Added the eventmachine and thin native extension gems.
 
 ## Version 20141219
 
