@@ -92,6 +92,6 @@ exec docker run \
 	-e "ARCHITECTURE=$ARCHITECTURE" \
 	-e "INITIALIZE=$INITIALIZE" \
 	-e "DOWNLOAD_RUBY=$DOWNLOAD_RUBY" \
-	phusion/ruby-traveler-builder \
+	phusion/traveling-ruby-builder \
 	/system/my_init --quiet --skip-runit --skip-startup-files -- \
 	/system/setup-runtime

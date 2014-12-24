@@ -124,6 +124,6 @@ exec docker run \
 	-e "SETUP_SOURCE=$SETUP_SOURCE" \
 	-e "COMPILE=$COMPILE" \
 	-e "SANITY_CHECK_OUTPUT=$SANITY_CHECK_OUTPUT" \
-	phusion/ruby-traveler-builder \
+	phusion/traveling-ruby-builder \
 	/system/my_init --quiet --skip-runit --skip-startup-files -- \
 	/system/build
