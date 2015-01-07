@@ -1,3 +1,6 @@
+## Version TBD
+ * Added RedCloth gem.
+
 ## Version 20141224
 
  * Fixed the mysql2 native extension not working on Linux. This is done by dynamically linking against libstdc++. Closes GH-21.
