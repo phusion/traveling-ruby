@@ -50,12 +50,10 @@ Traveling Ruby aims to solve the problem of supplying precompiled **Ruby 2.1** b
 
 There are also some real-world examples of how people used Traveling Ruby to package their Ruby tools:
 
- * BOSH (release engineering tool)<br>
-   [Blog post](https://blog.starkandwayne.com/2014/12/24/traveling-bosh-cli-no-more-installation-pain/)<br>
-   [Github repo](https://github.com/cloudfoundry-community/traveling-bosh)
- * Elasticrawl (AWS Elastic MapReduce job runner)<br>
-   [Blog post](https://rossfairbanks.com/2015/01/13/packaging-elasticrawl-using-traveling-ruby.html)<br>
-   [Github repo](https://github.com/rossf7/traveling-elasticrawl)
+ * **BOSH (release engineering tool)**<br>
+   [Blog post](https://blog.starkandwayne.com/2014/12/24/traveling-bosh-cli-no-more-installation-pain/) | [Github repo](https://github.com/cloudfoundry-community/traveling-bosh)
+ * **Elasticrawl (AWS Elastic MapReduce job runner)**<br>
+   [Blog post](https://rossfairbanks.com/2015/01/13/packaging-elasticrawl-using-traveling-ruby.html) | [Github repo](https://github.com/rossf7/traveling-elasticrawl)
 
 <a name="limitations"></a>
 
