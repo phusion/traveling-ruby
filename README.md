@@ -48,6 +48,15 @@ Traveling Ruby aims to solve the problem of supplying precompiled **Ruby 2.1** b
  * [Tutorial 2: gem dependencies](TUTORIAL-2.md) - Managing and packaging gem dependencies using Bundler.
  * [Tutorial 3: native extensions](TUTORIAL-3.md) - Managing and packaging native extension gems.
 
+There are also some real-world examples of how people used Traveling Ruby to package their Ruby tools:
+
+ * BOSH (release engineering tool)<br>
+   [Blog post](https://blog.starkandwayne.com/2014/12/24/traveling-bosh-cli-no-more-installation-pain/)<br>
+   [Github repo](https://github.com/cloudfoundry-community/traveling-bosh)
+ * Elasticrawl (AWS Elastic MapReduce job runner)<br>
+   [Blog post](https://rossfairbanks.com/2015/01/13/packaging-elasticrawl-using-traveling-ruby.html)<br>
+   [Github repo](https://github.com/rossf7/traveling-elasticrawl)
+
 <a name="limitations"></a>
 
 ## Limitations
