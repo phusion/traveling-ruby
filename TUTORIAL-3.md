@@ -51,8 +51,8 @@ Using the Rakefile from tutorial 2, create the gem bundle which is to be include
 Run these to remove any native extensions from that bundle:
 
     $ rm -rf packaging/vendor/ruby/*/extensions
-    $ find packaging/vendor/ruby/*/gems -name '*.so' | xargs rm
-    $ find packaging/vendor/ruby/*/gems -name '*.bundle' | xargs rm
+    $ find packaging/vendor/ruby/*/gems -name '*.so' | xargs rm -f
+    $ find packaging/vendor/ruby/*/gems -name '*.bundle' | xargs rm -f
 
 ## Dropping native extensions
 
