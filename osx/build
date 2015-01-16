@@ -177,6 +177,12 @@ fi
 if [[ "$GEMFILE" != "" ]]; then
 	GEMFILE="`absolute_path \"$GEMFILE\"`"
 fi
+if [[ -e ~/.bundle/config ]]; then
+	echo "ERROR: ~/.bundle/config detected. Global Bundler configuration" \
+		"could conflict with this build script, so please remove" \
+		"~/.bundle/config first."
+	exit 1
+fi
 
 
 #######################################
