@@ -54,6 +54,8 @@ There are also some real-world examples of how people used Traveling Ruby to pac
    [Blog post](https://blog.starkandwayne.com/2014/12/24/traveling-bosh-cli-no-more-installation-pain/) | [Github repo](https://github.com/cloudfoundry-community/traveling-bosh)
  * **Elasticrawl (AWS Elastic MapReduce job runner)**<br>
    [Blog post](https://rossfairbanks.com/2015/01/13/packaging-elasticrawl-using-traveling-ruby.html) | [Github repo](https://github.com/rossf7/traveling-elasticrawl)
+ * **Octodown (Github markdown preview tool)**<br>
+   [Github repo](https://github.com/ianks/octodown) | [Traveling Ruby issue](https://github.com/ianks/octodown/issues/29) | [Traveling Ruby pull request](https://github.com/ianks/octodown/pull/38)
 
 <a name="limitations"></a>
 
