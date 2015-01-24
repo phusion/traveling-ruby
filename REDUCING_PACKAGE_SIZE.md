@@ -39,10 +39,11 @@ You can typically safely remove the following files:
 
 Depending on which gems you use, there may be more files that you can remove. What I typically do is to run `find lib/vendor/ruby | less` to inspect which files exist, and try to identify the files that I think can be removed.
 
-For example, most gems that contain a Rakefile only need those Rakefiles for the purpose of developing those gems. Usually, you can safely remove those Rakefiles without impacting your application. In a similar fashion, the `task` directory within those gems (which typically contain further Rake tasks) can also be removed.
+Here are a few examples:
 
-As another example, the `nokogori` gem contains the `suppressions` directory. This directory contains Valgrind suppression files, so if you never use Valgrind (which is very likely) then you can remove that directory too.
-
-As a final example, the `rack` gem contains a `contrib` directory which appears to be only relevant for documentation purposes, so it too can be removed.
+ * Many gems that contain a Rakefile only need those Rakefiles for the purpose of developing those gems. In many cases, you can safely remove those Rakefiles without impacting your application. In a similar fashion, the `task` directory within those gems (which typically contain further Rake tasks) can also be removed.
+ * The `nokogori` gem contains the `suppressions` directory. This directory contains Valgrind suppression files, so if you never use Valgrind (which is very likely) then you can remove that directory too.
+ * The `rack` gem contains a `contrib` directory which appears to be only relevant for documentation purposes, so it too can be removed.
+ * Some gems, such as `json` and `thread_safe`, contain Java source files because they also support JRuby. You can remove these Java source files.
 
 When in doubt, you should inspect the gem's source code to check how a file is used and whether you can remove it.
