@@ -48,11 +48,12 @@ Using the Rakefile from tutorial 2, create the gem bundle which is to be include
 
     $ rake package:bundle_install
 
-Run these to remove any native extensions from that bundle:
+Run these to remove any native extensions and compilation products from that bundle:
 
     $ rm -rf packaging/vendor/ruby/*/extensions
     $ find packaging/vendor/ruby/*/gems -name '*.so' | xargs rm -f
     $ find packaging/vendor/ruby/*/gems -name '*.bundle' | xargs rm -f
+    $ find packaging/vendor/ruby/*/gems -name '*.o' | xargs rm -f
 
 ## Dropping native extensions
 
@@ -159,8 +160,9 @@ We update the Rakefile so that all of the above steps are automated by running `
 	    sh "rm -rf packaging/tmp"
 	    sh "rm -f packaging/vendor/*/*/cache/*"
 	    sh "rm -rf packaging/vendor/ruby/*/extensions"
-	    sh "find packaging/vendor/ruby/*/gems -name '*.so' | xargs rm"
-	    sh "find packaging/vendor/ruby/*/gems -name '*.bundle' | xargs rm"
+	    sh "find packaging/vendor/ruby/*/gems -name '*.so' | xargs rm -f"
+	    sh "find packaging/vendor/ruby/*/gems -name '*.bundle' | xargs rm -f"
+	    sh "find packaging/vendor/ruby/*/gems -name '*.o' | xargs rm -f"
 	  end
 	end
 
