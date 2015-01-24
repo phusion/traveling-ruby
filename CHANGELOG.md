@@ -1,5 +1,6 @@
-## Version TBD
- * Added RedCloth gem.
+## Next version (not yet released)
+
+ * Added the following native extension gems: RedCloth, escape_utils, posix-spawn, nokogumbo, github-markdown.
 
 ## Version 20141224
 
@@ -27,4 +28,4 @@
 
 ## Version 20141206
 
- * Initial release
+ * Initial release.
