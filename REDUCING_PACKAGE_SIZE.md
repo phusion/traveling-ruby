@@ -31,16 +31,26 @@ You can typically safely remove the following files:
     rm -rf lib/vendor/ruby/*/gems/*/sample
     rm -rf lib/vendor/ruby/*/gems/*/doc-api
 
-    # Remove leftover C source code
+    # Remove misc unnecessary files
+    rm -rf lib/vendor/ruby/*/gems/*/.gitignore
+    rm -rf lib/vendor/ruby/*/gems/*/.travis.yml
+
+    # Remove leftover native extension sources
     find lib/vendor/ruby -name '*.c' | xargs rm -f
     find lib/vendor/ruby -name '*.h' | xargs rm -f
+    find lib/vendor/ruby -name 'extconf.rb' | xargs rm -f
 
-    # Remove Java source code. They're only used for JRuby support
+    # Remove Java files. They're only used for JRuby support
     find lib/vendor/ruby -name '*.java' | xargs rm -f
+    find lib/vendor/ruby -name '*.class' | xargs rm -f
 
 ## Removing gem-specific files
 
-Depending on which gems you use, there may be more files that you can remove. What I typically do is to run `find lib/vendor/ruby | less` to inspect which files exist, and try to identify the files that I think can be removed.
+Depending on which gems you use, there may be more files that you can remove.
+
+What I typically do is to run `find lib/vendor/ruby | less` to inspect which files exist, and try to identify the files that I think can be removed.
+
+To focus on non-Ruby files, I run `find . -type f | grep -v '.rb$' | less` which filters out all .rb files.
 
 Here are a few examples:
 
