@@ -55,6 +55,8 @@ There are also some real-world examples of how people used Traveling Ruby to pac
    [Blog post](https://blog.starkandwayne.com/2014/12/24/traveling-bosh-cli-no-more-installation-pain/) | [Github repo](https://github.com/cloudfoundry-community/traveling-bosh)
  * **Elasticrawl (AWS Elastic MapReduce job runner)**<br>
    [Blog post](https://rossfairbanks.com/2015/01/13/packaging-elasticrawl-using-traveling-ruby.html) | [Github repo](https://github.com/rossf7/traveling-elasticrawl)
+ * **VirtKick (cloud web panel)**<br>
+   [Github repo](https://github.com/virtkick/virtkick-webapp)
  * **Octodown (Github markdown preview tool)**<br>
    [Github repo](https://github.com/ianks/octodown) | [Traveling Ruby issue](https://github.com/ianks/octodown/issues/29) | [Traveling Ruby pull request](https://github.com/ianks/octodown/pull/38)
 
@@ -73,7 +75,6 @@ The Traveling Ruby binaries are built using the build system in this repository.
 The build system requires Docker and `make`. To build binaries, run:
 
     cd linux
-    ./setup-docker-image
     make
 
 ### OS X
@@ -86,7 +87,7 @@ The build system requires the Developer Tools to be installed. It has only been 
 ## Future work
 
  * Document how the build system works.
- * Provide a Rails example. This is only possible after we've gotten a good system in place for compiling native extensions.
+ * Provide a Rails example.
  * Windows support. We (Phusion) have no interest in providing Windows support for the time being, but we will welcome any pull requests for this.
 
 ## FAQ
