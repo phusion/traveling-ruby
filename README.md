@@ -47,6 +47,7 @@ Traveling Ruby aims to solve the problem of supplying precompiled **Ruby 2.1** b
  * [Tutorial 1: hello world](TUTORIAL-1.md) - Learn in 5 minutes how to create self-contained packages of a hello world app without gem dependencies.
  * [Tutorial 2: gem dependencies](TUTORIAL-2.md) - Managing and packaging gem dependencies using Bundler.
  * [Tutorial 3: native extensions](TUTORIAL-3.md) - Managing and packaging native extension gems.
+ * [Guide: Reducing the size of your Traveling Ruby packages](REDUCING_PACKAGE_SIZE.md)
 
 There are also some real-world examples of how people used Traveling Ruby to package their Ruby tools:
 
