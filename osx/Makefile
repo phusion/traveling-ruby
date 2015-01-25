@@ -8,17 +8,17 @@ GEM_DIR := traveling-ruby-gems-$(VERSION)-$(RUBY_VERSION)-osx
 
 package: $(PACKAGE) $(GEM_DIR)
 
-$(PACKAGE): runtime/ok output/bin
+$(PACKAGE): output/bin
 	./package -r $(PACKAGE) output
 
-$(GEM_DIR): runtime/ok output/bin
+$(GEM_DIR): output/bin
 	./package -E $(GEM_DIR) output
 
 runtime/ok:
 	./setup-runtime runtime
 	touch runtime/ok
 
-output/bin:
+output/bin: runtime/ok
 	mkdir -p output
 	./build runtime output
 
