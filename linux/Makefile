@@ -9,10 +9,10 @@ CONCURRENCY := $(shell ./internal/cpucount)
 
 package: $(PACKAGE)-x86.tar.gz $(PACKAGE)-x86_64.tar.gz $(GEM_DIR)-x86 $(GEM_DIR)-x86_64
 
-$(PACKAGE)-x86.tar.gz: runtime/x86/ok output/x86/bin
+$(PACKAGE)-x86.tar.gz: output/x86/bin
 	./package -r $(PACKAGE)-x86.tar.gz output/x86
 
-$(PACKAGE)-x86_64.tar.gz: runtime/x86_64/ok output/x86_64/bin
+$(PACKAGE)-x86_64.tar.gz: output/x86_64/bin
 	./package -r $(PACKAGE)-x86_64.tar.gz output/x86_64
 
 $(GEM_DIR)-x86: output/x86/bin
@@ -31,11 +31,11 @@ runtime/x86_64/ok:
 	./setup-runtime -a x86_64 runtime/x86_64
 	touch runtime/x86_64/ok
 
-output/x86/bin:
+output/x86/bin: runtime/x86/ok
 	mkdir -p output/x86
 	./build -j $(CONCURRENCY) -a x86 runtime/x86 output/x86
 
-output/x86_64/bin:
+output/x86_64/bin: runtime/x86_64/ok
 	mkdir -p output/x86_64
 	./build -j $(CONCURRENCY) -a x86_64 runtime/x86_64 output/x86_64
 
