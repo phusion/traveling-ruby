@@ -36,6 +36,8 @@ FORCE_MYSQL=false
 SKIP_MYSQL=false
 FORCE_POSTGRESQL=false
 SKIP_POSTGRESQL=false
+FORCE_ICU=false
+SKIP_ICU=false
 
 function _cleanup()
 {
@@ -82,6 +84,10 @@ function usage()
 	echo "  -S      Skip installing sqlite3"
 	echo "  -z      Force installing liblzma"
 	echo "  -Z      Skip installing liblzma"
+	echo "  -p      Force installing PostgreSQL"
+	echo "  -P      Skip installing PostgreSQL"
+	echo "  -i      Force installing ICU"
+	echo "  -I      Skip installing ICU"
 	echo
 	echo "  -j NUM  Compilation concurrency. Default: 4"
 	echo "  -h      Show this help"
@@ -91,7 +97,7 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "oOnNeEgGfFyYsSzZpPj:h" opt; do
+	while getopts "oOnNeEgGfFyYsSzZpPiIj:h" opt; do
 		case "$opt" in
 		o)
 			FORCE_OPENSSL=true
@@ -147,6 +153,12 @@ function parse_options()
 		P)
 			SKIP_POSTGRESQL=true
 			;;
+		i)
+			FORCE_ICU=true
+			;;
+		I)
+			SKIP_ICU=true
+			;;
 		j)
 			CONCURRENCY=$OPTARG
 			;;
@@ -178,7 +190,7 @@ RUNTIME_DIR="`cd \"$RUNTIME_DIR\" && pwd`"
 #######################################
 
 
-TOTAL_LIBS=10
+TOTAL_LIBS=11
 RUBY_MAJOR_MINOR=2.1
 RUBY_VERSION=2.1.5
 CMAKE_VERSION=3.0.2
@@ -195,6 +207,8 @@ SQLITE3_VERSION=3080702
 XZ_VERSION=5.0.8
 MYSQL_LIB_VERSION=6.1.5
 POSTGRESQL_VERSION=9.3.5
+ICU_VERSION=54.1
+ICU_DIR_VERSION=54_1
 export PATH="$RUNTIME_DIR/bin:$PATH"
 export LIBRARY_PATH="$RUNTIME_DIR/lib"
 export DYLD_FALLBACK_LIBRARY_PATH="$RUNTIME_DIR/lib"
@@ -538,6 +552,30 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libpq.a" ]] || $FORCE_POSTGRESQL; then
 	run rm -rf postgresql-$POSTGRESQL_VERSION
 
 	run rm "$RUNTIME_DIR"/lib/libpq.*dylib
+else
+	echo "Already installed."
+fi
+echo
+
+header "Compiling runtime libraries 11/$TOTAL_LIBS: ICU..."
+if $SKIP_ICU; then
+	echo "Skipped."
+elif [[ ! -e "$RUNTIME_DIR/lib/libicudata.a" ]] || $FORCE_ICU; then
+	download_and_extract icu4c-$ICU_DIR_VERSION-src.tgz \
+		http://download.icu-project.org/files/icu4c/$ICU_VERSION/icu4c-$ICU_DIR_VERSION-src.tgz
+	echo "Entering $RUNTIME_DIR/icu4c-$ICU_DIR_VERSION-src"
+	pushd icu/source >/dev/null
+
+	run ./configure --prefix="$RUNTIME_DIR" --disable-samples --disable-tests \
+		--enable-static --disable-shared --with-library-bits=64 \
+		CFLAGS="-fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0" \
+		CXXFLAGS="-fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0"
+	run make -j$CONCURRENCY
+	run make install -j$CONCURRENCY
+
+	echo "Entering $RUNTIME_DIR"
+	popd >/dev/null
+	run rm -rf icu
 else
 	echo "Already installed."
 fi

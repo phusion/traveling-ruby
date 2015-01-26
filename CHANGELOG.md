@@ -2,7 +2,7 @@
 
 Upgrading to this version is strongly recommended because of the OpenSSL upgrade, which fixes some security vulnerabilities!
 
- * Added the following native extension gems: RedCloth, escape_utils, posix-spawn, nokogumbo, github-markdown, rugged.
+ * Added the following native extension gems: RedCloth, escape_utils, posix-spawn, nokogumbo, github-markdown, rugged, charlock_holmes.
  * Upgraded to OpenSSL 1.0.1l.
 
 ## Version 20141224

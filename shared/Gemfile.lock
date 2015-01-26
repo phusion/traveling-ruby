@@ -3,6 +3,7 @@ GEM
   specs:
     RedCloth (4.2.9)
     bcrypt (3.1.9)
+    charlock_holmes (0.7.3)
     daemons (1.1.9)
     escape_utils (1.0.1)
     eventmachine (1.0.4)
@@ -32,6 +33,7 @@ PLATFORMS
 DEPENDENCIES
   RedCloth
   bcrypt
+  charlock_holmes
   escape_utils
   ffi
   github-markdown

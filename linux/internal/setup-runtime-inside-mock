@@ -22,6 +22,11 @@ function download_and_extract()
 
 CONCURRENCY=2
 export PATH=/usr/local/override/bin:$PATH
+if [[ "$ARCHITECTURE" = x86_64 ]]; then
+	ARCHITECTURE_BITS=64
+else
+	ARCHITECTURE_BITS=32
+fi
 
 CMAKE_VERSION=3.0.2
 OPENSSL_VERSION=1.0.1l
@@ -29,6 +34,8 @@ FFI_VERSION=3.2.1
 SQLITE3_VERSION=3080702
 MYSQL_LIB_VERSION=6.1.5
 POSTGRESQL_VERSION=9.3.5
+ICU_VERSION=54.1
+ICU_DIR_VERSION=54_1
 
 
 echo "----- chroot entered -----"
@@ -170,5 +177,26 @@ if [[ ! -e /usr/local/override/lib/libpq.a ]]; then
 	echo "Leaving source directory"
 	popd >/dev/null
 	run rm -rf postgresql-$POSTGRESQL_VERSION
+fi
+echo
+
+header "Installing ICU"
+if [[ ! -e /usr/local/override/lib/libicudata.a ]]; then
+	download_and_extract icu4c-$ICU_DIR_VERSION-src.tgz \
+		http://download.icu-project.org/files/icu4c/$ICU_VERSION/icu4c-$ICU_DIR_VERSION-src.tgz
+	echo "Entering $RUNTIME_DIR/icu4c-$ICU_DIR_VERSION-src"
+	pushd icu/source >/dev/null
+
+	run ./configure --prefix="$RUNTIME_DIR" --disable-samples --disable-tests \
+		--enable-static --disable-shared --with-library-bits=$ARCHITECTURE_BITS \
+		CFLAGS="-fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0" \
+		CXXFLAGS="-fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0"
+	run make -j$CONCURRENCY
+	run make install -j$CONCURRENCY
+	run strip --strip-debug /usr/local/override/lib/libicu*.a
+
+	echo "Leaving source directory"
+	popd >/dev/null
+	run rm -rf icu
 fi
 echo
