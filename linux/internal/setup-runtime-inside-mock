@@ -187,7 +187,7 @@ if [[ ! -e /usr/local/override/lib/libicudata.a ]]; then
 	echo "Entering $RUNTIME_DIR/icu4c-$ICU_DIR_VERSION-src"
 	pushd icu/source >/dev/null
 
-	run ./configure --prefix="$RUNTIME_DIR" --disable-samples --disable-tests \
+	run ./configure --prefix=/usr/local/override --disable-samples --disable-tests \
 		--enable-static --disable-shared --with-library-bits=$ARCHITECTURE_BITS \
 		CFLAGS="-fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0" \
 		CXXFLAGS="-fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0"
