@@ -25,6 +25,7 @@ GEM
       daemons (~> 1.0, >= 1.0.9)
       eventmachine (~> 1.0)
       rack (~> 1.0)
+    unf_ext (0.0.6)
     yajl-ruby (1.2.1)
 
 PLATFORMS
@@ -46,4 +47,5 @@ DEPENDENCIES
   rugged
   sqlite3
   thin
+  unf_ext
   yajl-ruby
