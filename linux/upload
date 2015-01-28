@@ -27,7 +27,7 @@ if [[ ! -e ~/.s3cfg ]]; then
 	docker run --rm -t -i \
 		-v "$SELFDIR/internal:/system:ro" \
 		-v "$TEMPDIR:/work" \
-		phusion/ruby-traveler-builder \
+		phusion/traveling-ruby-builder \
 		/system/my_init --quiet --skip-runit --skip-startup-files -- \
 		/system/s3configure
 	cp "$TEMPDIR/s3cfg" ~/.s3cfg
@@ -58,7 +58,7 @@ docker run --rm -t -i \
 	"${MOUNTS[@]}" \
 	-v "$S3CFG:/s3cfg:ro" \
 	-v "$SELFDIR/internal:/system:ro" \
-	phusion/ruby-traveler-builder \
+	phusion/traveling-ruby-builder \
 	/system/my_init --quiet --skip-runit --skip-startup-files -- \
 	/system/s3init \
 	s3cmd -P sync --no-preserve "${FILE_BASENAMES[@]}" s3://traveling-ruby/releases/
