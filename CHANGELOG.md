@@ -4,6 +4,7 @@ Upgrading to this version is strongly recommended because of the OpenSSL upgrade
 
  * Added the following native extension gems: RedCloth, escape_utils, posix-spawn, nokogumbo, github-markdown, rugged, charlock_holmes, unf_ext.
  * Upgraded to OpenSSL 1.0.1l.
+ * The Linux version and the OS X version now use the same CA root certificates. Closes GH-24.
 
 ## Version 20141224
 
