@@ -1,3 +1,7 @@
+## Version 20150204-next
+
+ * Fixed a problem with the 'rugged' native extension on Linux. Closes GH-33.
+
 ## Version 20150204
 
  * Added additonal native extension versions:
