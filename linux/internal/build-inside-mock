@@ -24,6 +24,12 @@ export LIBRARY_PATH=/usr/local/override/lib
 export PKG_CONFIG_PATH=/usr/local/override/lib/pkgconfig:/usr/lib/pkgconfig
 export PATH=/usr/local/override/bin:$PATH
 
+if [[ "$NAME" = x86_64 ]]; then
+	export PATH=/system/bin64:$PATH
+else
+	export PATH=/system/bin32:$PATH
+fi
+
 function grep_without_fail()
 {
 	grep "$@" || true

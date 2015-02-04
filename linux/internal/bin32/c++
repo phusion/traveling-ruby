@@ -1,0 +1,7 @@
+#!/bin/sh
+# -march i586 fixes gcc builtin atomics. The default architecture on
+# x86 CentOS 5 i386.
+export CCACHE_COMPRESS=1
+export CCACHE_COMPRESS_LEVEL=3
+export CCACHE_DIR=/ccache
+exec /usr/bin/ccache /usr/bin/g++ -march=i586 "$@"

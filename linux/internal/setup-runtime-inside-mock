@@ -24,8 +24,10 @@ CONCURRENCY=2
 export PATH=/usr/local/override/bin:$PATH
 if [[ "$ARCHITECTURE" = x86_64 ]]; then
 	ARCHITECTURE_BITS=64
+	export PATH=/system/bin64:$PATH
 else
 	ARCHITECTURE_BITS=32
+	export PATH=/system/bin32:$PATH
 fi
 
 CMAKE_VERSION=3.0.2
@@ -42,7 +44,8 @@ echo "----- chroot entered -----"
 cd /tmp
 run rm -rf /tmp/*
 run rpm --rebuilddb
-run yum install -y @development-tools gcc gcc-c++ wget sudo zlib-devel readline-devel
+run yum install -y @development-tools gcc gcc-c++ wget sudo zlib-devel readline-devel ccache
+run mkdir -p /ccache
 echo
 
 
@@ -134,16 +137,9 @@ if [[ ! -e /usr/local/override/lib/libmysqlclient.aa ]]; then
 	echo "Entering mysql-connector-c-$MYSQL_LIB_VERSION-src"
 	pushd mysql-connector-c-$MYSQL_LIB_VERSION-src >/dev/null
 
-	if [[ "$ARCHITECTURE" = x86 ]]; then
-		# Fixes gcc builtin atomics. The default architecture on x86
-		# CentOS 5 i386.
-		MYSQL_CFLAGS="-march=i586"
-	else
-		MYSQL_CFLAGS=
-	fi
 	run cmake -DCMAKE_INSTALL_PREFIX=/usr/local/override \
-		-DCMAKE_C_FLAGS="-fPIC -fvisibility=hidden $MYSQL_CFLAGS" \
-		-DCMAKE_CXX_FLAGS="-fPIC -fvisibility=hidden $MYSQL_CFLAGS" . \
+		-DCMAKE_C_FLAGS="-fPIC -fvisibility=hidden" \
+		-DCMAKE_CXX_FLAGS="-fPIC -fvisibility=hidden" . \
 		-DDISABLE_SHARED=1
 	run make -j$CONCURRENCY libmysql
 	run make -C libmysql install
