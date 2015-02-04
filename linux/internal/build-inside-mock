@@ -181,6 +181,8 @@ run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/{test-unit,rdoc}-*
 if [[ -e /system/gemfiles ]]; then
 	run /tmp/ruby/bin/gem install bundler -v $BUNDLER_VERSION --no-rdoc --no-ri
 
+	DEFAULT_LDFLAGS=`/tmp/ruby/bin/ruby -rrbconfig -e 'puts RbConfig::CONFIG["LDFLAGS"]'`
+
 	for GEMFILE in /system/gemfiles/*/Gemfile; do
 		run cp "$GEMFILE" /tmp/ruby/
 		if [[ -e "$GEMFILE.lock" ]]; then
@@ -188,6 +190,8 @@ if [[ -e /system/gemfiles ]]; then
 		fi
 		echo "+ Entering /tmp/ruby"
 		pushd /tmp/ruby >/dev/null
+		run /tmp/ruby/bin/bundle config --local build.charlock_holmes \
+			--with-ldflags="$DEFAULT_LDFLAGS -licui18n -licuuc -licudata"
 		run /tmp/ruby/bin/bundle install --system --retry 3
 		run rm Gemfile*
 		echo "+ Leaving /tmp/ruby"
