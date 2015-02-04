@@ -111,9 +111,9 @@ if [[ "$GEMFILE" != "" ]]; then
 			fi
 		done
 	else
-		GEMFILE_MOUNT=(-v "$GEMFILE:/gemfiles/Gemfile:ro")
+		GEMFILE_MOUNT=(-v "$GEMFILE:/gemfiles/default/Gemfile:ro")
 		if [[ -e "$GEMFILE.lock" ]]; then
-			GEMFILE_MOUNT+=(-v "$GEMFILE.lock:/gemfiles/Gemfile.lock:ro")
+			GEMFILE_MOUNT+=(-v "$GEMFILE.lock:/gemfiles/default/Gemfile.lock:ro")
 		fi
 	fi
 fi
