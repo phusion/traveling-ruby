@@ -185,6 +185,7 @@ function parse_options()
 parse_options "$@"
 mkdir -p "$RUNTIME_DIR"
 RUNTIME_DIR="`cd \"$RUNTIME_DIR\" && pwd`"
+"$SELFDIR/internal/check_sdk"
 
 
 #######################################

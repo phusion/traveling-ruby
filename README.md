@@ -66,23 +66,13 @@ There are also some real-world examples of how people used Traveling Ruby to pac
 
 Traveling Ruby only supports a number of popular native extension gems, and only in some specific versions. You cannot use just any native extension gem. Native extensions are covered in [tutorial 3](TUTORIAL-3.md).
 
-## The build system
+## Building binaries
 
-The Traveling Ruby binaries are built using the build system in this repository.
+The Traveling Ruby project supplies binaries that application developers can use. These binaries are built using the build systems in this repository. As an application developer, you do not have to use the build system. You only have to use the build systems when contributing to Traveling Ruby, when trying to reproduce our binaries, or when you want to customize the binaries.
 
-### Linux
+For the Linux build system, see [linux/README.md](linux/README.md).
 
-The build system requires Docker and `make`. To build binaries, run:
-
-    cd linux
-    make
-
-### OS X
-
-The build system requires the Developer Tools to be installed. It has only been tested in 10.9 Mavericks. It *should* work on all OS X versions >= 10.8 Mountain Lion, but that has not been tested. To build binaries, run:
-
-    cd osx
-    make
+For the OS X build system, see [osx/README.md](osx/README.md).
 
 ## Future work
 

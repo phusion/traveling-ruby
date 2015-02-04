@@ -183,6 +183,7 @@ if [[ -e ~/.bundle/config ]]; then
 		"~/.bundle/config first."
 	exit 1
 fi
+"$SELFDIR/internal/check_sdk"
 
 
 #######################################

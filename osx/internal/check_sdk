@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+XCODEPATH=`xcode-select -p`
+if [[ ! -e "$XCODEPATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk" ]]; then
+	echo " *** ERROR: the OS X 10.8 SDK is required. Please refer to" \
+		"https://github.com/phusion/traveling-ruby/blob/master/osx/README.md" \
+		"for installation instructions." >&2
+	exit 1
+fi
