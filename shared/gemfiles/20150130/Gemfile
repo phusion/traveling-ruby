@@ -1,8 +1,3 @@
-# This Gemfile defines all native extensions that Traveling Ruby supports.
-# To add a new native extension, add it to this Gemfile, run `bundle install` on
-# your workstation (to update the Gemfile.lock), and re-run the Traveling Ruby
-# build system.
-
 #source 'http://production.cf.rubygems.org/'
 source 'https://rubygems.org'
 

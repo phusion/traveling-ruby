@@ -11,7 +11,7 @@ RUNTIME_DIR=
 OUTPUT_DIR=
 ARCHITECTURE=
 CONCURRENCY=$CPUCOUNT
-GEMFILE="$SELFDIR/../shared/Gemfile"
+GEMFILE="$SELFDIR/../shared/gemfiles"
 SETUP_SOURCE=true
 COMPILE=true
 SANITY_CHECK_OUTPUT=true
@@ -101,9 +101,20 @@ if [[ ! -e "$RUNTIME_DIR/mock" ]]; then
 fi
 if [[ "$GEMFILE" != "" ]]; then
 	GEMFILE="`absolute_path \"$GEMFILE\"`"
-	GEMFILE_MOUNT=(-v "$GEMFILE:/Gemfile:ro")
-	if [[ -e "$GEMFILE.lock" ]]; then
-		GEMFILE_MOUNT+=(-v "$GEMFILE.lock:/Gemfile.lock:ro")
+	if [[ -d "$GEMFILE" ]]; then
+		for F in "$GEMFILE"/*/Gemfile; do
+			DIR="`dirname \"$F\"`"
+			DIR="`basename \"$DIR\"`"
+			GEMFILE_MOUNT+=(-v "$F:/gemfiles/$DIR/Gemfile:ro")
+			if [[ -e "$F.lock" ]]; then
+				GEMFILE_MOUNT+=(-v "$F.lock:/gemfiles/$DIR/Gemfile.lock:ro")
+			fi
+		done
+	else
+		GEMFILE_MOUNT=(-v "$GEMFILE:/gemfiles/Gemfile:ro")
+		if [[ -e "$GEMFILE.lock" ]]; then
+			GEMFILE_MOUNT+=(-v "$GEMFILE.lock:/gemfiles/Gemfile.lock:ro")
+		fi
 	fi
 fi
 

@@ -1,0 +1,49 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    RedCloth (4.2.9)
+    bcrypt (3.1.10)
+    charlock_holmes (0.7.3)
+    daemons (1.1.9)
+    escape_utils (1.0.1)
+    eventmachine (1.0.6)
+    ffi (1.9.6)
+    github-markdown (0.6.8)
+    json (1.8.2)
+    mini_portile (0.6.2)
+    mysql2 (0.3.17)
+    nokogiri (1.6.6.2)
+      mini_portile (~> 0.6.0)
+    nokogumbo (1.3.0)
+      nokogiri
+    posix-spawn (0.3.9)
+    rack (1.6.0)
+    rugged (0.21.4)
+    sqlite3 (1.3.10)
+    thin (1.6.3)
+      daemons (~> 1.0, >= 1.0.9)
+      eventmachine (~> 1.0)
+      rack (~> 1.0)
+    unf_ext (0.0.6)
+    yajl-ruby (1.2.1)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  RedCloth
+  bcrypt
+  charlock_holmes
+  escape_utils
+  ffi
+  github-markdown
+  json
+  mysql2
+  nokogiri
+  nokogumbo
+  posix-spawn
+  rugged
+  sqlite3
+  thin
+  unf_ext
+  yajl-ruby

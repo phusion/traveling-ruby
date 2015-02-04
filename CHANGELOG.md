@@ -1,3 +1,15 @@
+## Version 20150130-next
+
+ * Added additonal native extension versions:
+   - bcrypt 3.1.10
+   - eventmachine 1.0.6
+   - json 1.8.2
+   - mini_portile 0.6.2
+   - nokogiri 1.6.6.2
+   - sqlite3 1.3.10
+   - nokogumbo 1.2.0
+   - rugged 0.22.0b5
+
 ## Version 20150130
 
 Upgrading to this version is strongly recommended because of the OpenSSL upgrade, which fixes some security vulnerabilities!

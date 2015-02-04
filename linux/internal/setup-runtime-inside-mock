@@ -109,6 +109,7 @@ if [[ ! -e /usr/local/override/lib/libffi.so.6 ]]; then
 fi
 echo
 
+header "Installing SQLite3"
 if [[ ! -e /usr/local/override/lib/libsqlite3.a ]]; then
 	download_and_extract sqlite-autoconf-$SQLITE3_VERSION.tar.gz \
 		http://www.sqlite.org/2014/sqlite-autoconf-$SQLITE3_VERSION.tar.gz
