@@ -223,4 +223,6 @@ We update the Rakefile so that all of the above steps are automated by running `
 
 ## Conclusion
 
-You can download the end result of this tutorial at https://github.com/phusion/traveling-ruby-native-extensions-demo.
+Congratulations, you've reached the end of the tutorial set and you've now learned all the basics of Traveling Ruby! You can download the end result of this tutorial at https://github.com/phusion/traveling-ruby-native-extensions-demo.
+
+Next, you may want to read [Reducing the size of your Traveling Ruby packages](REDUCING_PACKAGE_SIZE.md).
