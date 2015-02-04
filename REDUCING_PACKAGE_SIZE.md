@@ -21,6 +21,7 @@ You can typically safely remove the following files:
     rm -f lib/vendor/ruby/*/gems/*/COPYING*
     rm -f lib/vendor/ruby/*/gems/*/LICENSE*
     rm -f lib/vendor/ruby/*/gems/*/MIT-LICENSE*
+    rm -f lib/vendor/ruby/*/gems/*/TODO
     rm -f lib/vendor/ruby/*/gems/*/*.txt
     rm -f lib/vendor/ruby/*/gems/*/*.md
     rm -f lib/vendor/ruby/*/gems/*/*.rdoc
@@ -36,14 +37,18 @@ You can typically safely remove the following files:
     rm -rf lib/vendor/ruby/*/gems/*/.gitignore
     rm -rf lib/vendor/ruby/*/gems/*/.travis.yml
 
-    # Remove leftover native extension sources
+    # Remove leftover native extension sources and compilation objects
     rm -f lib/vendor/ruby/*/gems/*/ext/Makefile
     rm -f lib/vendor/ruby/*/gems/*/ext/*/Makefile
+    rm -f lib/vendor/ruby/*/gems/*/ext/*/tmp
     find lib/vendor/ruby -name '*.c' | xargs rm -f
     find lib/vendor/ruby -name '*.cpp' | xargs rm -f
     find lib/vendor/ruby -name '*.h' | xargs rm -f
     find lib/vendor/ruby -name '*.rl' | xargs rm -f
     find lib/vendor/ruby -name 'extconf.rb' | xargs rm -f
+    find lib/vendor/ruby/*/gems -name '*.o' | xargs rm -f
+    find lib/vendor/ruby/*/gems -name '*.so' | xargs rm -f
+    find lib/vendor/ruby/*/gems -name '*.bundle' | xargs rm -f
 
     # Remove Java files. They're only used for JRuby support
     find lib/vendor/ruby -name '*.java' | xargs rm -f
@@ -61,6 +66,8 @@ Here are a few examples:
 
  * Many gems that contain a Rakefile only need those Rakefiles for the purpose of developing those gems. In many cases, you can safely remove those Rakefiles without impacting your application. In a similar fashion, the `task` directory within those gems (which typically contain further Rake tasks) can also be removed.
  * The `nokogori` gem contains the `suppressions` directory. This directory contains Valgrind suppression files, so if you never use Valgrind (which is very likely) then you can remove that directory too.
+ * The `nokogori` gem also contains the `ports` directory. This directory is only used during compilation of the native extension, so it can be removed.
  * The `rack` gem contains a `contrib` directory which appears to be only relevant for documentation purposes, so it too can be removed.
+ * The `rugged` gem contains a `vendor` directory which contains the libgit2 source code, but this directory is only used during compilation of the native extension, so it can be safely removed.
 
 When in doubt, you should inspect the gem's source code to check how a file is used and whether you can remove it.
