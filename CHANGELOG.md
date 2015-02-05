@@ -2,6 +2,7 @@
 
  * Fixed a problem with the 'rugged' native extension on Linux. Closes GH-33.
  * Fixed a problem with the 'charlock_holmes' native extension on Linux. Closes GH-34.
+ * Upgraded Bundler to 1.7.12.
 
 ## Version 20150204
 
