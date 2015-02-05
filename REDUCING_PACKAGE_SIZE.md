@@ -71,3 +71,28 @@ Here are a few examples:
  * The `rugged` gem contains a `vendor` directory which contains the libgit2 source code, but this directory is only used during compilation of the native extension, so it can be safely removed.
 
 When in doubt, you should inspect the gem's source code to check how a file is used and whether you can remove it.
+
+## Removing seldomly used encodings
+
+Ruby support many encodings that are seldomly used. Most applications only use ASCII and UTF-8. But Ruby also supports UTF-16, UTF-32, various Chinese, Japanese and Korean encodings, etc. Usually you can get rid of everything besides ASCII and UTF-8:
+
+    rm -f lib/ruby/lib/ruby/*/*/enc/cp949*
+    rm -f lib/ruby/lib/ruby/*/*/enc/euc_*
+    rm -f lib/ruby/lib/ruby/*/*/enc/shift_jis*
+    rm -f lib/ruby/lib/ruby/*/*/enc/koi8_*
+    rm -f lib/ruby/lib/ruby/*/*/enc/emacs*
+    rm -f lib/ruby/lib/ruby/*/*/enc/gb*
+    rm -f lib/ruby/lib/ruby/*/*/enc/big5*
+    rm -f lib/ruby/lib/ruby/*/*/enc/windows*
+    rm -f lib/ruby/lib/ruby/*/*/enc/utf_16*
+    rm -f lib/ruby/lib/ruby/*/*/enc/utf_32*
+
+Very few applications need support for transcoding strings from one encoding to another, besides ASCII and UTF-8. You can get rid of transcoding support as follows:
+
+    rm -rf lib/ruby/lib/ruby/*/*/enc/trans
+
+## Removing RDoc
+
+Most likely your application does not need RDoc during runtime. You can remove that as follows:
+
+    rm -rf lib/ruby/lib/ruby/*/rdoc*
