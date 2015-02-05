@@ -76,7 +76,6 @@ For the OS X build system, see [osx/README.md](osx/README.md).
 
 ## Future work
 
- * Document how the build system works.
  * Provide a Rails example.
  * Windows support. We (Phusion) have no interest in providing Windows support for the time being, but we will welcome any pull requests for this.
 
