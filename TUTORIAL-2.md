@@ -53,7 +53,7 @@ rake package DIR_ONLY=1
 
 In the previous step, we used Bundler to install gems so that you can run your app during development. But you *also* need to run Bundler a second time, to install the gems that you want to include in your package. During the packaging phase, the gems installed by this second Bundler invocation will be copied into the packages.
 
-But first, be aware that **you must run this Bundler instance with Ruby 2.1** because the Traveling Ruby binaries are Ruby 2.1, and because Bundler installs into a directory that contains the Ruby version number. If you run Bundler using any other Ruby version, things will fail in a later step.
+But first, be aware that you must run this Bundler instance with the same Ruby version that you intend to package with, because Bundler installs into a directory that contains the Ruby version number. Traveling Ruby currently supports Ruby 2.1.5 and 2.2.0, but this tutorial utilizes Ruby 2.1.5. **So in this tutorial you must run Bundler with Ruby 2.1.** If you run Bundler using any other Ruby version, things will fail in a later step.
 
 So first verify your Ruby version:
 
