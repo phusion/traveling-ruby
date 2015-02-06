@@ -213,6 +213,7 @@ if [[ $? != 0 ]]; then
 	exit
 fi
 run rm /tmp/ruby/bin/{erb,rdoc,ri,testrb}
+run rm -rf /tmp/ruby/include
 run rm -rf /tmp/ruby/share
 run rm -rf /tmp/ruby/lib/{libruby-static.a,pkgconfig}
 run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
