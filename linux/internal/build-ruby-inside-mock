@@ -107,6 +107,18 @@ cd /tmp
 echo
 
 
+if [[ ! -e /ruby-$RUBY_VERSION.tar.gz ]]; then
+	header "Downloading Ruby source"
+	RUBY_MAJOR=`echo $RUBY_VERSION | cut -d . -f 1`
+	RUBY_MINOR=`echo $RUBY_VERSION | cut -d . -f 2`
+	RUBY_MAJOR_MINOR="$RUBY_MAJOR.$RUBY_MINOR"
+	run rm -f /ruby-$RUBY_VERSION.tar.gz.tmp
+	run wget -O /ruby-$RUBY_VERSION.tar.gz.tmp \
+		http://cache.ruby-lang.org/pub/ruby/$RUBY_MAJOR_MINOR/ruby-$RUBY_VERSION.tar.gz
+	run mv /ruby-$RUBY_VERSION.tar.gz.tmp /ruby-$RUBY_VERSION.tar.gz
+	echo
+fi
+
 if $SETUP_SOURCE; then
 	header "Extracting source code"
 	run rm -rf /tmp/ruby-$RUBY_VERSION
@@ -195,7 +207,7 @@ if [[ -e /system/gemfiles ]]; then
 		pushd /tmp/ruby >/dev/null
 		run /tmp/ruby/bin/bundle config --local build.charlock_holmes \
 			--with-ldflags="$DEFAULT_LDFLAGS -licui18n -licuuc -licudata"
-		run /tmp/ruby/bin/bundle install --system --retry 3
+		run /tmp/ruby/bin/bundle install --system --retry 3 --jobs $CONCURRENCY
 		run rm Gemfile*
 		echo "+ Leaving /tmp/ruby"
 		popd >/dev/null
@@ -212,14 +224,24 @@ run strip --strip-all /tmp/ruby/bin/ruby
 if [[ $? != 0 ]]; then
 	exit
 fi
-run rm /tmp/ruby/bin/{erb,rdoc,ri,testrb}
+run rm /tmp/ruby/bin/{erb,rdoc,ri}
+run rm -f /tmp/ruby/bin/testrb # Only Ruby 2.1 has it
 run rm -rf /tmp/ruby/include
 run rm -rf /tmp/ruby/share
 run rm -rf /tmp/ruby/lib/{libruby-static.a,pkgconfig}
+run rm -rf /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
 run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
 run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out}
 run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
 run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/*.{c,h}
+
+if [[ -e /system/gemfiles ]]; then
+	echo "+ Entering Bundler gem directory"
+	pushd /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/bundler-$BUNDLER_VERSION >/dev/null
+	rm -rf .gitignore .rspec .travis.yml man Rakefile lib/bundler/man/*.txt lib/bundler/templates
+	popd >/dev/null
+	echo "+ Leaving Bundler gem directory"
+fi
 
 # Create wrapper scripts
 mv /tmp/ruby/bin /tmp/ruby/bin.real

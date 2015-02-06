@@ -6,6 +6,7 @@ SELFDIR=`cd "$SELFDIR" && pwd`
 source "$SELFDIR/internal/reset_environment.sh"
 source "$SELFDIR/../shared/library.sh"
 BUNDLER_VERSION=`cat "$SELFDIR/../BUNDLER_VERSION.txt"`
+RUBY_VERSIONS=(`cat "$SELFDIR/../RUBY_VERSIONS.txt"`)
 
 WORKDIR=
 OWNS_WORKDIR=true
@@ -13,6 +14,7 @@ GEMFILES=()
 
 RUNTIME_DIR=
 OUTPUT_DIR=
+RUBY_VERSION=${RUBY_VERSIONS[0]}
 CONCURRENCY=4
 GEMFILE="$SELFDIR/../shared/gemfiles"
 SETUP_SOURCE=true
@@ -99,25 +101,26 @@ EOF
 
 function usage()
 {
-	echo "Usage: ./build [options] <RUNTIME DIR> <OUTPUT DIR>"
+	echo "Usage: ./build-ruby [options] <RUNTIME DIR> <OUTPUT DIR>"
 	echo "Build Traveling Ruby binaries."
 	echo
 	echo "Options:"
-	echo "  -E       Do not setup source"
-	echo "  -C       Do not compile Ruby"
-	echo "  -G       Do not install gems"
+	echo "  -E          Do not setup source"
+	echo "  -C          Do not compile Ruby"
+	echo "  -G          Do not install gems"
 	echo
-	echo "  -w DIR   Use the given working directory instead of creating a temporary one"
-	echo "  -j NUM   Compilation concurrency. Default: 4"
-	echo "  -g PATH  Build gems as specified by the given Gemfile"
-	echo "  -h       Show this help"
+	echo "  -r VERSION  Ruby version to build. Default: $RUBY_VERSION"
+	echo "  -w DIR      Use the given working directory instead of creating a temporary one"
+	echo "  -j NUM      Compilation concurrency. Default: 4"
+	echo "  -g PATH     Build gems as specified by the given Gemfile"
+	echo "  -h          Show this help"
 }
 
 function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "ECGw:j:g:h" opt; do
+	while getopts "ECGr:w:j:g:h" opt; do
 		case "$opt" in
 		E)
 			SETUP_SOURCE=false
@@ -127,6 +130,9 @@ function parse_options()
 			;;
 		G)
 			GEMFILE=
+			;;
+		r)
+			RUBY_VERSION=$OPTARG
 			;;
 		w)
 			WORKDIR="$OPTARG"
@@ -198,8 +204,17 @@ fi
 #######################################
 
 
-RUBY_MAJOR_MINOR=2.1
-RUBY_VERSION=2.1.5
+if [[ ! -e "$RUNTIME_DIR/ruby-$RUBY_VERSION.tar.gz" ]]; then
+	header "Downloading Ruby source code..."
+	RUBY_MAJOR=`echo $RUBY_VERSION | cut -d . -f 1`
+	RUBY_MINOR=`echo $RUBY_VERSION | cut -d . -f 2`
+	RUBY_MAJOR_MINOR="$RUBY_MAJOR.$RUBY_MINOR"
+	run rm -f "$RUNTIME_DIR/ruby-$RUBY_VERSION.tar.gz.tmp"
+	run curl --fail -L -o "$RUNTIME_DIR/ruby-$RUBY_VERSION.tar.gz.tmp" \
+		http://cache.ruby-lang.org/pub/ruby/$RUBY_MAJOR_MINOR/ruby-$RUBY_VERSION.tar.gz
+	run mv "$RUNTIME_DIR/ruby-$RUBY_VERSION.tar.gz.tmp" "$RUNTIME_DIR/ruby-$RUBY_VERSION.tar.gz"
+	echo
+fi
 
 
 header "Preparing Ruby source code..."
@@ -216,7 +231,7 @@ pushd "$WORKDIR" >/dev/null
 
 if $SETUP_SOURCE; then
 	run rm -rf "ruby-$RUBY_VERSION"
-	run tar xzf "$RUNTIME_DIR/ruby.tar.gz"
+	run tar xzf "$RUNTIME_DIR/ruby-$RUBY_VERSION.tar.gz"
 fi
 echo "Entering ruby-$RUBY_VERSION"
 pushd "ruby-$RUBY_VERSION" >/dev/null
@@ -299,7 +314,7 @@ if [[ "$GEMFILE" != "" ]]; then
 		run /tmp/ruby/bin/bundle config --local build.nokogiri ""
 		run /tmp/ruby/bin/bundle config --local build.mysql2 "--with-mysql_config"
 		run /tmp/ruby/bin/bundle config --local build.charlock_holmes "--with-icu-dir=$RUNTIME_DIR"
-		run /tmp/ruby/bin/bundle install --system --retry 3
+		run /tmp/ruby/bin/bundle install --system --retry 3 --jobs $CONCURRENCY
 		run /tmp/ruby/bin/bundle package
 		run rm -rf "$RUNTIME_DIR/vendor"
 		run mv vendor "$RUNTIME_DIR/"
@@ -339,14 +354,24 @@ echo "+ Stripping libraries..."
 if [[ $? != 0 ]]; then
 	exit
 fi
-run rm /tmp/ruby/bin/{erb,rdoc,ri,testrb}
+run rm /tmp/ruby/bin/{erb,rdoc,ri}
+run rm -f /tmp/ruby/bin/testrb # Only Ruby 2.1 has it
 run rm -rf /tmp/ruby/include
 run rm -rf /tmp/ruby/share
 run rm -rf /tmp/ruby/lib/{libruby-static.a,pkgconfig}
+run rm -rf /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
 run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
 run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out,mkmf.log}
 run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
 run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/*.{c,h}
+
+if [[ "$GEMFILE" != "" ]]; then
+	echo "+ Entering Bundler gem directory"
+	pushd /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/bundler-$BUNDLER_VERSION >/dev/null
+	rm -rf .gitignore .rspec .travis.yml man Rakefile lib/bundler/man/*.txt lib/bundler/templates
+	popd >/dev/null
+	echo "+ Leaving Bundler gem directory"
+fi
 
 # Create wrapper scripts.
 run mv /tmp/ruby/bin /tmp/ruby/bin.real

@@ -1,0 +1,81 @@
+VERSION       = File.read("../VERSION.txt").strip
+RUBY_VERSIONS = File.read("../RUBY_VERSIONS.txt").strip.split(/\s+/)
+ARCHITECTURES = ["x86", "x86_64"]
+CONCURRENCY   = `./internal/cpucount`.to_i
+
+task :default => :package
+
+desc "Create packages for all Ruby versions (#{RUBY_VERSIONS.join(' ')}) and all architectures (#{ARCHITECTURES.join(' ')}"
+task :package do
+  # Do nothing
+end
+
+desc "Build binaries for all Ruby versions (#{RUBY_VERSIONS.join(' ')}) and all architectures (#{ARCHITECTURES.join(' ')}"
+task :build do
+  # Do nothing
+end
+
+desc "Upload all packages to the server"
+task :upload do
+  # Do nothing
+end
+
+desc "Clean all packages, but not the runtime"
+task :clean do
+  sh "rm -rf output"
+end
+
+desc "Clean everything, including the runtime"
+task "clean-all" => :clean do
+  sh "rm -rf runtime"
+end
+
+ARCHITECTURES.each do |arch|
+  RUBY_VERSIONS.each do |ruby_version|
+    package = "traveling-ruby-#{VERSION}-#{ruby_version}-linux-#{arch}.tar.gz"
+    gem_dir = "traveling-ruby-gems-#{VERSION}-#{ruby_version}-linux-#{arch}"
+
+    task :package => "package:#{ruby_version}:#{arch}"
+    task :build   => "build:#{ruby_version}:#{arch}"
+    task :upload  => "upload:#{ruby_version}:#{arch}"
+    task :clean   => "clean:#{ruby_version}:#{arch}"
+
+    desc "Create packages for Ruby #{ruby_version} #{arch}"
+    task "package:#{ruby_version}:#{arch}" => [package, "#{gem_dir}/ok"]
+
+    desc "Build binaries for Ruby #{ruby_version} #{arch}"
+    task "build:#{ruby_version}:#{arch}" => "output/#{ruby_version}-#{arch}/bin"
+
+    file(package => "output/#{ruby_version}-#{arch}/bin") do
+      sh "./package -r #{package} output/#{ruby_version}-#{arch}"
+    end
+
+    file("#{gem_dir}/ok" => "output/#{ruby_version}-#{arch}/bin") do
+      sh "./package -E #{gem_dir} output/#{ruby_version}-#{arch}"
+      touch "#{gem_dir}/ok"
+    end
+
+    # We use 'file' instead of 'directory' here so that packages are updated
+    # whenever we update binaries.
+    file("output/#{ruby_version}-#{arch}/bin" => "runtime/#{arch}/ok") do
+      sh "mkdir -p output/#{ruby_version}-#{arch}"
+      sh "./build-ruby -j #{CONCURRENCY} -a #{arch} runtime/#{arch} output/#{ruby_version}-#{arch}"
+    end
+
+    desc "Upload Ruby #{ruby_version} #{arch} packages to the server"
+    task "upload:#{ruby_version}:#{arch}" => [package, "#{gem_dir}/ok"] do
+      sh "./upload #{package} #{gem_dir}"
+    end
+
+    desc "Clean Ruby #{ruby_version} packages, but not the runtime"
+    task "clean:#{ruby_version}:#{arch}" do
+      sh "rm -rf #{package} #{gem_dir} output/#{arch}"
+    end
+  end
+
+  file "runtime/#{arch}/ok" do
+    sh "mkdir -p runtime/#{arch}"
+    sh "./setup-runtime -a #{arch} runtime/#{arch}"
+    sh "touch runtime/#{arch}/ok"
+  end
+end

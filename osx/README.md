@@ -2,10 +2,12 @@
 
 The build system requires the Developer Commandline Tools to be installed, as well as the OS X 10.8 SDK.
 
-To build binaries, run:
+To build binary packages, run:
 
     cd osx
-    make
+    rake
+
+You can view all tasks by running `rake -T`.
 
 ## Installing the OS X 10.8 SDK
 

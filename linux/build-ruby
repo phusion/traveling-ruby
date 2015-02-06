@@ -6,10 +6,12 @@ SELFDIR=`cd "$SELFDIR" && pwd`
 source "$SELFDIR/../shared/library.sh"
 
 CPUCOUNT=`"$SELFDIR/internal/cpucount"`
+RUBY_VERSIONS=(`cat "$SELFDIR/../RUBY_VERSIONS.txt"`)
 
 RUNTIME_DIR=
 OUTPUT_DIR=
 ARCHITECTURE=
+RUBY_VERSION=${RUBY_VERSIONS[0]}
 CONCURRENCY=$CPUCOUNT
 GEMFILE="$SELFDIR/../shared/gemfiles"
 SETUP_SOURCE=true
@@ -19,29 +21,33 @@ GEMFILE_MOUNT=()
 
 function usage()
 {
-	echo "Usage: ./build [options] <RUNTIME DIR> <OUTPUT_DIR>"
+	echo "Usage: ./build-ruby [options] <RUNTIME DIR> <OUTPUT_DIR>"
 	echo "Build Traveling Ruby binaries."
 	echo
 	echo "Options:"
-	echo "  -a NAME    Architecture to setup (x86, x86_64)"
+	echo "  -a NAME     Architecture to setup (x86, x86_64)"
+	echo "  -r VERSION  Ruby version to build. Default: $RUBY_VERSION"
 	echo
-	echo "  -E         Do not setup source"
-	echo "  -C         Do not compile Ruby"
-	echo "  -G         Do not install gems"
+	echo "  -E          Do not setup source"
+	echo "  -C          Do not compile Ruby"
+	echo "  -G          Do not install gems"
 	echo
-	echo "  -j NUMBER  Set build concurrency. Default: $CPUCOUNT"
-	echo "  -g PATH    Build gems as specified by the given Gemfile"
-	echo "  -h         Show this help"
+	echo "  -j NUMBER   Set build concurrency. Default: $CPUCOUNT"
+	echo "  -g PATH     Build gems as specified by the given Gemfile"
+	echo "  -h          Show this help"
 }
 
 function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "a:ECGj:g:h" opt; do
+	while getopts "a:r:ECGj:g:h" opt; do
 		case "$opt" in
 		a)
 			ARCHITECTURE=$OPTARG
+			;;
+		r)
+			RUBY_VERSION=$OPTARG
 			;;
 		E)
 			SETUP_SOURCE=false
@@ -131,10 +137,11 @@ exec docker run \
 	-e "RUBY_VERSION=`cat \"$SELFDIR/../RUBY_VERSION.txt\"`" \
 	-e "BUNDLER_VERSION=`cat \"$SELFDIR/../BUNDLER_VERSION.txt\"`" \
 	-e "ARCHITECTURE=$ARCHITECTURE" \
+	-e "RUBY_VERSION=$RUBY_VERSION" \
 	-e "CONCURRENCY=$CONCURRENCY" \
 	-e "SETUP_SOURCE=$SETUP_SOURCE" \
 	-e "COMPILE=$COMPILE" \
 	-e "SANITY_CHECK_OUTPUT=$SANITY_CHECK_OUTPUT" \
 	phusion/traveling-ruby-builder \
 	/system/my_init --quiet --skip-runit --skip-startup-files -- \
-	/system/build
+	/system/build-ruby

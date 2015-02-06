@@ -28,7 +28,7 @@ echo $SETUP_SOURCE > $ROOT/system/SETUP_SOURCE
 echo $COMPILE > $ROOT/system/COMPILE
 echo $SANITY_CHECK_OUTPUT > $ROOT/system/SANITY_CHECK_OUTPUT
 echo "Entering mock chroot"
-run /system/setuser app /usr/bin/mock -r $CHROOT_NAME --quiet --shell /system/build-inside-mock
+run /system/setuser app /usr/bin/mock -r $CHROOT_NAME --quiet --shell /system/build-ruby-inside-mock
 echo "Left mock chroot"
 echo
 

@@ -43,9 +43,9 @@ The runtime is saved to the `runtime` directory.
 ### The build phase
 
 ![](https://raw.githubusercontent.com/phusion/traveling-ruby/master/doc/linux_build_system_build.png)<br>
-_The `build` script uses the Mock chroots inside the Docker container to invoke the compiler, which produces out binaries._
+_The `build-ruby` script uses the Mock chroots inside the Docker container to invoke the compiler, which produces out binaries._
 
-Once the runtime is setup, the Makefile proceeds with invoking the `build` script. This script runs the compiler inside the Mock chroot environments to produce binaries. The script:
+Once the runtime is setup, the Makefile proceeds with invoking the `build-ruby` script. This script runs the compiler inside the Mock chroot environments to produce binaries. The script:
 
  * Builds Ruby. It extracts the Ruby source tarball and runs `./configure`, `make` and `make install`.
  * Builds the native extensions that Traveling Ruby supports. It runs `bundle install` on the Gemfile located in the `shared/` directory in the Traveling Ruby repository.

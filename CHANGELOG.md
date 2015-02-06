@@ -1,8 +1,10 @@
 ## Version 20150204-next
 
+ * Added support for Ruby 2.2.0. Version 2.1.5 and 2.2.0 are supported in parallel for the time being.
  * Fixed a problem with the 'rugged' native extension on Linux. Closes GH-33.
  * Fixed a problem with the 'charlock_holmes' native extension on Linux. Closes GH-34.
  * Header files are no longer packaged. This saves 256 KB.
+ * RDoc and various unnecessary Bundler files have been removed. This saves about 1.2 MB.
  * Upgraded Bundler to 1.7.12.
 
 ## Version 20150204

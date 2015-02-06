@@ -7,9 +7,6 @@ function list_db_files()
 	file "$@" | grep 'Berkeley DB' | grep 'version 9' | awk '{ print $1 }' | sed 's/:$//'
 }
 
-RUBY_MAJOR=`echo $RUBY_VERSION | cut -d . -f 1`
-RUBY_MINOR=`echo $RUBY_VERSION | cut -d . -f 2`
-RUBY_MAJOR_MINOR="$RUBY_MAJOR.$RUBY_MINOR"
 if [[ "$ARCHITECTURE" = x86 ]]; then
 	CHROOT_NAME=epel-5-i386
 else
@@ -56,15 +53,5 @@ run /system/setuser app /usr/bin/mock -r $CHROOT_NAME --shell /system/setup-runt
 run rm -rf /var/lib/mock/$CHROOT_NAME/root/system
 echo "----- chroot left -----"
 echo
-
-if $DOWNLOAD_RUBY; then
-	header "Downloading Ruby"
-	run rm -f /tmp/ruby.tar.gz
-	run wget -O /tmp/ruby.tar.gz \
-		http://cache.ruby-lang.org/pub/ruby/$RUBY_MAJOR_MINOR/ruby-$RUBY_VERSION.tar.gz
-	run cp /tmp/ruby.tar.gz /var/lib/mock/$CHROOT_NAME/root/ruby-$RUBY_VERSION.tar.gz
-	run rm /tmp/ruby.tar.gz
-	echo
-fi
 
 header "Finished!"
