@@ -4,10 +4,10 @@ The `linux/` directory contains the build system for building Traveling Ruby bin
 
 ## Building binaries
 
-The build system requires Docker and `make`. To build binaries, run:
+The build system requires Docker and Rake. To build binaries, run:
 
     cd linux
-    make
+    rake
 
 This will produce a `traveling-ruby-XXXXX.tar.gz` file which contains the Ruby binaries, and a `traveling-ruby-gems-XXXXX` directory which contains the native extensions.
 
@@ -28,7 +28,7 @@ But there is a problem with Docker: we cannot create Mock chroots within a Docke
 ![](https://raw.githubusercontent.com/phusion/traveling-ruby/master/doc/linux_build_system_setup_runtime.png)<br>
 _The `setup-runtime` script creates Mock chroots inside the Docker container._
 
-The Makefile begins by invoking the `setup-runtime` script. This script:
+The Rakefile begins by invoking the `setup-runtime` script. This script:
 
  * Pulls the Docker image. 
  * Runs Mock inside the container to create the Mock chroots.
@@ -45,7 +45,7 @@ The runtime is saved to the `runtime` directory.
 ![](https://raw.githubusercontent.com/phusion/traveling-ruby/master/doc/linux_build_system_build.png)<br>
 _The `build-ruby` script uses the Mock chroots inside the Docker container to invoke the compiler, which produces out binaries._
 
-Once the runtime is setup, the Makefile proceeds with invoking the `build-ruby` script. This script runs the compiler inside the Mock chroot environments to produce binaries. The script:
+Once the runtime is setup, the Rakefile proceeds with invoking the `build-ruby` script. This script runs the compiler inside the Mock chroot environments to produce binaries. The script:
 
  * Builds Ruby. It extracts the Ruby source tarball and runs `./configure`, `make` and `make install`.
  * Builds the native extensions that Traveling Ruby supports. It runs `bundle install` on the Gemfile located in the `shared/` directory in the Traveling Ruby repository.
@@ -55,7 +55,7 @@ The build outputs are saved to the `output` directory.
 
 ### The package phase
 
-Once binaries are compiled, the Makefile invokes the `package` script. This script packages files inside the `output` directory into various tarballs.
+Once binaries are compiled, the Rakefile invokes the `package` script. This script packages files inside the `output` directory into various tarballs.
 
 ## Why CentOS 6?
 
