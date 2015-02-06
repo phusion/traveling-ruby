@@ -36,6 +36,8 @@ FORCE_POSTGRESQL=false
 SKIP_POSTGRESQL=false
 FORCE_ICU=false
 SKIP_ICU=false
+FORCE_LIBSSH2=false
+SKIP_LIBSSH2=false
 
 function _cleanup()
 {
@@ -189,7 +191,7 @@ RUNTIME_DIR="`cd \"$RUNTIME_DIR\" && pwd`"
 #######################################
 
 
-TOTAL_LIBS=11
+TOTAL_LIBS=12
 CMAKE_VERSION=3.0.2
 PKG_CONFIG_VERSION=0.28
 OPENSSL_VERSION=1.0.1l
@@ -206,6 +208,7 @@ MYSQL_LIB_VERSION=6.1.5
 POSTGRESQL_VERSION=9.3.5
 ICU_VERSION=54.1
 ICU_DIR_VERSION=54_1
+LIBSSH2_VERSION=1.4.3
 export PATH="$RUNTIME_DIR/bin:$PATH"
 export LIBRARY_PATH="$RUNTIME_DIR/lib"
 export DYLD_FALLBACK_LIBRARY_PATH="$RUNTIME_DIR/lib"
@@ -296,6 +299,9 @@ elif [[ ! -e "$RUNTIME_DIR/bin/openssl" ]] || $FORCE_OPENSSL; then
 		"$RUNTIME_DIR/lib/libssl.1.0.0.dylib"
 	run install_name_tool -id "@executable_path/../lib/libcrypto.1.0.0.dylib" \
 		"$RUNTIME_DIR/lib/libcrypto.1.0.0.dylib"
+
+	run sed -i 's/^Libs.private:/Libs.private: -L${libdir} -lssl -lcrypto -lz/' "$RUNTIME_DIR/lib/pkgconfig/openssl.pc"
+	run sed -i 's/^Libs.private:/Libs.private: -L${libdir} -lssl -lcrypto -lz/' "$RUNTIME_DIR/lib/pkgconfig/libssl.pc"
 else
 	echo "Already installed."
 fi
@@ -565,9 +571,33 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libicudata.a" ]] || $FORCE_ICU; then
 	run make -j$CONCURRENCY
 	run make install -j$CONCURRENCY
 
-	echo "Entering $RUNTIME_DIR"
+	echo "Leaving source directory"
 	popd >/dev/null
 	run rm -rf icu
+else
+	echo "Already installed."
+fi
+echo
+
+header "Compiling runtime libraries 12/$TOTAL_LIBS: libssh2..."
+if $SKIP_LIBSSH2; then
+	echo "Skipped."
+elif [[ ! -e "$RUNTIME_DIR/lib/libssh2.a" ]] || $FORCE_LIBSSH2; then
+	download_and_extract libssh2-$LIBSSH2_VERSION.tar.gz \
+		http://www.libssh2.org/download/libssh2-$LIBSSH2_VERSION.tar.gz
+	echo "Entering $RUNTIME_DIR/libssh2-$LIBSSH2_VERSION"
+	pushd libssh2-$LIBSSH2_VERSION >/dev/null
+
+	run ./configure --prefix="$RUNTIME_DIR" --enable-static --disable-shared \
+		--with-openssl --with-libz --disable-examples-build --disable-debug \
+		CFLAGS="-fPIC -fvisibility=hidden" \
+		CXXFLAGS="-fPIC -fvisibility=hidden"
+	run make -j$CONCURRENCY
+	run make install-strip -j$CONCURRENCY
+
+	echo "Leaving source directory"
+	popd >/dev/null
+	run rm -rf libssh2-$LIBSSH2_VERSION
 else
 	echo "Already installed."
 fi

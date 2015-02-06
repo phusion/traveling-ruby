@@ -225,6 +225,7 @@ export DYLD_FALLBACK_LIBRARY_PATH="$RUNTIME_DIR/lib"
 export PKG_CONFIG_PATH="$RUNTIME_DIR/lib/pkgconfig:/usr/lib/pkgconfig"
 export RUNTIME_DIR
 export DEAD_STRIP=false
+export RUBYOPT=-r"$SELFDIR/internal/modify_rbconfig_while_building"
 
 echo "Entering working directory $WORKDIR"
 pushd "$WORKDIR" >/dev/null

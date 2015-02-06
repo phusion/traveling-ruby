@@ -8,6 +8,9 @@ task :package do
   # Do nothing
 end
 
+desc "Build the runtime"
+task :runtime => "runtime/ok"
+
 desc "Build binaries for all Ruby versions (#{RUBY_VERSIONS.join(' ')})"
 task :build do
   # Do nothing
@@ -72,7 +75,7 @@ RUBY_VERSIONS.each do |ruby_version|
   end
 end
 
-file "runtime/ok" do
+file "runtime/ok" => "setup-runtime" do
   sh "./setup-runtime runtime"
   sh "touch runtime/ok"
 end

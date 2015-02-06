@@ -38,6 +38,7 @@ MYSQL_LIB_VERSION=6.1.5
 POSTGRESQL_VERSION=9.3.5
 ICU_VERSION=54.1
 ICU_DIR_VERSION=54_1
+LIBSSH2_VERSION=1.4.3
 
 
 echo "----- chroot entered -----"
@@ -197,5 +198,25 @@ if [[ ! -e /usr/local/override/lib/libicudata.a ]]; then
 	echo "Leaving source directory"
 	popd >/dev/null
 	run rm -rf icu
+fi
+echo
+
+header "Installing libssh2"
+if [[ ! -e /usr/local/override/lib/libssh2.a ]]; then
+	download_and_extract libssh2-$LIBSSH2_VERSION.tar.gz \
+		http://www.libssh2.org/download/libssh2-$LIBSSH2_VERSION.tar.gz
+	echo "Entering $RUNTIME_DIR/libssh2-$LIBSSH2_VERSION"
+	pushd libssh2-$LIBSSH2_VERSION >/dev/null
+
+	run ./configure --prefix=/usr/local/override --enable-static --disable-shared \
+		--with-openssl --with-libz --disable-examples-build --disable-debug \
+		CFLAGS="-fPIC -fvisibility=hidden" \
+		CXXFLAGS="-fPIC -fvisibility=hidden"
+	run make -j$CONCURRENCY
+	run make install-strip -j$CONCURRENCY
+
+	echo "Leaving source directory"
+	popd >/dev/null
+	run rm -rf libssh2-$LIBSSH2_VERSION
 fi
 echo

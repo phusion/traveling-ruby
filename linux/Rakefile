@@ -10,6 +10,11 @@ task :package do
   # Do nothing
 end
 
+desc "Build the runtime"
+task :runtime do
+  # Do nothing
+end
+
 desc "Build binaries for all Ruby versions (#{RUBY_VERSIONS.join(' ')}) and all architectures (#{ARCHITECTURES.join(' ')}"
 task :build do
   # Do nothing
@@ -73,7 +78,9 @@ ARCHITECTURES.each do |arch|
     end
   end
 
-  file "runtime/#{arch}/ok" do
+  task :runtime => "runtime/#{arch}/ok"
+
+  file "runtime/#{arch}/ok" => ["setup-runtime", "internal/setup-runtime", "internal/setup-runtime-inside-mock"] do
     sh "mkdir -p runtime/#{arch}"
     sh "./setup-runtime -a #{arch} runtime/#{arch}"
     sh "touch runtime/#{arch}/ok"
