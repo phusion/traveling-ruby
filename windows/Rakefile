@@ -1,0 +1,63 @@
+VERSION       = File.read("../VERSION.txt").strip
+RUBY_VERSIONS = File.read("../RUBY_VERSIONS.txt").strip.split(/\s+/)[0..0]
+
+task :default => :package
+
+desc "Create packages for all Ruby versions (#{RUBY_VERSIONS.join(' ')})"
+task :package do
+  # Do nothing
+end
+
+desc "Build binaries for all Ruby versions (#{RUBY_VERSIONS.join(' ')})"
+task :build do
+  # Do nothing
+end
+
+desc "Upload all packages to the server"
+task :upload do
+  # Do nothing
+end
+
+desc "Clean all packages and binaries"
+task :clean do
+  sh "rm -rf output"
+end
+
+RUBY_VERSIONS.each do |ruby_version|
+  package = "traveling-ruby-#{VERSION}-#{ruby_version}-win32.tar.gz"
+  gem_dir = "traveling-ruby-gems-#{VERSION}-#{ruby_version}-win32"
+
+  task :package => "package:#{ruby_version}"
+  task :build   => "build:#{ruby_version}"
+  task :upload  => "upload:#{ruby_version}"
+  task :clean   => "clean:#{ruby_version}"
+
+  desc "Create packages for Ruby #{ruby_version}"
+  task "package:#{ruby_version}" => [package]
+
+  desc "Build binaries for Ruby #{ruby_version}"
+  task "build:#{ruby_version}" => "output/#{ruby_version}/bin"
+
+  file(package => "output/#{ruby_version}/bin") do
+    sh "./package -r #{package} output/#{ruby_version}"
+  end
+
+  # We use 'file' instead of 'directory' here so that packages are updated
+  # whenever we update binaries.
+  file("output/#{ruby_version}/bin") do
+    sh "mkdir -p cache output/#{ruby_version}"
+    sh "./build-ruby -a x86 -r #{ruby_version} cache output/#{ruby_version}"
+  end
+
+  desc "Upload Ruby #{ruby_version} packages to the server"
+  task "upload:#{ruby_version}" => [package, "#{gem_dir}/ok"] do
+    sh "s3cmd -P sync --no-preserve #{package} s3://traveling-ruby/releases/"
+    sh "s3cmd -P --delete-removed --no-preserve -r sync #{gem_dir}/ s3://traveling-ruby/releases/#{gem_dir}/"
+    sh "s3cmd del s3://traveling-ruby/releases/#{gem_dir}/ok"
+  end
+
+  desc "Clean Ruby #{ruby_version} packages and binaries, but not the runtime"
+  task "clean:#{ruby_version}" do
+    sh "rm -rf #{package} #{gem_dir} output/#{ruby_version}"
+  end
+end
