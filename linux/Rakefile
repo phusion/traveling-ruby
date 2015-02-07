@@ -32,7 +32,7 @@ end
 
 desc "Clean everything, including the runtime"
 task "clean-all" => :clean do
-  sh "rm -rf runtime"
+  sh "sudo rm -rf runtime"
 end
 
 ARCHITECTURES.each do |arch|
