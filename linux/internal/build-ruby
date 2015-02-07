@@ -13,7 +13,7 @@ run rm -rf $ROOT/system $ROOT/output
 run mkdir $ROOT/system $ROOT/output
 run cp -R /system/* $ROOT/system/
 run cp -R /system_shared/* $ROOT/system/
-run rm -rf $ROOT/system/gemfiles/*
+run rm -rf $ROOT/system/gemfiles
 if [[ -e /gemfiles ]]; then
 	run cp -R /gemfiles $ROOT/system/
 fi

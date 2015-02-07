@@ -126,6 +126,7 @@ fi
 
 exec docker run \
 	--rm \
+	-t -i \
 	--cap-add SYS_ADMIN --cap-add SYS_CHROOT \
 	-v "$SELFDIR/internal:/system:ro" \
 	-v "$SELFDIR/../shared:/system_shared:ro" \
@@ -134,7 +135,6 @@ exec docker run \
 	"${GEMFILE_MOUNT[@]}" \
 	-e "APP_UID=`id -u`" \
 	-e "APP_GID=`id -g`" \
-	-e "RUBY_VERSION=`cat \"$SELFDIR/../RUBY_VERSION.txt\"`" \
 	-e "BUNDLER_VERSION=`cat \"$SELFDIR/../BUNDLER_VERSION.txt\"`" \
 	-e "ARCHITECTURE=$ARCHITECTURE" \
 	-e "RUBY_VERSION=$RUBY_VERSION" \
