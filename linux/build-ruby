@@ -126,7 +126,6 @@ fi
 
 exec docker run \
 	--rm \
-	-t -i \
 	--cap-add SYS_ADMIN --cap-add SYS_CHROOT \
 	-v "$SELFDIR/internal:/system:ro" \
 	-v "$SELFDIR/../shared:/system_shared:ro" \

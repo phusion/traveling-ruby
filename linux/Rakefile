@@ -41,6 +41,7 @@ ARCHITECTURES.each do |arch|
     gem_dir = "traveling-ruby-gems-#{VERSION}-#{ruby_version}-linux-#{arch}"
 
     task :package => "package:#{ruby_version}:#{arch}"
+    task :runtime => "runtime:#{ruby_version}:#{arch}"
     task :build   => "build:#{ruby_version}:#{arch}"
     task :upload  => "upload:#{ruby_version}:#{arch}"
     task :clean   => "clean:#{ruby_version}:#{arch}"
@@ -48,8 +49,19 @@ ARCHITECTURES.each do |arch|
     desc "Create packages for Ruby #{ruby_version} #{arch}"
     task "package:#{ruby_version}:#{arch}" => [package, "#{gem_dir}/ok"]
 
+    desc "Build the runtime for Ruby #{ruby_version} #{arch}"
+    task "runtime:#{ruby_version}:#{arch}" => "runtime/#{ruby_version}-#{arch}/ok"
+
     desc "Build binaries for Ruby #{ruby_version} #{arch}"
     task "build:#{ruby_version}:#{arch}" => "output/#{ruby_version}-#{arch}/bin"
+
+
+    file "runtime/#{ruby_version}-#{arch}/ok" => ["setup-runtime", "internal/setup-runtime", "internal/setup-runtime-inside-mock"] do
+      sh "mkdir -p runtime/#{ruby_version}-#{arch}"
+      sh "./setup-runtime -a #{arch} -r #{ruby_version} runtime/#{ruby_version}-#{arch}"
+      sh "touch runtime/#{ruby_version}-#{arch}/ok"
+    end
+
 
     file(package => "output/#{ruby_version}-#{arch}/bin") do
       sh "./package -r #{package} output/#{ruby_version}-#{arch}"
@@ -62,10 +74,11 @@ ARCHITECTURES.each do |arch|
 
     # We use 'file' instead of 'directory' here so that packages are updated
     # whenever we update binaries.
-    file("output/#{ruby_version}-#{arch}/bin" => "runtime/#{arch}/ok") do
+    file("output/#{ruby_version}-#{arch}/bin" => "runtime/#{ruby_version}-#{arch}/ok") do
       sh "mkdir -p output/#{ruby_version}-#{arch}"
-      sh "./build-ruby -j #{CONCURRENCY} -a #{arch} runtime/#{arch} output/#{ruby_version}-#{arch}"
+      sh "./build-ruby -j #{CONCURRENCY} -a #{arch} -r #{ruby_version} runtime/#{ruby_version}-#{arch} output/#{ruby_version}-#{arch}"
     end
+
 
     desc "Upload Ruby #{ruby_version} #{arch} packages to the server"
     task "upload:#{ruby_version}:#{arch}" => [package, "#{gem_dir}/ok"] do
@@ -76,13 +89,5 @@ ARCHITECTURES.each do |arch|
     task "clean:#{ruby_version}:#{arch}" do
       sh "rm -rf #{package} #{gem_dir} output/#{arch}"
     end
-  end
-
-  task :runtime => "runtime/#{arch}/ok"
-
-  file "runtime/#{arch}/ok" => ["setup-runtime", "internal/setup-runtime", "internal/setup-runtime-inside-mock"] do
-    sh "mkdir -p runtime/#{arch}"
-    sh "./setup-runtime -a #{arch} runtime/#{arch}"
-    sh "touch runtime/#{arch}/ok"
   end
 end

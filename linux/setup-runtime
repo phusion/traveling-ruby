@@ -15,20 +15,24 @@ function usage()
 	echo "Sets up the Traveling Ruby build system's runtime."
 	echo
 	echo "Options:"
-	echo "  -a NAME  Architecture to setup (x86, x86_64)"
-	echo "  -i       Only initialize chroot environment"
-	echo "  -I       Do not initialize chroot environment"
-	echo "  -h       Show this help"
+	echo "  -a NAME     Architecture to setup (x86, x86_64)"
+	echo "  -r VERSION  Ruby version to setup"
+	echo "  -i          Only initialize chroot environment"
+	echo "  -I          Do not initialize chroot environment"
+	echo "  -h          Show this help"
 }
 
 function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "a:iIh" opt; do
+	while getopts "a:r:iIh" opt; do
 		case "$opt" in
 		a)
 			ARCHITECTURE=$OPTARG
+			;;
+		r)
+			RUBY_VERSION=$OPTARG
 			;;
 		i)
 			INITIALIZE=true
@@ -63,6 +67,10 @@ function parse_options()
 		echo "ERROR: please specify an architecture with -a."
 		exit 1
 	fi
+	if [[ "$RUBY_VERSION" = "" ]]; then
+		echo "ERROR: please specify a Ruby version with -r."
+		exit 1
+	fi
 }
 
 
@@ -79,6 +87,7 @@ exec docker run \
 	-v "$SELFDIR/../shared:/system_shared:ro" \
 	-v "$RUNTIME_DIR/mock:/var/lib/mock" \
 	-e "ARCHITECTURE=$ARCHITECTURE" \
+	-e "RUBY_VERSION=$RUBY_VERSION" \
 	-e "INITIALIZE=$INITIALIZE" \
 	phusion/traveling-ruby-builder \
 	/system/my_init --quiet --skip-runit --skip-startup-files -- \
