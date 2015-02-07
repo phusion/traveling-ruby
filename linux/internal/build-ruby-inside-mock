@@ -103,6 +103,22 @@ EOF
 	chmod +x "$FILE"
 }
 
+function debug_shell()
+{
+	(
+		cd /tmp/ruby/lib/ruby/gems/*/gems
+		export PATH=/tmp/ruby/bin:$PATH
+		export TERM=xterm
+		export DEFAULT_LDFLAGS=`/tmp/ruby/bin/ruby -rrbconfig -e 'puts RbConfig::CONFIG["LDFLAGS"]'`
+		yum install -y nano
+		echo "Debugging shell activated"
+		sh
+	)
+	if [[ $? != 0 ]]; then
+		exit 1
+	fi
+}
+
 cd /tmp
 echo
 
@@ -197,6 +213,8 @@ if [[ -e /system/gemfiles ]]; then
 	run /tmp/ruby/bin/gem install bundler -v $BUNDLER_VERSION --no-rdoc --no-ri
 
 	DEFAULT_LDFLAGS=`/tmp/ruby/bin/ruby -rrbconfig -e 'puts RbConfig::CONFIG["LDFLAGS"]'`
+	export BUNDLE_BUILD__CHARLOCK_HOLMES=--with-ldflags="'$DEFAULT_LDFLAGS -Wl,--whole-archive -licui18n -licuuc -licudata -Wl,--no-whole-archive -lstdc++'"
+	export BUNDLE_BUILD__RUGGED=--with-ldflags="'$DEFAULT_LDFLAGS -Wl,--whole-archive -lssl -lcrypto -Wl,--no-whole-archive'"
 
 	for GEMFILE in /system/gemfiles/*/Gemfile; do
 		run cp "$GEMFILE" /tmp/ruby/
@@ -205,10 +223,6 @@ if [[ -e /system/gemfiles ]]; then
 		fi
 		echo "+ Entering /tmp/ruby"
 		pushd /tmp/ruby >/dev/null
-		run /tmp/ruby/bin/bundle config --local build.charlock_holmes \
-			--with-ldflags="$DEFAULT_LDFLAGS -licui18n -licuuc -licudata"
-		run /tmp/ruby/bin/bundle config --local build.rugged \
-			--with-ldflags="$DEFAULT_LDFLAGS -Wl,--whole-archive -lssl -lcrypto -Wl,--no-whole-archive"
 		run /tmp/ruby/bin/bundle install --system --retry 3 --jobs $CONCURRENCY
 		run rm Gemfile*
 		echo "+ Leaving /tmp/ruby"
