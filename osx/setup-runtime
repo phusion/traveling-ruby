@@ -300,8 +300,8 @@ elif [[ ! -e "$RUNTIME_DIR/bin/openssl" ]] || $FORCE_OPENSSL; then
 	run install_name_tool -id "@executable_path/../lib/libcrypto.1.0.0.dylib" \
 		"$RUNTIME_DIR/lib/libcrypto.1.0.0.dylib"
 
-	run sed -i 's/^Libs.private:/Libs.private: -L${libdir} -lssl -lcrypto -lz/' "$RUNTIME_DIR/lib/pkgconfig/openssl.pc"
-	run sed -i 's/^Libs.private:/Libs.private: -L${libdir} -lssl -lcrypto -lz/' "$RUNTIME_DIR/lib/pkgconfig/libssl.pc"
+	run sed -i 's/^Libs.private:.*/Libs.private: -L${libdir} -lssl -lcrypto -lz/' "$RUNTIME_DIR/lib/pkgconfig/openssl.pc"
+	run sed -i 's/^Libs.private:.*/Libs.private: -L${libdir} -lssl -lcrypto -lz/' "$RUNTIME_DIR/lib/pkgconfig/libssl.pc"
 else
 	echo "Already installed."
 fi

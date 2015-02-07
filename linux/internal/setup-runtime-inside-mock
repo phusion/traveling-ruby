@@ -81,10 +81,10 @@ if [[ ! -e /usr/local/override/bin/openssl ]]; then
 	run strip --strip-all /usr/local/override/bin/openssl
 	run strip --strip-debug /usr/local/override/lib/libcrypto.a
 	run strip --strip-debug /usr/local/override/lib/libssl.a
-	run sed -i 's/^Libs:/Libs: -L${libdir} -lssl -lcrypto -ldl/' /usr/local/override/lib/pkgconfig/openssl.pc
-	run sed -i 's/^Libs.private:/Libs.private: -L${libdir} -lssl -lcrypto -ldl -lz/' /usr/local/override/lib/pkgconfig/openssl.pc
-	run sed -i 's/^Libs:/Libs: -L${libdir} -lssl -lcrypto -ldl/' /usr/local/override/lib/pkgconfig/libssl.pc
-	run sed -i 's/^Libs.private:/Libs.private: -L${libdir} -lssl -lcrypto -ldl -lz/' /usr/local/override/lib/pkgconfig/libssl.pc
+	run sed -i 's/^Libs:.*/Libs: -L${libdir} -lssl -lcrypto -ldl/' /usr/local/override/lib/pkgconfig/openssl.pc
+	run sed -i 's/^Libs.private:.*/Libs.private: -L${libdir} -lssl -lcrypto -ldl -lz/' /usr/local/override/lib/pkgconfig/openssl.pc
+	run sed -i 's/^Libs:.*/Libs: -L${libdir} -lssl -lcrypto -ldl/' /usr/local/override/lib/pkgconfig/libssl.pc
+	run sed -i 's/^Libs.private:.*/Libs.private: -L${libdir} -lssl -lcrypto -ldl -lz/' /usr/local/override/lib/pkgconfig/libssl.pc
 
 	echo "Leaving source directory"
 	popd >/dev/null
