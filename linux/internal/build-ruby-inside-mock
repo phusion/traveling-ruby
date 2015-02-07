@@ -207,6 +207,8 @@ if [[ -e /system/gemfiles ]]; then
 		pushd /tmp/ruby >/dev/null
 		run /tmp/ruby/bin/bundle config --local build.charlock_holmes \
 			--with-ldflags="$DEFAULT_LDFLAGS -licui18n -licuuc -licudata"
+		run /tmp/ruby/bin/bundle config --local build.rugged \
+			--with-ldflags="$DEFAULT_LDFLAGS -Wl,--whole-archive -lssl -lcrypto -Wl,--no-whole-archive"
 		run /tmp/ruby/bin/bundle install --system --retry 3 --jobs $CONCURRENCY
 		run rm Gemfile*
 		echo "+ Leaving /tmp/ruby"
