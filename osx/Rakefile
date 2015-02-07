@@ -71,7 +71,7 @@ RUBY_VERSIONS.each do |ruby_version|
 
   desc "Clean Ruby #{ruby_version} packages, but not the runtime"
   task "clean:#{ruby_version}" do
-    sh "rm -rf #{package} #{gem_dir} output/#{}"
+    sh "rm -rf #{package} #{gem_dir} output/#{ruby_version}"
   end
 end
 
