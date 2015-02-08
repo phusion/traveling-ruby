@@ -17,14 +17,14 @@ Traveling Ruby provides a specific version of the sqlite3 gem. See [the Travelin
 Let's also modify hello.rb to do what we want:
 
     #!/usr/bin/env ruby
-    require 'paint'
+    require 'faker'
     require 'sqlite3'
 
     db = SQLite3::Database.new("hello.sqlite3")
     db.execute("create table if not exists foo (name varchar(255))")
     db.execute("insert into foo values ('hello world')")
     db.close
-    puts Paint["Database file modified.", :red]
+    puts "Hello #{Faker::Name.name}, database file modified."
 
 Then install your gem bundle:
 
@@ -33,7 +33,7 @@ Then install your gem bundle:
 Verify that the modified program works:
 
     $ bundle exec ruby hello.rb
-    Database file modified. (in red)
+    Hello Freida Walker, database file modified.
     $ sqlite3 hello.sqlite3
     sqlite> select * from foo;
     name

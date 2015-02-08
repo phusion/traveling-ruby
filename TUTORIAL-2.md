@@ -10,12 +10,12 @@ You can find the end result of this tutorial at https://github.com/phusion/trave
 
 ## Preparation
 
-Suppose that we want our hello world app from tutorial 1 to print the message in red. We'll want to use [the paint gem](https://github.com/janlelis/paint) for that. Let's start by creating a Gemfile...
+Suppose that we want our hello world app from tutorial 1 to greet a random person instead of the world. We'll want to use [the Faker gem](https://github.com/stympy/faker) for that. Let's start by creating a Gemfile...
 
 ```Ruby
 source 'https://rubygems.org'
 
-gem 'paint'
+gem 'faker'
 
 group :development do
   gem 'rake'
@@ -26,8 +26,8 @@ end
 
 ```Ruby
 #!/usr/bin/env ruby
-require 'paint'
-puts Paint["hello world", :red]
+require 'faker'
+puts "hello #{Faker::Name.name}"
 ```
 
 Then install your gem bundle:
@@ -40,7 +40,7 @@ Verify that your hello world works:
 
 ```Bash
 bundle exec ruby hello.rb
-# => hello world (in red)
+# => hello Miss Susan Casper
 ```
 
 Then, using the Rakefile from tutorial 1, create package directories without creating tar.gz files:
