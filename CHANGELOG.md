@@ -1,6 +1,11 @@
 ## Version 20150204-next
 
  * Added support for Ruby 2.2.0. Version 2.1.5 and 2.2.0 are supported in parallel for the time being.
+ * Added support for creating Windows packages. But there are currently a number of caveats:
+   - Traveling Ruby supports creating packages *for* Windows, but it does not yet support creating packages *on* Windows. That is, the Traveling Ruby tutorials and the documentation do not work when you are a Ruby developer on Windows. To create Windows packages, you must use OS X or Linux.
+
+     This is because in our documentation we make heavy use of standard Unix tools. Tools which are not available on Windows. In the future we may replace the use of such tools with Ruby tools so that the documentation works on Windows too.
+   - Only Ruby 2.1.5 is supported for Windows, not 2.2.0. This is because [the RubyInstaller project](http://rubyinstaller.org/) hasn't released Ruby 2.2.0 binaries yet.
  * Fixed a problem with the 'rugged' native extension on Linux. Closes GH-33.
  * Fixed a problem with the 'charlock_holmes' native extension on Linux. Closes GH-34.
  * Header files are no longer packaged. This saves 256 KB.
