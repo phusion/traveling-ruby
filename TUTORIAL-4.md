@@ -108,6 +108,6 @@ hello Mrs. Mellie Ebert
 
 ## Conclusion
 
-Congratulations, you've learned how to create packages for Windows! You've now reached the end of this tutorial series and you now master the basics of Traveling Ruby.
+Congratulations, you've learned how to create packages for Windows! You've now reached the end of this tutorial series and you now master the basics of Traveling Ruby. You can find the end result of this tutorial at https://github.com/phusion/traveling-ruby-windows-demo.
 
 Next up, you may want to read [the guides](README.md#getting-started), which cover intermediate to advanced topics.
