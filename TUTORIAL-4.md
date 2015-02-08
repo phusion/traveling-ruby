@@ -2,10 +2,7 @@
 
 In the previous tutorials we covered [the basics](TUTORIAL-1.md), [gem dependencies](TUTORIAL-2.md) and [native extensions](TUTORIAL-3.md). But we never covered Windows support. That's because the flow for Windows support is a bit different from other platforms, so it deserves its own tutorial.
 
-But there are two important caveats:
-
- * **Traveling Ruby does not support native extensions for Windows**! You can only package pure-Ruby applications if you want to target Windows.
- * This tutorial, and the resulting Rakefile, don't work on Windows. To create packages *for* Windows, you'll need to use Linux or OS X. See the [caveats](README.md#caveats) for an explanation.
+But there are several [**important Windows-specific caveats**](README.md#caveats). You should read them before proceeding with this tutorial!!
 
 You can find the end result of this tutorial at https://github.com/phusion/traveling-ruby-windows-demo.
 
