@@ -1,8 +1,8 @@
-/runtime
-/output
 /linux/runtime
 /linux/output
 /osx/runtime
 /osx/output
 /osx/work
+/windows/cache
+/windows/output
 *.tar.gz
