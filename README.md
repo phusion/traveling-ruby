@@ -35,8 +35,7 @@ This makes the release process much simpler. Instead of having to create more th
  * Linux x86.
  * Linux x86_64.
  * OS X.
-
-(Note: Traveling Ruby [doesn't bother with supporting Windows yet](#windows_support). Sorry.)
+ * Windows. But see [the Windows-specific caveats](#caveats).
 
 However, distributing a precompiled Ruby interpreter that works for all end users, is more easily said than done. [Read this section](#why_precompiled_binary_difficult) to learn why it's difficult.
 
@@ -44,10 +43,16 @@ Traveling Ruby aims to solve the problem of supplying precompiled **Ruby 2.1** b
 
 ## Getting started
 
+Begin with the tutorials:
+
  * [Tutorial 1: hello world](TUTORIAL-1.md) - Learn in 5 minutes how to create self-contained packages of a hello world app without gem dependencies.
  * [Tutorial 2: gem dependencies](TUTORIAL-2.md) - Managing and packaging gem dependencies using Bundler.
  * [Tutorial 3: native extensions](TUTORIAL-3.md) - Managing and packaging native extension gems.
- * [Guide: Reducing the size of your Traveling Ruby packages](REDUCING_PACKAGE_SIZE.md)
+ * [Tutorial 4: creating packages for Windows](TUTORIAL-4.md) - Creating packages for Windows users.
+
+Once you've finished the tutorials, read the guides for intermediate to advanced topics:
+
+ * [Reducing the size of your Traveling Ruby packages](REDUCING_PACKAGE_SIZE.md)
 
 There are also some real-world examples of how people used Traveling Ruby to package their Ruby tools:
 
@@ -60,11 +65,22 @@ There are also some real-world examples of how people used Traveling Ruby to pac
  * **Octodown (Github markdown preview tool)**<br>
    [Github repo](https://github.com/ianks/octodown) | [Traveling Ruby issue](https://github.com/ianks/octodown/issues/29) | [Traveling Ruby pull request](https://github.com/ianks/octodown/pull/38)
 
-<a name="limitations"></a>
+<a name="caveats"></a>
 
-## Limitations
+## Caveats
 
-Traveling Ruby only supports a number of popular native extension gems, and only in some specific versions. You cannot use just any native extension gem. Native extensions are covered in [tutorial 3](TUTORIAL-3.md).
+Native extensions:
+
+ * Traveling Ruby only supports native extensions when creating Linux and OS X packages. Native extensions are currently not supported when creating Windows packages.
+ * Traveling Ruby only supports a number of popular native extension gems, and only in some specific versions. You cannot use just any native extension gem.
+ * Native extensions are covered in [tutorial 3](TUTORIAL-3.md).
+
+Windows support:
+
+ * Traveling Ruby supports creating packages *for* Windows, but it does not yet support creating packages *on* Windows. That is, the Traveling Ruby tutorials and the documentation do not work when you are a Ruby developer on Windows. To create Windows packages, you must use OS X or Linux.
+
+   This is because in our documentation we make heavy use of standard Unix tools. Tools which are not available on Windows. In the future we may replace the use of such tools with Ruby tools so that the documentation works on Windows too.
+ * Traveling Ruby currently supports Ruby 2.1.5 and Ruby 2.2.0 for Linux and OS X. But for Windows, only Ruby 2.1.5 is supported. This is because [the RubyInstaller project](http://rubyinstaller.org/) hasn't released Ruby 2.2.0 binaries yet.
 
 ## Building binaries
 
@@ -77,7 +93,8 @@ For the OS X build system, see [osx/README.md](osx/README.md).
 ## Future work
 
  * Provide a Rails example.
- * Windows support. We (Phusion) have no interest in providing Windows support for the time being, but we will welcome any pull requests for this.
+ * Native extensions support for Windows. We're currently blocked by the fact that [the RubyInstaller project](http://rubyinstaller.org/) hasn't been updated for Ruby 2.2.0 yet.
+ * Document the Windows build system.
 
 ## FAQ
 
@@ -150,9 +167,9 @@ Yes. OS X versions up to 10.8 Mountain Lion ship Ruby 1.8. Only starting from 10
 
 <a name="windows_support"></a>
 
-### Why does Traveling Ruby not support Windows?
+### Why does Traveling Ruby support Windows?
 
-We haven't spent the effort, and we're currently not creating any tools that should run on Windows. If Windows support is important to you, feel free to open a pull request.
+[Yes](TUTORIAL-4.md), but with some [caveats](#caveats).
 
 ### How big is a hello world packaged with Traveling Ruby?
 

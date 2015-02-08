@@ -6,6 +6,8 @@ Normally, native extensions need to be compiled. But the goal of Traveling Ruby 
 
 So instead, the Traveling Ruby project supplies a number of precompiled native extensions that you can drop into your packages. Only specific versions are supplied, so your Gemfile must match the versions of the native extension gems that we supply.
 
+**Windows notes**: native extenstions are not yet supported in Windows! See the [caveats](README.md#caveats).
+
 ## Preparation
 
 Suppose that we want our hello world app from tutorial 2 to insert a row into an SQLite database file. We'll want to use the sqlite3 gem for that.
@@ -223,6 +225,6 @@ We update the Rakefile so that all of the above steps are automated by running `
 
 ## Conclusion
 
-Congratulations, you've reached the end of the tutorial set and you've now learned all the basics of Traveling Ruby! You can download the end result of this tutorial at https://github.com/phusion/traveling-ruby-native-extensions-demo.
+In this tutorial you've learned how to deal with native extensions. You can download the end result of this tutorial at https://github.com/phusion/traveling-ruby-native-extensions-demo.
 
-Next, you may want to read [Reducing the size of your Traveling Ruby packages](REDUCING_PACKAGE_SIZE.md).
+In all the tutorials so far, we've not covered Windows. Proceed with [tutorial 4](TUTORIAL-4.md) to learn about creating Windows packages.
