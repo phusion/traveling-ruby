@@ -304,6 +304,10 @@ if [[ "$GEMFILE" != "" ]]; then
 		run cp /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/bundler-$BUNDLER_VERSION.gem "$RUNTIME_DIR/vendor/cache/"
 	fi
 
+	export BUNDLE_BUILD__NOKOGIRI=" "
+	export BUNDLE_BUILD__MYSQL2="--with-mysql_config"
+	export BUNDLE_BUILD__CHARLOCK_HOLMES="--with-icu-dir=$RUNTIME_DIR"
+
 	# Run bundle install.
 	for GEMFILE in "${GEMFILES[@]}"; do
 		run cp "$GEMFILE" /tmp/ruby/
@@ -312,9 +316,6 @@ if [[ "$GEMFILE" != "" ]]; then
 		fi
 		echo "+ Entering /tmp/ruby"
 		pushd /tmp/ruby >/dev/null
-		run /tmp/ruby/bin/bundle config --local build.nokogiri ""
-		run /tmp/ruby/bin/bundle config --local build.mysql2 "--with-mysql_config"
-		run /tmp/ruby/bin/bundle config --local build.charlock_holmes "--with-icu-dir=$RUNTIME_DIR"
 		run /tmp/ruby/bin/bundle install --system --retry 3 --jobs $CONCURRENCY
 		run /tmp/ruby/bin/bundle package
 		run rm -rf "$RUNTIME_DIR/vendor"

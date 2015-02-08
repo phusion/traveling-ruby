@@ -16,6 +16,11 @@ task :build do
   # Do nothing
 end
 
+desc "Test all Ruby versions (#{RUBY_VERSIONS.join(' ')})"
+task :test do
+  # Do nothing
+end
+
 desc "Upload all packages to the server"
 task :upload do
   # Do nothing
@@ -37,6 +42,7 @@ RUBY_VERSIONS.each do |ruby_version|
 
   task :package => "package:#{ruby_version}"
   task :build   => "build:#{ruby_version}"
+  task :test    => "test:#{ruby_version}"
   task :upload  => "upload:#{ruby_version}"
   task :clean   => "clean:#{ruby_version}"
 
@@ -45,6 +51,7 @@ RUBY_VERSIONS.each do |ruby_version|
 
   desc "Build binaries for Ruby #{ruby_version}"
   task "build:#{ruby_version}" => "output/#{ruby_version}/bin"
+
 
   file(package => "output/#{ruby_version}/bin") do
     sh "./package -r #{package} output/#{ruby_version}"
@@ -60,6 +67,12 @@ RUBY_VERSIONS.each do |ruby_version|
   file("output/#{ruby_version}/bin" => "runtime/ok") do
     sh "mkdir -p output/#{ruby_version}"
     sh "./build-ruby -r #{ruby_version} runtime output/#{ruby_version}"
+  end
+
+
+  desc "Test Ruby #{ruby_version}"
+  task "test:#{ruby_version}" => "output/#{ruby_version}/bin" do
+    sh "./test-gems output/#{ruby_version}"
   end
 
   desc "Upload Ruby #{ruby_version} packages to the server"

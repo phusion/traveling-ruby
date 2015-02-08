@@ -1,0 +1,64 @@
+#!/bin/bash
+set -e
+
+SELFDIR=`dirname "$0"`
+SELFDIR=`cd "$SELFDIR" && pwd`
+source "$SELFDIR/library.sh"
+
+BUILD_OUTPUT_DIR=
+
+function usage()
+{
+	echo "Usage: ./test-gems [options] <BUILD OUTPUT DIR>"
+	echo "Test the native extension gems."
+	echo
+	echo "Options:"
+	echo "  -h         Show this help"
+}
+
+function parse_options()
+{
+	local OPTIND=1
+	local opt
+	while getopts "h" opt; do
+		case "$opt" in
+		h)
+			usage
+			exit
+			;;
+		*)
+			return 1
+			;;
+		esac
+	done
+
+	(( OPTIND -= 1 )) || true
+	shift $OPTIND || true
+	BUILD_OUTPUT_DIR="$1"
+
+	if [[ "$BUILD_OUTPUT_DIR" = "" ]]; then
+		usage
+		exit 1
+	fi
+	if [[ ! -e "$BUILD_OUTPUT_DIR" ]]; then
+		echo "ERROR: $BUILD_OUTPUT_DIR doesn't exist."
+		exit 1
+	fi
+}
+
+
+parse_options "$@"
+
+
+##########
+
+
+GEMS=(rugged charlock_holmes unf_ext bcrypt RedCloth github/markdown
+	eventmachine escape_utils json nokogiri mysql2 ffi pg posix-spawn
+	thin sqlite3 yajl)
+
+header "Testing gems..."
+for LIB in ${GEMS[@]}; do
+	run "$BUILD_OUTPUT_DIR/bin/ruby" -r$LIB -e true
+done
+echo "All gems OK!"

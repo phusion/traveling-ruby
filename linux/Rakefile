@@ -20,6 +20,11 @@ task :build do
   # Do nothing
 end
 
+desc "Test all Ruby versions (#{RUBY_VERSIONS.join(' ')})"
+task :test do
+  # Do nothing
+end
+
 desc "Upload all packages to the server"
 task :upload do
   # Do nothing
@@ -43,6 +48,7 @@ ARCHITECTURES.each do |arch|
     task :package => "package:#{ruby_version}:#{arch}"
     task :runtime => "runtime:#{ruby_version}:#{arch}"
     task :build   => "build:#{ruby_version}:#{arch}"
+    task :test    => "test:#{ruby_version}:#{arch}"
     task :upload  => "upload:#{ruby_version}:#{arch}"
     task :clean   => "clean:#{ruby_version}:#{arch}"
 
@@ -79,6 +85,11 @@ ARCHITECTURES.each do |arch|
       sh "./build-ruby -j #{CONCURRENCY} -a #{arch} -r #{ruby_version} runtime/#{ruby_version}-#{arch} output/#{ruby_version}-#{arch}"
     end
 
+
+    desc "Test Ruby #{ruby_version} #{arch}"
+    task "test:#{ruby_version}:#{arch}" => "output/#{ruby_version}-#{arch}/bin" do
+      sh "./test-gems output/#{ruby_version}-#{arch}"
+    end
 
     desc "Upload Ruby #{ruby_version} #{arch} packages to the server"
     task "upload:#{ruby_version}:#{arch}" => [package, "#{gem_dir}/ok"] do
