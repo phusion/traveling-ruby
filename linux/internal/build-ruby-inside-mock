@@ -208,7 +208,7 @@ echo $GEM_EXTENSION_API_VERSION > /tmp/ruby/info/GEM_EXTENSION_API_VERSION
 
 echo "Patching rbconfig.rb"
 echo >> /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/$RUBY_ARCH/rbconfig.rb
-cat "$SELFDIR/internal/rbconfig_patch.rb" >> /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/$RUBY_ARCH/rbconfig.rb
+cat "/system/rbconfig_patch.rb" >> /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/$RUBY_ARCH/rbconfig.rb
 
 # Remove some standard dummy gems. We must do this before
 # installing further gems in order to prevent accidentally
