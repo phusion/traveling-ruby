@@ -66,7 +66,8 @@ RUBY_VERSIONS.each do |ruby_version|
   # whenever we update binaries.
   file("output/#{ruby_version}/bin" => "runtime/ok") do
     sh "mkdir -p output/#{ruby_version}"
-    sh "./build-ruby -r #{ruby_version} runtime output/#{ruby_version}"
+    sh "mkdir -p /tmp/ruby-#{ruby_version}"
+    sh "./build-ruby -r #{ruby_version} -w /tmp/ruby-#{ruby_version} runtime output/#{ruby_version}"
   end
 
 

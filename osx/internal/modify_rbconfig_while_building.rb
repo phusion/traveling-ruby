@@ -6,8 +6,8 @@ require 'rbconfig'
 
   ldflags.reject! { |x| x =~ /^-L/ }
   ldflags << "-L."
-  ldflags << "-L#{ENV['RUNTIME_DIR']}"
-  ldflags << "-L/tmp/ruby/lib"
+  ldflags << "-L#{ENV['RUNTIME_DIR']}/lib"
+  ldflags << "-L#{ENV['TMPBUILDROOT']}/lib"
   ldflags << "-L/usr/lib"
 
   config["LDFLAGS"] = ldflags.join(" ")

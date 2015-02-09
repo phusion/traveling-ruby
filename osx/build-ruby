@@ -8,13 +8,13 @@ source "$SELFDIR/../shared/library.sh"
 BUNDLER_VERSION=`cat "$SELFDIR/../BUNDLER_VERSION.txt"`
 RUBY_VERSIONS=(`cat "$SELFDIR/../RUBY_VERSIONS.txt"`)
 
-WORKDIR=
-OWNS_WORKDIR=true
 GEMFILES=()
 
 RUNTIME_DIR=
 OUTPUT_DIR=
 RUBY_VERSION=${RUBY_VERSIONS[0]}
+WORKDIR=
+OWNS_WORKDIR=true
 CONCURRENCY=4
 GEMFILE="$SELFDIR/../shared/gemfiles"
 SETUP_SOURCE=true
@@ -30,7 +30,9 @@ function _cleanup()
 
 function create_environment_file() {
 	local FILE="$1"
-	local LOAD_PATHS=`/tmp/ruby/bin.real/ruby "$SELFDIR/../shared/dump-load-paths.rb"`
+	local LOAD_PATHS
+
+	LOAD_PATHS=`"$TMPBUILDROOT/bin.real/ruby" "$SELFDIR/../shared/dump-load-paths.rb" "$TMPBUILDROOT"`
 
 	cat > "$FILE" <<'EOF'
 #!/bin/bash
@@ -97,6 +99,17 @@ exec "\$ROOT/bin.real/$NAME" "\$@"
 EOF
 	fi
 	chmod +x "$FILE"
+}
+
+function debug_shell()
+{
+	(
+		cd "$TMPBUILDROOT"
+		export PATH="$TMPBUILDROOT/bin:$PATH"
+		echo "Debug shell:"
+		sh
+	)
+	[[ $? == 0 ]]
 }
 
 function usage()
@@ -184,6 +197,7 @@ elif [[ ! -e "$WORKDIR" ]]; then
 else
 	WORKDIR="`cd \"$WORKDIR\" && pwd`"
 fi
+TMPBUILDROOT="$WORKDIR/inst"
 if [[ "$GEMFILE" != "" ]]; then
 	GEMFILE="`absolute_path \"$GEMFILE\"`"
 	if [[ -d "$GEMFILE" ]]; then
@@ -224,6 +238,7 @@ export LIBRARY_PATH="$RUNTIME_DIR/lib"
 export DYLD_FALLBACK_LIBRARY_PATH="$RUNTIME_DIR/lib"
 export PKG_CONFIG_PATH="$RUNTIME_DIR/lib/pkgconfig:/usr/lib/pkgconfig"
 export RUNTIME_DIR
+export TMPBUILDROOT
 export DEAD_STRIP=false
 export RUBYOPT=-r"$SELFDIR/internal/modify_rbconfig_while_building"
 
@@ -242,7 +257,7 @@ echo
 if $SETUP_SOURCE; then
 	header "Configuring..."
 	./configure \
-		--prefix /tmp/ruby \
+		--prefix "$TMPBUILDROOT" \
 		--disable-install-doc \
 		--disable-install-rdoc \
 		--disable-install-capi \
@@ -261,47 +276,62 @@ fi
 
 
 header "Installing to temporary build output directory..."
-run rm -rf /tmp/ruby
+(
+	shopt -s dotglob
+	run mkdir -p "$TMPBUILDROOT"
+	run rm -rf "$TMPBUILDROOT"/*
+)
+[[ $? == 0 ]]
 run make install-nodoc
 echo
 
 
 header "Postprocessing build output..."
 
+echo "Entering $TMPBUILDROOT"
+pushd "$TMPBUILDROOT" >/dev/null
+
 # Copy over various useful files.
-run cp -pR "$RUNTIME_DIR"/lib/*.dylib* /tmp/ruby/lib/
-run cp "$SELFDIR/internal/restore_environment.rb" /tmp/ruby/lib/
-run cp "$SELFDIR/../shared/ca-bundle.crt" /tmp/ruby/lib/
-export SSL_CERT_FILE=/tmp/ruby/lib/ca-bundle.crt
+run cp -pR "$RUNTIME_DIR"/lib/*.dylib* lib/
+run cp "$SELFDIR/internal/restore_environment.rb" lib/
+run cp "$SELFDIR/../shared/ca-bundle.crt" lib/
+export SSL_CERT_FILE="$TMPBUILDROOT/lib/ca-bundle.crt"
 
 # Dump various information about the Ruby binaries.
-RUBY_COMPAT_VERSION=`/tmp/ruby/bin/ruby -rrbconfig -e 'puts RbConfig::CONFIG["ruby_version"]'`
-GEM_PLATFORM=`/tmp/ruby/bin/ruby -e 'puts Gem::Platform.local.to_s'`
-GEM_EXTENSION_API_VERSION=`/tmp/ruby/bin/ruby -e 'puts Gem.extension_api_version'`
-run mkdir /tmp/ruby/info
-echo "+ Dumping information about the Ruby binaries into /tmp/ruby/info"
-echo $RUBY_COMPAT_VERSION > /tmp/ruby/info/RUBY_COMPAT_VERSION
-echo $GEM_PLATFORM > /tmp/ruby/info/GEM_PLATFORM
-echo $GEM_EXTENSION_API_VERSION > /tmp/ruby/info/GEM_EXTENSION_API_VERSION
+RUBY_COMPAT_VERSION=`"$TMPBUILDROOT/bin/ruby" -rrbconfig -e 'puts RbConfig::CONFIG["ruby_version"]'`
+RUBY_ARCH=`"$TMPBUILDROOT/bin/ruby" -rrbconfig -e 'puts RbConfig::CONFIG["arch"]'`
+GEM_PLATFORM=`"$TMPBUILDROOT/bin/ruby" -e 'puts Gem::Platform.local.to_s'`
+GEM_EXTENSION_API_VERSION=`"$TMPBUILDROOT/bin/ruby" -e 'puts Gem.extension_api_version'`
+run mkdir info
+echo "Dumping information about the Ruby binaries into $TMPBUILDROOT/info"
+echo $RUBY_COMPAT_VERSION > info/RUBY_COMPAT_VERSION
+echo $RUBYARCH > info/RUBY_ARCH
+echo $GEM_PLATFORM > info/GEM_PLATFORM
+echo $GEM_EXTENSION_API_VERSION > info/GEM_EXTENSION_API_VERSION
+
+echo "Patching rbconfig.rb"
+echo >> "$TMPBUILDROOT/lib/ruby/$RUBY_COMPAT_VERSION/$RUBY_ARCH/rbconfig.rb"
+cat "$SELFDIR/internal/rbconfig_patch.rb" >> "$TMPBUILDROOT/lib/ruby/$RUBY_COMPAT_VERSION/$RUBY_ARCH/rbconfig.rb"
 
 # Remove some standard dummy gems. We must do this before
 # installing further gems in order to prevent accidentally
 # removing explicitly gems.
-run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/{test-unit,rdoc}-*
+run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/{test-unit,rdoc}-*
 
 if [[ "$GEMFILE" != "" ]]; then
 	# Restore cached gems.
 	if [[ -e "$RUNTIME_DIR/vendor" ]]; then
-		run cp -pR "$RUNTIME_DIR/vendor" /tmp/ruby/vendor
+		run cp -pR "$RUNTIME_DIR/vendor" vendor
 	fi
 
 	# Install Bundler, either from cache or directly.
 	if [[ -e "$RUNTIME_DIR/vendor/cache/bundler-$BUNDLER_VERSION.gem" ]]; then
-		run /tmp/ruby/bin/gem install "$RUNTIME_DIR/vendor/cache/bundler-$BUNDLER_VERSION.gem" --no-rdoc --no-ri
+		run "$TMPBUILDROOT/bin/gem" install "$RUNTIME_DIR/vendor/cache/bundler-$BUNDLER_VERSION.gem" --no-rdoc --no-ri
 	else
-		run /tmp/ruby/bin/gem install bundler -v $BUNDLER_VERSION --no-rdoc --no-ri
+		run "$TMPBUILDROOT/bin/gem" install bundler -v $BUNDLER_VERSION --no-rdoc --no-ri
 		run mkdir -p "$RUNTIME_DIR/vendor/cache"
-		run cp /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/bundler-$BUNDLER_VERSION.gem "$RUNTIME_DIR/vendor/cache/"
+		run cp "$TMPBUILDROOT"/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/bundler-$BUNDLER_VERSION.gem \
+			"$RUNTIME_DIR/vendor/cache/"
 	fi
 
 	export BUNDLE_BUILD__NOKOGIRI=" "
@@ -310,80 +340,77 @@ if [[ "$GEMFILE" != "" ]]; then
 
 	# Run bundle install.
 	for GEMFILE in "${GEMFILES[@]}"; do
-		run cp "$GEMFILE" /tmp/ruby/
+		run cp "$GEMFILE" ./
 		if [[ -e "$GEMFILE.lock" ]]; then
-			run cp "$GEMFILE.lock" /tmp/ruby/
+			run cp "$GEMFILE.lock" ./
 		fi
-		echo "+ Entering /tmp/ruby"
-		pushd /tmp/ruby >/dev/null
-		run /tmp/ruby/bin/bundle install --system --retry 3 --jobs $CONCURRENCY
-		run /tmp/ruby/bin/bundle package
-		run rm -rf "$RUNTIME_DIR/vendor"
-		run mv vendor "$RUNTIME_DIR/"
-		
+		run "$TMPBUILDROOT/bin/bundle" install --system --retry 3 --jobs $CONCURRENCY
+		run "$TMPBUILDROOT/bin/bundle" package
+
+		# Cache gems.
+		run mkdir -p "$RUNTIME_DIR/vendor/cache"
+		run mv vendor/cache/* "$RUNTIME_DIR"/vendor/cache/
+
 		run rm -rf Gemfile* .bundle
-		echo "+ Leaving /tmp/ruby"
-		popd >/dev/null
 	done
 fi
 
 # Strip binaries and remove unnecessary files.
-run strip -S /tmp/ruby/bin/ruby
-echo "+ Stripping libraries..."
+run strip -S bin/ruby
+echo "Stripping libraries..."
 (
 	set -o pipefail
-	find /tmp/ruby -name '*.bundle' | xargs strip -S
-	find /tmp/ruby -name '*.dylib' | xargs strip -S
+	find . -name '*.bundle' | xargs strip -S
+	find . -name '*.dylib' | xargs strip -S
 )
-if [[ $? != 0 ]]; then
-	exit
-fi
-run rm /tmp/ruby/bin/{erb,rdoc,ri}
-run rm -f /tmp/ruby/bin/testrb # Only Ruby 2.1 has it
-run rm -rf /tmp/ruby/include
-run rm -rf /tmp/ruby/share
-run rm -rf /tmp/ruby/lib/{libruby-static.a,pkgconfig}
-run rm -rf /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
-run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
-run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out,mkmf.log}
-run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
-run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/*.{c,h}
+[[ $? == 0 ]]
+run rm bin/{erb,rdoc,ri}
+run rm -f bin/testrb # Only Ruby 2.1 has it
+run rm -rf include
+run rm -rf share
+run rm -rf lib/{libruby-static.a,pkgconfig}
+run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
+run rm -f lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
+run rm -f lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out,mkmf.log}
+run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
+run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/*.{c,h}
 
 if [[ "$GEMFILE" != "" ]]; then
-	echo "+ Entering Bundler gem directory"
-	pushd /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/bundler-$BUNDLER_VERSION >/dev/null
+	echo "Entering Bundler gem directory"
+	pushd lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/bundler-$BUNDLER_VERSION >/dev/null
 	rm -rf .gitignore .rspec .travis.yml man Rakefile lib/bundler/man/*.txt lib/bundler/templates
 	popd >/dev/null
-	echo "+ Leaving Bundler gem directory"
+	echo "Leaving Bundler gem directory"
 fi
 
 # Create wrapper scripts.
-run mv /tmp/ruby/bin /tmp/ruby/bin.real
-run mkdir /tmp/ruby/bin
-run create_environment_file /tmp/ruby/bin/ruby_environment
+run mv bin bin.real
+run mkdir bin
+run create_environment_file bin/ruby_environment
 
-run create_wrapper /tmp/ruby/bin/ruby ruby false
-run create_wrapper /tmp/ruby/bin/gem gem true
-run create_wrapper /tmp/ruby/bin/irb irb true
-run create_wrapper /tmp/ruby/bin/rake rake true
+run create_wrapper bin/ruby ruby false
+run create_wrapper bin/gem gem true
+run create_wrapper bin/irb irb true
+run create_wrapper bin/rake rake true
 if $INSTALL_GEMS; then
-	run create_wrapper /tmp/ruby/bin/bundle bundle true
-	run create_wrapper /tmp/ruby/bin/bundler bundler true
+	run create_wrapper bin/bundle bundle true
+	run create_wrapper bin/bundler bundler true
 fi
 
+echo "Leaving $TMPBUILDROOT"
+popd >/dev/null
 echo
 
 
 header "Sanity checking build output..."
-bash "$SELFDIR/internal/sanity_check" /tmp/ruby
+bash "$SELFDIR/internal/sanity_check" "$TMPBUILDROOT"
 echo
 
 
 header "Committing build output..."
 shopt -s dotglob
 run rm -rf "$OUTPUT_DIR"/*
-run mv /tmp/ruby/* "$OUTPUT_DIR"/
-run rm -rf /tmp/ruby
+run mv "$TMPBUILDROOT"/* "$OUTPUT_DIR"/
 echo
 
 header "All done!"
