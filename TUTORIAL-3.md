@@ -115,7 +115,7 @@ We update the Rakefile so that all of the above steps are automated by running `
 
 	PACKAGE_NAME = "hello"
 	VERSION = "1.0.0"
-	TRAVELING_RUBY_VERSION = "20141215-2.1.5"
+	TRAVELING_RUBY_VERSION = "20150210-2.1.5"
 	SQLITE3_VERSION = "1.3.9"  # Must match Gemfile
 
 	desc "Package your app"
