@@ -147,8 +147,8 @@ header "Extracting Ruby..."
 if [[ $? != 0 ]]; then
 	exit 1
 fi
-run mv "$OUTPUT_DIR/ruby-$RUBY_VERSION-$RUBY_ARCH-mingw32"/* "$OUTPUT_DIR/"
-run rm -rf "$OUTPUT_DIR/ruby-$RUBY_VERSION-$RUBY_ARCH-mingw32"
+run mv "$OUTPUT_DIR/ruby-$RUBY_VERSION-$RUBY_FILE_ARCH-mingw32"/* "$OUTPUT_DIR/"
+run rm -rf "$OUTPUT_DIR/ruby-$RUBY_VERSION-$RUBY_FILE_ARCH-mingw32"
 echo
 
 

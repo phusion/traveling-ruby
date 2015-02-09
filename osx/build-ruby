@@ -237,6 +237,9 @@ export PATH="$RUNTIME_DIR/bin:$PATH"
 export LIBRARY_PATH="$RUNTIME_DIR/lib"
 export DYLD_FALLBACK_LIBRARY_PATH="$RUNTIME_DIR/lib"
 export PKG_CONFIG_PATH="$RUNTIME_DIR/lib/pkgconfig:/usr/lib/pkgconfig"
+export CCACHE_DIR="$RUNTIME_DIR/ccache"
+export CCACHE_COMPRESS=1
+export CCACHE_COMPRESS_LEVEL=3
 export RUNTIME_DIR
 export TMPBUILDROOT
 export DEAD_STRIP=false

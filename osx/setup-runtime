@@ -10,6 +10,8 @@ TEMPDIR=
 
 RUNTIME_DIR=
 CONCURRENCY=4
+FORCE_CCACHE=false
+SKIP_CCACHE=false
 FORCE_CMAKE=false
 SKIP_CMAKE=false
 FORCE_PKG_CONFIG=false
@@ -191,7 +193,9 @@ RUNTIME_DIR="`cd \"$RUNTIME_DIR\" && pwd`"
 #######################################
 
 
+TOTAL_TOOLS=3
 TOTAL_LIBS=12
+CCACHE_VERSION=3.2.1
 CMAKE_VERSION=3.0.2
 PKG_CONFIG_VERSION=0.28
 OPENSSL_VERSION=1.0.1l
@@ -219,11 +223,36 @@ export DEAD_STRIP=true
 
 header "Initializing..."
 run mkdir -p "$RUNTIME_DIR"
+run mkdir -p "$RUNTIME_DIR/ccache"
+export CCACHE_DIR="$RUNTIME_DIR/ccache"
+export CCACHE_COMPRESS=1
+export CCACHE_COMPRESS_LEVEL=3
 echo "Entering $RUNTIME_DIR"
 cd "$RUNTIME_DIR"
 echo
 
-header "Installing CMake..."
+header "Installing tool 1/$TOTAL_TOOLS: ccache..."
+if $SKIP_CCACHE; then
+	echo "Skipped."
+elif [[ ! -e "$RUNTIME_DIR/bin/ccache" ]] || $FORCE_CCACHE; then
+	download_and_extract ccache-$CCACHE_VERSION.tar.gz \
+		http://samba.org/ftp/ccache/ccache-$CCACHE_VERSION.tar.gz
+	echo "Entering $RUNTIME_DIR/cmake-$CMAKE_VERSION"
+	pushd ccache-$CCACHE_VERSION >/dev/null
+
+	run ./configure --prefix="$RUNTIME_DIR"
+	run make -j$CONCURRENCY
+	run make install
+
+	echo "Leaving source directory"
+	popd >/dev/null
+	run rm -rf ccache-$CCACHE_VERSION
+else
+	echo "Already installed."
+fi
+echo
+
+header "Installing tool 2/$TOTAL_TOOLS: CMake..."
 if $SKIP_CMAKE; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/bin/cmake" ]] || $FORCE_CMAKE; then
@@ -244,7 +273,7 @@ else
 fi
 echo
 
-header "Installing pkg-config..."
+header "Installing tool 3/$TOTAL_TOOLS: pkg-config..."
 if $SKIP_PKG_CONFIG; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/bin/pkg-config" ]] || $FORCE_PKG_CONFIG; then

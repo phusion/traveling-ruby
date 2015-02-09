@@ -1,8 +1,12 @@
 #!/bin/bash
 set -e
+CXX=(/usr/bin/c++)
 ARGS=()
 REGEX='(^| )-c( |$)'
 
+if [[ "$RUNTIME_DIR" != "" && -e "$RUNTIME_DIR/bin/ccache" ]]; then
+	CXX=("$RUNTIME_DIR/bin/ccache" /usr/bin/c++)
+fi
 if [[ "$DEAD_STRIP" != "" ]] && $DEAD_STRIP; then
 	ARGS+=(-Wl,-dead_strip)
 fi
@@ -10,10 +14,10 @@ if [[ "$@" =~ $REGEX ]]; then
 	if [[ "$RUNTIME_DIR" != "" ]]; then
 		ARGS+=("-I$RUNTIME_DIR/include")
 	fi
-	exec /usr/bin/c++ "${ARGS[@]}" "$@"
+	exec "${CXX[@]}" "${ARGS[@]}" "$@"
 else
 	if [[ "$RUNTIME_DIR" != "" ]]; then
 		ARGS+=("-L$RUNTIME_DIR/lib")
 	fi
-	exec /usr/bin/c++ -Wl,-headerpad_max_install_names "${ARGS[@]}" "$@"
+	exec "${CXX[@]}" -Wl,-headerpad_max_install_names "${ARGS[@]}" "$@"
 fi
