@@ -25,7 +25,6 @@ end
 
 RUBY_VERSIONS.each do |ruby_version|
   package = "traveling-ruby-#{VERSION}-#{ruby_version}-win32.tar.gz"
-  gem_dir = "traveling-ruby-gems-#{VERSION}-#{ruby_version}-win32"
 
   task :package => "package:#{ruby_version}"
   task :build   => "build:#{ruby_version}"
@@ -50,14 +49,12 @@ RUBY_VERSIONS.each do |ruby_version|
   end
 
   desc "Upload Ruby #{ruby_version} packages to the server"
-  task "upload:#{ruby_version}" => [package, "#{gem_dir}/ok"] do
+  task "upload:#{ruby_version}" => [package] do
     sh "s3cmd -P sync --no-preserve #{package} s3://traveling-ruby/releases/"
-    sh "s3cmd -P --delete-removed --no-preserve -r sync #{gem_dir}/ s3://traveling-ruby/releases/#{gem_dir}/"
-    sh "s3cmd del s3://traveling-ruby/releases/#{gem_dir}/ok"
   end
 
   desc "Clean Ruby #{ruby_version} packages and binaries, but not the runtime"
   task "clean:#{ruby_version}" do
-    sh "rm -rf #{package} #{gem_dir} output/#{ruby_version}"
+    sh "rm -rf #{package} output/#{ruby_version}"
   end
 end
