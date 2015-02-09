@@ -8,7 +8,7 @@ You can find the end result of this tutorial at https://github.com/phusion/trave
 
 ## Creating a batch file
 
-Suppose that we want to create a Windows package for our hello world app from [tutorial 2](TUTORIAL-2.md). The first thing we need to create is a Windows wrapper script. We already have a Unix wrapper script in `packaging/wrapper.sh`, which works onr Linux and OS X, but Windows doesn't support Unix shell scripts. For Windows we'll need to create a wrapper script in the DOS batch format.
+Suppose that we want to create a Windows package for our hello world app from [tutorial 2](TUTORIAL-2.md). The first thing we need to create is a Windows wrapper script. We already have a Unix wrapper script in `packaging/wrapper.sh`, which works on Linux and OS X, but Windows doesn't support Unix shell scripts. For Windows we'll need to create a wrapper script in the DOS batch format.
 
 Create `packaging/wrapper.bat`:
 
@@ -47,7 +47,7 @@ file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-win32.tar.gz" do
 end
 ```
 
-Finally, we must update the `create_package` method so that it generates the package slightly differently depending on the target platform. First, update its signature and add a `os_type = :unix` parameter:
+We must update the `create_package` method so that it generates the package slightly differently depending on the target platform. Update its signature and add a `os_type = :unix` parameter:
 
 ```Ruby
 def create_package(target, os_type = :unix)
@@ -67,7 +67,7 @@ else
 end
 ```
 
-Finally, there is a line which creates the final tar.gz file. We'll want to modify this so that a .zip file is created when targeting Windows.
+There is a line which creates the final tar.gz file. We'll want to modify this so that a .zip file is created when targeting Windows.
 
 ```Ruby
 # Look for:
