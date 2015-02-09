@@ -37,7 +37,9 @@ function grep_without_fail()
 
 function create_environment_file() {
 	local FILE="$1"
-	local LOAD_PATHS=`/tmp/ruby/bin.real/ruby /system/dump-load-paths.rb`
+	local LOAD_PATHS
+
+	LOAD_PATHS=`/tmp/ruby/bin.real/ruby /system/dump-load-paths.rb`
 
 	cat > "$FILE" <<'EOF'
 #!/bin/bash
@@ -114,9 +116,7 @@ function debug_shell()
 		echo "Debugging shell activated"
 		sh
 	)
-	if [[ $? != 0 ]]; then
-		exit 1
-	fi
+	[[ $? == 0 ]]
 }
 
 cd /tmp
@@ -196,13 +196,19 @@ export SSL_CERT_FILE=/tmp/ruby/lib/ca-bundle.crt
 
 # Dump various information about the Ruby binaries.
 RUBY_COMPAT_VERSION=`/tmp/ruby/bin/ruby -rrbconfig -e 'puts RbConfig::CONFIG["ruby_version"]'`
+RUBY_ARCH=`/tmp/ruby/bin/ruby -rrbconfig -e 'puts RbConfig::CONFIG["arch"]'`
 GEM_PLATFORM=`/tmp/ruby/bin/ruby -e 'puts Gem::Platform.local.to_s'`
 GEM_EXTENSION_API_VERSION=`/tmp/ruby/bin/ruby -e 'puts Gem.extension_api_version'`
 run mkdir /tmp/ruby/info
 echo "+ Dumping information about the Ruby binaries into /tmp/ruby/info"
 echo $RUBY_COMPAT_VERSION > /tmp/ruby/info/RUBY_COMPAT_VERSION
+echo $RUBY_ARCH > /tmp/ruby/info/RUBY_ARCH
 echo $GEM_PLATFORM > /tmp/ruby/info/GEM_PLATFORM
 echo $GEM_EXTENSION_API_VERSION > /tmp/ruby/info/GEM_EXTENSION_API_VERSION
+
+echo "Patching rbconfig.rb"
+echo >> /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/$RUBY_ARCH/rbconfig.rb
+cat "$SELFDIR/internal/rbconfig_patch.rb" >> /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/$RUBY_ARCH/rbconfig.rb
 
 # Remove some standard dummy gems. We must do this before
 # installing further gems in order to prevent accidentally
