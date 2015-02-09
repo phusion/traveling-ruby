@@ -1,4 +1,4 @@
-## Version 20150204-next
+## Version 20150210
 
  * Added support for Ruby 2.2.0. Version 2.1.5 and 2.2.0 are supported in parallel for the time being.
  * Added support for creating Windows packages. But there are currently a number of caveats:
