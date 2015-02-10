@@ -1,3 +1,7 @@
+## Version 20150210-next
+
+ * Added additional native extensions: puma, unicorn, kgio, raindrops, fast-stemmer, hitimes, redcarpet.
+
 ## Version 20150210
 
  * Added support for Ruby 2.2.0. Version 2.1.5 and 2.2.0 are supported in parallel for the time being.

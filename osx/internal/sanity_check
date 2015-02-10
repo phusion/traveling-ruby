@@ -25,7 +25,7 @@ TAB=`perl -e 'print "\t"'`
 ERROR=false
 STANDARD_LIBS="(@executable_path/|/usr/lib/libobjc|/usr/lib/libSystem|/usr/lib/libutil|/usr/lib/libz"
 STANDARD_LIBS="$STANDARD_LIBS|/usr/lib/libiconv|/usr/lib/libstdc\+\+)\."
-STANDARD_LIBS="($STANDARD_LIBS|CoreFoundation)"
+STANDARD_LIBS="($STANDARD_LIBS|CoreFoundation|CoreServices)"
 
 for F in $DIR/bin.real/ruby `find $DIR -name '*.bundle'` `find $DIR -name '*.dylib'`; do
 	EXTRA_LIBS=`otool -L $F | tail -n +2 | sed "s/^${TAB}//" | sed "s/ (.*//" | grep_without_fail -vE "$STANDARD_LIBS"`

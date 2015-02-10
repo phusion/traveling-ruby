@@ -1,0 +1,27 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    fast-stemmer (1.0.2)
+    hitimes (1.2.2)
+    kgio (2.9.3)
+    puma (2.11.0)
+      rack (>= 1.1, < 2.0)
+    rack (1.6.0)
+    raindrops (0.13.0)
+    redcarpet (3.2.2)
+    unicorn (4.8.3)
+      kgio (~> 2.6)
+      rack
+      raindrops (~> 0.7)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  fast-stemmer
+  hitimes
+  kgio
+  puma
+  raindrops
+  redcarpet
+  unicorn
