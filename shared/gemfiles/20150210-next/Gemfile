@@ -3,7 +3,9 @@ source 'https://rubygems.org'
 gem 'fast-stemmer'
 gem 'hitimes'
 gem 'redcarpet'
-gem 'puma'
+gem 'pg'
+gem 'mysql2', '0.3.11' # Latest version that has a Windows binary
+gem 'puma', :platforms => :ruby
 gem 'kgio', :platforms => :ruby
 gem 'raindrops', :platforms => :ruby
 gem 'unicorn', :platforms => :ruby

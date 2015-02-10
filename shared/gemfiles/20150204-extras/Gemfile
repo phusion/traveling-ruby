@@ -1,4 +1,4 @@
 source 'https://rubygems.org'
 
 gem 'nokogumbo', '1.2.0'
-gem 'rugged', '0.22.0b5'
+gem 'rugged', '0.22.0b5', :platforms => :ruby

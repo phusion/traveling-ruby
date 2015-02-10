@@ -4,12 +4,15 @@ GEM
     mini_portile (0.6.2)
     nokogiri (1.6.6.2)
       mini_portile (~> 0.6.0)
+    nokogiri (1.6.6.2-x86-mingw32)
+      mini_portile (~> 0.6.0)
     nokogumbo (1.2.0)
       nokogiri
     rugged (0.22.0b5)
 
 PLATFORMS
   ruby
+  x86-mingw32
 
 DEPENDENCIES
   nokogumbo (= 1.2.0)
