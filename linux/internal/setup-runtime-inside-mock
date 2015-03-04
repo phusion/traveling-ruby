@@ -45,7 +45,7 @@ echo "----- chroot entered -----"
 cd /tmp
 run rm -rf /tmp/*
 run rpm --rebuilddb
-run yum install -y @development-tools gcc gcc-c++ wget sudo zlib-devel readline-devel ccache
+run yum install -y @development-tools gcc gcc-c++ wget sudo zlib-devel readline-devel openssl-devel ccache
 run mkdir -p /ccache
 echo
 
