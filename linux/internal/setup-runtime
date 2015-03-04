@@ -13,6 +13,7 @@ else
 	CHROOT_NAME=epel-5-x86_64
 fi
 MOCK_NAME="$CHROOT_NAME-$RUBY_VERSION-$ARCHITECTURE"
+run mount -o remount,rw /sys
 run chown root:mock /var/lib/mock
 run chmod g+ws /var/lib/mock
 echo
