@@ -64,6 +64,8 @@ There are also some real-world examples of how people used Traveling Ruby to pac
    [Github repo](https://github.com/virtkick/virtkick-webapp)
  * **Octodown (Github markdown preview tool)**<br>
    [Github repo](https://github.com/ianks/octodown) | [Traveling Ruby issue](https://github.com/ianks/octodown/issues/29) | [Traveling Ruby pull request](https://github.com/ianks/octodown/pull/38)
+ * **WebAirplay (local webapp to send videos to airplay devices)**<br>
+   [Github repo](https://github.com/antulik/web-airplay)
 
 <a name="caveats"></a>
 
