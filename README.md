@@ -2,7 +2,7 @@
 
 ![](https://openclipart.org/image/300px/svg_to_png/181225/Travel_backpacks.png)
 
-Traveling Ruby is a project which supplies self-contained, "portable" Ruby binaries: Ruby binaries that can run on any Linux distribution and any OS X machine. This allows Ruby app developers to bundle these binaries with their Ruby app, so that they can distribute a single package to end users, without needing end users to first install Ruby or gems.
+Traveling Ruby is a project which supplies self-contained, "portable" Ruby binaries: Ruby binaries that can run on any Linux distribution and any OS X machine. It also has Windows support [(with some caveats)](#caveats). This allows Ruby app developers to bundle these binaries with their Ruby app, so that they can distribute a single package to end users, without needing end users to first install Ruby or gems.
 
 [![](https://raw.githubusercontent.com/phusion/traveling-ruby/master/doc/video.png)](https://vimeo.com/phusionnl/review/113827942/ceca7e70da)
 
@@ -64,6 +64,8 @@ There are also some real-world examples of how people used Traveling Ruby to pac
    [Github repo](https://github.com/virtkick/virtkick-webapp)
  * **Octodown (Github markdown preview tool)**<br>
    [Github repo](https://github.com/ianks/octodown) | [Traveling Ruby issue](https://github.com/ianks/octodown/issues/29) | [Traveling Ruby pull request](https://github.com/ianks/octodown/pull/38)
+ * **WebAirplay (local webapp to send videos to airplay devices)**<br>
+   [Github repo](https://github.com/antulik/web-airplay)
 
 <a name="caveats"></a>
 
