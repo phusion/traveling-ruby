@@ -1,6 +1,7 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    curses (1.0.1)
     fast-stemmer (1.0.2)
     hitimes (1.2.2)
     hitimes (1.2.2-x86-mingw32)
@@ -25,6 +26,7 @@ PLATFORMS
   x86-mingw32
 
 DEPENDENCIES
+  curses
   fast-stemmer
   hitimes
   kgio

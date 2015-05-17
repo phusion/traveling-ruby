@@ -56,7 +56,7 @@ parse_options "$@"
 GEMS=(rugged charlock_holmes unf_ext bcrypt RedCloth github/markdown
 	eventmachine escape_utils json nokogiri mysql2 ffi pg posix-spawn
 	thin sqlite3 yajl puma/puma_http11 kgio raindrops fast-stemmer
-	hitimes redcarpet snappy)
+	hitimes redcarpet snappy curses)
 
 header "Testing gems..."
 for LIB in ${GEMS[@]}; do

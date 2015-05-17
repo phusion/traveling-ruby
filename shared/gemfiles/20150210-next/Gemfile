@@ -10,3 +10,4 @@ gem 'puma', :platforms => :ruby
 gem 'kgio', :platforms => :ruby
 gem 'raindrops', :platforms => :ruby
 gem 'unicorn', :platforms => :ruby
+gem 'curses', :platforms => :ruby

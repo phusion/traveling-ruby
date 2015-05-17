@@ -1,7 +1,7 @@
 ## Version 20150210-next
 
  * The Ruby versions that we now support are: 2.1.6 and 2.2.0.
- * Added additional native extensions: puma, unicorn, kgio, raindrops, fast-stemmer, hitimes, redcarpet, snappy.
+ * Added additional native extensions: puma, unicorn, kgio, raindrops, fast-stemmer, hitimes, redcarpet, snappy, curses.
  * Upgraded bundler gem to version 1.9.9.
  * Upgraded mysql2 gem to version 0.3.11.
  * Upgraded pg gem to version 0.18.2.
