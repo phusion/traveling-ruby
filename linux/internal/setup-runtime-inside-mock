@@ -196,7 +196,7 @@ if [[ ! -e /usr/local/override/lib/libsqlite3.a ]]; then
 	pushd sqlite-autoconf-$SQLITE3_VERSION >/dev/null
 
 	run ./configure --prefix=/usr/local/override --disable-shared \
-		--disable-dynamic-extensions CFLAGS='-fPIC -fvisibility=hidden'
+		--disable-dynamic-extensions CFLAGS='-O2 -fPIC -fvisibility=hidden'
 	run make -j$CONCURRENCY
 	run make install-strip
 
@@ -236,7 +236,7 @@ if [[ ! -e /usr/local/override/lib/libpq.a ]]; then
 	echo "Entering postgresql-$POSTGRESQL_VERSION"
 	pushd postgresql-$POSTGRESQL_VERSION >/dev/null
 
-	run ./configure --prefix=/usr/local/override CFLAGS="-fPIC -fvisibility=hidden"
+	run ./configure --prefix=/usr/local/override CFLAGS="-O2 -fPIC -fvisibility=hidden"
 	run make -j$CONCURRENCY -C src/common
 	run make -j$CONCURRENCY -C src/backend
 	run make -j$CONCURRENCY -C src/interfaces/libpq
@@ -262,9 +262,9 @@ if [[ ! -e /usr/local/override/lib/libicudata.a ]]; then
 
 	run ./configure --prefix=/usr/local/override --disable-samples --disable-tests \
 		--enable-static --disable-shared --with-library-bits=$ARCHITECTURE_BITS \
-		CFLAGS="-fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0" \
-		CXXFLAGS="-fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0"
-	run make -j$CONCURRENCY
+		CFLAGS="-O2 -fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0" \
+		CXXFLAGS="-O2 -fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0"
+	run make -j$CONCURRENCY VERBOSE=1
 	run make install -j$CONCURRENCY
 	run strip --strip-debug /usr/local/override/lib/libicu*.a
 
@@ -283,8 +283,8 @@ if [[ ! -e /usr/local/override/lib/libssh2.a ]]; then
 
 	run ./configure --prefix=/usr/local/override --enable-static --disable-shared \
 		--with-openssl --with-libz --disable-examples-build --disable-debug \
-		CFLAGS="-fPIC -fvisibility=hidden" \
-		CXXFLAGS="-fPIC -fvisibility=hidden"
+		CFLAGS="-O2 -fPIC -fvisibility=hidden" \
+		CXXFLAGS="-O2 -fPIC -fvisibility=hidden"
 	run make -j$CONCURRENCY
 	run make install-strip -j$CONCURRENCY
 

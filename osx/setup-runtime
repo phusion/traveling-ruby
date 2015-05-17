@@ -92,10 +92,14 @@ function usage()
 	echo "  -S      Skip installing sqlite3"
 	echo "  -z      Force installing liblzma"
 	echo "  -Z      Skip installing liblzma"
+	echo "  -m      Force installing MySQL"
+	echo "  -M      Skip installing MySQL"
 	echo "  -p      Force installing PostgreSQL"
 	echo "  -P      Skip installing PostgreSQL"
 	echo "  -i      Force installing ICU"
 	echo "  -I      Skip installing ICU"
+	echo "  -b      Force installing libssh2"
+	echo "  -B      Skip installing libssh2"
 	echo
 	echo "  -j NUM  Compilation concurrency. Default: 4"
 	echo "  -h      Show this help"
@@ -105,7 +109,7 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "oOnNeEgGfFyYsSzZpPiIj:h" opt; do
+	while getopts "oOnNeEgGfFyYsSzZmMpPiIbBj:h" opt; do
 		case "$opt" in
 		o)
 			FORCE_OPENSSL=true
@@ -155,6 +159,12 @@ function parse_options()
 		Z)
 			SKIP_LIBLZMA=true
 			;;
+		m)
+			FORCE_MYSQL=true
+			;;
+		M)
+			SKIP_MYSQL=true
+			;;
 		p)
 			FORCE_POSTGRESQL=true
 			;;
@@ -166,6 +176,12 @@ function parse_options()
 			;;
 		I)
 			SKIP_ICU=true
+			;;
+		b)
+			FORCE_LIBSSH2=true
+			;;
+		B)
+			SKIP_LIBSSH2=true
 			;;
 		j)
 			CONCURRENCY=$OPTARG
@@ -558,7 +574,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libsqlite3.a" ]] || $FORCE_SQLITE3; then
 	pushd sqlite-autoconf-$SQLITE3_VERSION >/dev/null
 
 	run ./configure --prefix="$RUNTIME_DIR" --disable-shared \
-		--disable-dynamic-extensions CFLAGS='-fPIC -fvisibility=hidden'
+		--disable-dynamic-extensions CFLAGS='-O2 -fPIC -fvisibility=hidden'
 	run make -j$CONCURRENCY
 	run make install-strip
 	echo "Entering $RUNTIME_DIR"
@@ -636,7 +652,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libpq.a" ]] || $FORCE_POSTGRESQL; then
 	echo "Entering $RUNTIME_DIR/postgresql-$POSTGRESQL_VERSION"
 	pushd postgresql-$POSTGRESQL_VERSION >/dev/null
 
-	run ./configure --prefix="$RUNTIME_DIR" CFLAGS="-fPIC -fvisibility=hidden"
+	run ./configure --prefix="$RUNTIME_DIR" CFLAGS="-O2 -fPIC -fvisibility=hidden"
 	run make -j$CONCURRENCY -C src/common
 	run make -j$CONCURRENCY -C src/backend
 	run make -j$CONCURRENCY -C src/interfaces/libpq
@@ -667,9 +683,9 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libicudata.a" ]] || $FORCE_ICU; then
 
 	run ./configure --prefix="$RUNTIME_DIR" --disable-samples --disable-tests \
 		--enable-static --disable-shared --with-library-bits=64 \
-		CFLAGS="-fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0" \
-		CXXFLAGS="-fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0"
-	run make -j$CONCURRENCY
+		CFLAGS="-O2 -fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0" \
+		CXXFLAGS="-O2 -fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0"
+	run make -j$CONCURRENCY VERBOSE=1
 	run make install -j$CONCURRENCY
 
 	echo "Leaving source directory"
@@ -691,8 +707,8 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libssh2.a" ]] || $FORCE_LIBSSH2; then
 
 	run ./configure --prefix="$RUNTIME_DIR" --enable-static --disable-shared \
 		--with-openssl --with-libz --disable-examples-build --disable-debug \
-		CFLAGS="-fPIC -fvisibility=hidden" \
-		CXXFLAGS="-fPIC -fvisibility=hidden"
+		CFLAGS="-O2 -fPIC -fvisibility=hidden" \
+		CXXFLAGS="-O2 -fPIC -fvisibility=hidden"
 	run make -j$CONCURRENCY
 	run make install-strip -j$CONCURRENCY
 
