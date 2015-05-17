@@ -221,6 +221,7 @@ if [[ -e /system/gemfiles ]]; then
 	DEFAULT_LDFLAGS=`/tmp/ruby/bin/ruby -rrbconfig -e 'puts RbConfig::CONFIG["LDFLAGS"]'`
 	export BUNDLE_BUILD__CHARLOCK_HOLMES=--with-ldflags="'$DEFAULT_LDFLAGS -Wl,--whole-archive -licui18n -licuuc -licudata -Wl,--no-whole-archive -lstdc++'"
 	export BUNDLE_BUILD__RUGGED=--with-ldflags="'$DEFAULT_LDFLAGS -Wl,--whole-archive -lssl -lcrypto -Wl,--no-whole-archive'"
+	export BUNDLE_BUILD__PUMA=--with-ldflags="'$DEFAULT_LDFLAGS -Wl,--whole-archive -lssl -lcrypto -lz -Wl,--no-whole-archive'"
 
 	for GEMFILE in /system/gemfiles/*/Gemfile; do
 		run cp "$GEMFILE" /tmp/ruby/
