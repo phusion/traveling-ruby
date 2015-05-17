@@ -230,7 +230,10 @@ if [[ -e /system/gemfiles ]]; then
 		fi
 		echo "+ Entering /tmp/ruby"
 		pushd /tmp/ruby >/dev/null
-		run /tmp/ruby/bin/bundle install --system --retry 3 --jobs $CONCURRENCY
+		# We set -j to 1 because of this bug:
+		# https://github.com/bundler/bundler/issues/3660
+		# When it is solved, we can set -j to $CONCURRENCY.
+		run /tmp/ruby/bin/bundle install --system --retry 3 --jobs 1
 		run rm Gemfile*
 		echo "+ Leaving /tmp/ruby"
 		popd >/dev/null

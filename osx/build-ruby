@@ -347,7 +347,10 @@ if [[ "$GEMFILE" != "" ]]; then
 		if [[ -e "$GEMFILE.lock" ]]; then
 			run cp "$GEMFILE.lock" ./
 		fi
-		run "$TMPBUILDROOT/bin/bundle" install --system --retry 3 --jobs $CONCURRENCY
+		# We set -j to 1 because of this bug:
+		# https://github.com/bundler/bundler/issues/3660
+		# When it is solved, we can set -j to $CONCURRENCY.
+		run "$TMPBUILDROOT/bin/bundle" install --system --retry 3 --jobs 1
 		run "$TMPBUILDROOT/bin/bundle" package
 
 		# Cache gems.
