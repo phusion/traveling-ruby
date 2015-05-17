@@ -83,6 +83,7 @@ Windows support:
 
    This is because in our documentation we make heavy use of standard Unix tools. Tools which are not available on Windows. In the future we may replace the use of such tools with Ruby tools so that the documentation works on Windows too.
  * Traveling Ruby currently supports Ruby 2.1.5 and Ruby 2.2.0 for Linux and OS X. But for Windows, only Ruby 2.1.5 is supported. This is because [the RubyInstaller project](http://rubyinstaller.org/) hasn't released Ruby 2.2.0 binaries yet.
+ * Native extensions are not yet supported.
 
 ## Building binaries
 
