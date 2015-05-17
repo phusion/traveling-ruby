@@ -82,7 +82,7 @@ run mkdir -p "$RUNTIME_DIR/mock"
 
 exec docker run \
 	--rm \
-	--cap-add SYS_ADMIN --cap-add SYS_CHROOT \
+	--privileged \
 	-v "$SELFDIR/internal:/system:ro" \
 	-v "$SELFDIR/../shared:/system_shared:ro" \
 	-v "$RUNTIME_DIR/mock:/var/lib/mock" \

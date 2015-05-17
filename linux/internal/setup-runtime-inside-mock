@@ -45,8 +45,14 @@ LIBSSH2_VERSION=1.4.3
 
 
 echo "----- chroot entered -----"
-cd /tmp
-run rm -rf /tmp/*
+# Clear /tmp.
+for F in *; do
+	# During the first 'mock' run, mock somehow mounts /tmp/ccache which we
+	# can't remove. So we skip this.
+	if [[ "$F" != ccache ]]; then
+		run rm -rf "/tmp/$F"
+	fi
+done
 run rpm --rebuilddb
 run yum install -y @development-tools gcc gcc-c++ wget sudo zlib-devel \
 	readline-devel ccache
