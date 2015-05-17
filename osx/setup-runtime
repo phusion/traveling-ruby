@@ -432,7 +432,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libncurses.5.dylib" ]] || $FORCE_NCURSES; then
 	run curl --fail -L -O http://ftp.gnu.org/pub/gnu/ncurses/ncurses-$NCURSES_VERSION.tar.gz
 	run tar xzf ncurses-$NCURSES_VERSION.tar.gz
 	run rm ncurses-$NCURSES_VERSION.tar.gz
-	echo "Entering $RUNTIME_DIR/gmp-$NCURSES_VERSION"
+	echo "Entering $RUNTIME_DIR/ncurses-$NCURSES_VERSION"
 	pushd ncurses-$NCURSES_VERSION >/dev/null
 
 	run ./configure --prefix="$RUNTIME_DIR" --with-shared --without-normal --without-cxx --without-cxx-binding \
