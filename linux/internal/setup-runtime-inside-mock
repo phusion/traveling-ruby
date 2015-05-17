@@ -30,6 +30,9 @@ else
 	export PATH=/system/bin32:$PATH
 fi
 
+AUTOCONF_VERSION=2.69
+AUTOMAKE_VERSION=1.15
+LIBTOOL_VERSION=2.4.6
 CMAKE_VERSION=3.0.2
 OPENSSL_VERSION=1.0.1l
 FFI_VERSION=3.2.1
@@ -45,8 +48,72 @@ echo "----- chroot entered -----"
 cd /tmp
 run rm -rf /tmp/*
 run rpm --rebuilddb
-run yum install -y @development-tools gcc gcc-c++ wget sudo zlib-devel readline-devel ccache
+run yum install -y @development-tools gcc gcc-c++ wget sudo zlib-devel \
+	readline-devel ccache
 run mkdir -p /ccache
+echo
+
+
+
+header "Installing autoconf..."
+if [[ ! -e /usr/local/override/bin/autoconf ]]; then
+	download_and_extract autoconf-$AUTOCONF_VERSION.tar.gz \
+		http://ftp.gnu.org/gnu/autoconf/autoconf-$AUTOCONF_VERSION.tar.gz
+	echo "Entering autoconf-$AUTOCONF_VERSION"
+	pushd autoconf-$AUTOCONF_VERSION >/dev/null
+
+	run ./configure --prefix=/usr/local/override \
+		--disable-shared --enable-static \
+		CFLAGS='-O2 -fPIC -fvisibility=hidden'
+	run make -j$CONCURRENCY
+	run make install-strip
+
+	echo "Leaving source directory"
+	popd >/dev/null
+	run rm -rf autoconf-$AUTOCONF_VERSION
+fi
+run mkdir -p /usr/local/override/share/aclocal
+run cp /usr/share/aclocal/pkg.m4 /usr/local/override/share/aclocal/
+echo
+
+
+header "Installing automake..."
+if [[ ! -e /usr/local/override/bin/automake ]]; then
+	download_and_extract automake-$AUTOMAKE_VERSION.tar.gz \
+		http://ftp.gnu.org/gnu/automake/automake-$AUTOMAKE_VERSION.tar.gz
+	echo "Entering automake-$AUTOMAKE_VERSION"
+	pushd automake-$AUTOMAKE_VERSION >/dev/null
+
+	run ./configure --prefix=/usr/local/override \
+		--disable-shared --enable-static \
+		CFLAGS='-O2 -fPIC -fvisibility=hidden'
+	run make -j$CONCURRENCY
+	run make install-strip
+
+	echo "Leaving source directory"
+	popd >/dev/null
+	run rm -rf automake-$AUTOMAKE_VERSION
+fi
+echo
+
+
+header "Installing libtool..."
+if [[ ! -e /usr/local/override/bin/libtoolize ]]; then
+	download_and_extract libtool-$LIBTOOL_VERSION.tar.gz \
+		http://ftp.gnu.org/gnu/libtool/libtool-$LIBTOOL_VERSION.tar.gz
+	echo "Entering libtool-$LIBTOOL_VERSION"
+	pushd libtool-$LIBTOOL_VERSION >/dev/null
+
+	run ./configure --prefix=/usr/local/override \
+		--disable-shared --enable-static \
+		CFLAGS='-O2 -fPIC -fvisibility=hidden'
+	run make -j$CONCURRENCY
+	run make install-strip
+
+	echo "Leaving source directory"
+	popd >/dev/null
+	run rm -rf libtool-$LIBTOOL_VERSION
+fi
 echo
 
 

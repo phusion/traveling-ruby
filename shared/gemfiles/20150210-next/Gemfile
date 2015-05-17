@@ -3,6 +3,7 @@ source 'https://rubygems.org'
 gem 'fast-stemmer'
 gem 'hitimes'
 gem 'redcarpet'
+gem 'snappy'
 gem 'pg'
 gem 'mysql2'
 gem 'puma', :platforms => :ruby

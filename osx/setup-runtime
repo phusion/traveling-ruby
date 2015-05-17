@@ -16,6 +16,12 @@ FORCE_CMAKE=false
 SKIP_CMAKE=false
 FORCE_PKG_CONFIG=false
 SKIP_PKG_CONFIG=false
+FORCE_AUTOCONF=false
+SKIP_AUTOCONF=false
+FORCE_AUTOMAKE=false
+SKIP_AUTOMAKE=false
+FORCE_LIBTOOL=false
+SKIP_LIBTOOL=false
 FORCE_OPENSSL=false
 SKIP_OPENSSL=false
 FORCE_NCURSES=false
@@ -193,11 +199,14 @@ RUNTIME_DIR="`cd \"$RUNTIME_DIR\" && pwd`"
 #######################################
 
 
-TOTAL_TOOLS=3
+TOTAL_TOOLS=6
 TOTAL_LIBS=12
 CCACHE_VERSION=3.2.1
 CMAKE_VERSION=3.0.2
 PKG_CONFIG_VERSION=0.28
+AUTOCONF_VERSION=2.69
+AUTOMAKE_VERSION=1.15
+LIBTOOL_VERSION=2.4.6
 OPENSSL_VERSION=1.0.1l
 NCURSES_VERSION=5.9
 LIBEDIT_VERSION=20141030-3.1
@@ -288,6 +297,68 @@ elif [[ ! -e "$RUNTIME_DIR/bin/pkg-config" ]] || $FORCE_PKG_CONFIG; then
 	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf pkg-config-$PKG_CONFIG_VERSION
+else
+	echo "Already installed."
+fi
+echo
+
+header "Installing tool 4/$TOTAL_TOOLS: autoconf..."
+if $SKIP_AUTOCONF; then
+	echo "Skipped."
+elif [[ ! -e "$RUNTIME_DIR/bin/autoconf" ]] || $FORCE_AUTOCONF; then
+	download_and_extract autoconf-$AUTOCONF_VERSION.tar.gz \
+		http://ftp.gnu.org/gnu/autoconf/autoconf-$AUTOCONF_VERSION.tar.gz
+	echo "Entering $RUNTIME_DIR/autoconf-$AUTOCONF_VERSION"
+	pushd autoconf-$AUTOCONF_VERSION >/dev/null
+
+	run ./configure --prefix="$RUNTIME_DIR"
+	run make -j$CONCURRENCY
+	run make install-strip
+	echo "Entering $RUNTIME_DIR"
+	popd >/dev/null
+	run rm -rf autoconf-$AUTOCONF_VERSION
+else
+	echo "Already installed."
+fi
+echo
+
+header "Installing tool 5/$TOTAL_TOOLS: automake..."
+if $SKIP_AUTOMAKE; then
+	echo "Skipped."
+elif [[ ! -e "$RUNTIME_DIR/bin/automake" ]] || $FORCE_AUTOMAKE; then
+	download_and_extract automake-$AUTOMAKE_VERSION.tar.gz \
+		http://ftp.gnu.org/gnu/automake/automake-$AUTOMAKE_VERSION.tar.gz
+	echo "Entering $RUNTIME_DIR/automake-$AUTOMAKE_VERSION"
+	pushd automake-$AUTOMAKE_VERSION >/dev/null
+
+	run ./configure --prefix="$RUNTIME_DIR"
+	run make -j$CONCURRENCY
+	run make install-strip
+	echo "Entering $RUNTIME_DIR"
+	popd >/dev/null
+	run rm -rf automake-$AUTOMAKE_VERSION
+else
+	echo "Already installed."
+fi
+echo
+
+header "Installing tool 6/$TOTAL_TOOLS: libtool..."
+if $SKIP_LIBTOOL; then
+	echo "Skipped."
+elif [[ ! -e "$RUNTIME_DIR/bin/libtoolize" ]] || $FORCE_LIBTOOL; then
+	download_and_extract libtool-$LIBTOOL_VERSION.tar.gz \
+		http://ftp.gnu.org/gnu/libtool/libtool-$LIBTOOL_VERSION.tar.gz
+	echo "Entering $RUNTIME_DIR/libtool-$LIBTOOL_VERSION"
+	pushd libtool-$LIBTOOL_VERSION >/dev/null
+
+	run ./configure --prefix="$RUNTIME_DIR" \
+		--disable-shared --enable-static \
+		CFLAGS='-O2 -fPIC -fvisibility=hidden'
+	run make -j$CONCURRENCY
+	run make install-strip
+	echo "Entering $RUNTIME_DIR"
+	popd >/dev/null
+	run rm -rf libtool-$LIBTOOL_VERSION
 else
 	echo "Already installed."
 fi
