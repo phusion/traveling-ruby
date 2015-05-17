@@ -13,7 +13,7 @@ GEM
       rack (>= 1.1, < 2.0)
     rack (1.6.0)
     raindrops (0.13.0)
-    redcarpet (3.2.2)
+    redcarpet (3.2.3)
     snappy (0.0.11)
     unicorn (4.8.3)
       kgio (~> 2.6)
