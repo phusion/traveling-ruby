@@ -1,5 +1,5 @@
 VERSION       = File.read("../VERSION.txt").strip
-RUBY_VERSIONS = File.read("../RUBY_VERSIONS.txt").strip.split(/\s+/)[0..0]
+RUBY_VERSIONS = File.read("../RUBY_VERSIONS.txt").strip.split(/\s+/)
 
 task :default => :package
 
