@@ -4,7 +4,7 @@ gem 'fast-stemmer'
 gem 'hitimes'
 gem 'redcarpet'
 gem 'pg'
-gem 'mysql2', '0.3.11' # Latest version that has a Windows binary
+gem 'mysql2'
 gem 'puma', :platforms => :ruby
 gem 'kgio', :platforms => :ruby
 gem 'raindrops', :platforms => :ruby

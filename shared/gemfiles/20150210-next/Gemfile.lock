@@ -5,10 +5,10 @@ GEM
     hitimes (1.2.2)
     hitimes (1.2.2-x86-mingw32)
     kgio (2.9.3)
-    mysql2 (0.3.11)
-    mysql2 (0.3.11-x86-mingw32)
-    pg (0.18.1)
-    pg (0.18.1-x86-mingw32)
+    mysql2 (0.3.18)
+    mysql2 (0.3.18-x86-mingw32)
+    pg (0.18.2)
+    pg (0.18.2-x86-mingw32)
     puma (2.11.0)
       rack (>= 1.1, < 2.0)
     rack (1.6.0)
@@ -27,7 +27,7 @@ DEPENDENCIES
   fast-stemmer
   hitimes
   kgio
-  mysql2 (= 0.3.11)
+  mysql2
   pg
   puma
   raindrops
