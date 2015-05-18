@@ -164,7 +164,8 @@ fi
 echo
 
 header "Installing libffi"
-if [[ ! -e /usr/local/override/lib/libffi.so.6 ]]; then
+LIBFFI_FILE=`echo /usr/local/override/lib*/libffi.so.6`
+if [[ ! -e "$LIBFFI_FILE" ]]; then
 	download_and_extract libffi-$FFI_VERSION.tar.gz \
 		ftp://sourceware.org/pub/libffi/libffi-$FFI_VERSION.tar.gz
 	echo "Entering libffi-$FFI_VERSION"
@@ -205,7 +206,7 @@ fi
 echo
 
 header "Installing MySQL"
-if [[ ! -e /usr/local/override/lib/libmysqlclient.aa ]]; then
+if [[ ! -e /usr/local/override/lib/libmysqlclient.a ]]; then
 	download_and_extract mysql-connector-c-$MYSQL_LIB_VERSION-src.tar.gz \
 		http://dev.mysql.com/get/Downloads/Connector-C/mysql-connector-c-$MYSQL_LIB_VERSION-src.tar.gz
 	echo "Entering mysql-connector-c-$MYSQL_LIB_VERSION-src"
@@ -293,7 +294,7 @@ fi
 echo
 
 header "Installing ncurses..."
-if [[ ! -e /usr/local/override/lib/libncurses.5.so ]]; then
+if [[ ! -e /usr/local/override/lib/libncurses.a ]]; then
 	download_and_extract ncurses-$NCURSES_VERSION.tar.gz \
 		http://ftp.gnu.org/gnu/ncurses/ncurses-$NCURSES_VERSION.tar.gz
 	echo "Entering ncurses-$NCURSES_VERSION"
