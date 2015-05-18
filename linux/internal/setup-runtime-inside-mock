@@ -42,6 +42,7 @@ POSTGRESQL_VERSION=9.3.5
 ICU_VERSION=54.1
 ICU_DIR_VERSION=54_1
 LIBSSH2_VERSION=1.4.3
+NCURSES_VERSION=5.9
 
 
 echo "----- chroot entered -----"
@@ -82,7 +83,6 @@ run mkdir -p /usr/local/override/share/aclocal
 run cp /usr/share/aclocal/pkg.m4 /usr/local/override/share/aclocal/
 echo
 
-
 header "Installing automake..."
 if [[ ! -e /usr/local/override/bin/automake ]]; then
 	download_and_extract automake-$AUTOMAKE_VERSION.tar.gz \
@@ -102,7 +102,6 @@ if [[ ! -e /usr/local/override/bin/automake ]]; then
 fi
 echo
 
-
 header "Installing libtool..."
 if [[ ! -e /usr/local/override/bin/libtoolize ]]; then
 	download_and_extract libtool-$LIBTOOL_VERSION.tar.gz \
@@ -121,7 +120,6 @@ if [[ ! -e /usr/local/override/bin/libtoolize ]]; then
 	run rm -rf libtool-$LIBTOOL_VERSION
 fi
 echo
-
 
 header "Installing CMake..."
 if [[ ! -e /usr/local/override/bin/cmake ]]; then
@@ -291,5 +289,28 @@ if [[ ! -e /usr/local/override/lib/libssh2.a ]]; then
 	echo "Leaving source directory"
 	popd >/dev/null
 	run rm -rf libssh2-$LIBSSH2_VERSION
+fi
+echo
+
+header "Installing ncurses..."
+if [[ ! -e /usr/local/override/lib/libncurses.5.so ]]; then
+	download_and_extract ncurses-$NCURSES_VERSION.tar.gz \
+		http://ftp.gnu.org/gnu/ncurses/ncurses-$NCURSES_VERSION.tar.gz
+	echo "Entering ncurses-$NCURSES_VERSION"
+	pushd ncurses-$NCURSES_VERSION >/dev/null
+
+	run ./configure --prefix=/usr/local/override --without-shared --without-debug \
+		--without-normal --without-cxx --without-cxx-binding \
+		--without-ada --without-manpages --without-progs --without-tests \
+		--enable-pc-files --without-develop --disable-ext-funcs \
+		CFLAGS='-O2 -fPIC -fvisibility=hidden'
+	# For some reason run_tic.sh freezes, so we remove it.
+	echo '#!/bin/true' > misc/run_tic.sh
+	run make -j$CONCURRENCY
+	run make install
+
+	echo "Leaving source directory"
+	popd >/dev/null
+	run rm -rf ncurses-$NCURSES_VERSION
 fi
 echo
