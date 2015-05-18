@@ -248,7 +248,7 @@ run strip --strip-all /tmp/ruby/bin/ruby
 	find /tmp/ruby -name '*.so' | xargs strip --strip-debug
 )
 if [[ $? != 0 ]]; then
-	exit
+	exit 1
 fi
 run rm /tmp/ruby/bin/{erb,rdoc,ri}
 run rm -f /tmp/ruby/bin/testrb # Only Ruby 2.1 has it
