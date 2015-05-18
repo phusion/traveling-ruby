@@ -59,6 +59,8 @@ GEMS=(openssl readline rugged charlock_holmes unf_ext bcrypt RedCloth github/mar
 	hitimes redcarpet snappy curses)
 
 header "Testing gems..."
+export LD_BIND_NOW=1
+export DYLD_BIND_AT_LAUNCH=1
 for LIB in ${GEMS[@]}; do
 	run "$BUILD_OUTPUT_DIR/bin/ruby" -r$LIB -e true
 done
