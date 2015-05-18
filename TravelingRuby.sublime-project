@@ -1,0 +1,15 @@
+{
+	"folders":
+	[
+		{
+			"path": ".",
+			"folder_exclude_patterns":
+			[
+				"linux/runtime",
+				"linux/output",
+				"osx/runtime",
+				"osx/output"
+			]
+		}
+	]
+}

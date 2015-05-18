@@ -5,4 +5,5 @@
 /osx/work
 /windows/cache
 /windows/output
+*.sublime-workspace
 *.tar.gz
