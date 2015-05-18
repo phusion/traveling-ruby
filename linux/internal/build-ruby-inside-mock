@@ -307,8 +307,8 @@ if $SANITY_CHECK_OUTPUT; then
 	header "Sanity checking build output"
 	(
 		SYSTEM_LIBRARIES="(linux-gate|linux-vdso|libpthread|librt|libdl|libcrypt|libm|libc"
-		SYSTEM_LIBRARIES="$SYSTEM_LIBRARIES|ld-linux.*|libutil|libz|libxslt|libxml2|libreadline"
-		SYSTEM_LIBRARIES="$SYSTEM_LIBRARIES|libtermcap|libffi|libnsl|libgcc_s|libstdc\+\+)\.so"
+		SYSTEM_LIBRARIES="$SYSTEM_LIBRARIES|ld-linux.*|libutil|libnsl|libgcc_s|libstdc\+\+"
+		SYSTEM_LIBRARIES="$SYSTEM_LIBRARIES|libz|libtermcap|libffi)\.so"
 		ERROR=false
 		set -o pipefail
 		for F in /tmp/ruby/bin.real/ruby `find /tmp/ruby -name '*.so'`; do
