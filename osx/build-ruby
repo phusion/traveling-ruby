@@ -272,8 +272,8 @@ fi
 
 if $COMPILE; then
 	header "Compiling..."
-	run make -j$CONCURRENCY exts.mk
-	run make -j$CONCURRENCY
+	run make -j$CONCURRENCY Q= V=1 exts.mk
+	run make -j$CONCURRENCY Q= V=1
 	echo
 fi
 

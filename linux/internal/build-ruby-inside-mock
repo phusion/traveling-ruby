@@ -149,8 +149,8 @@ fi
 if $COMPILE; then
 	header "Compiling"
 	run sed -i 's|dir_config("openssl")|$libs << " -lz "; dir_config("openssl")|' ext/openssl/extconf.rb
-	run make -j$CONCURRENCY exts.mk
-	run make -j$CONCURRENCY
+	run make -j$CONCURRENCY Q= V=1 exts.mk
+	run make -j$CONCURRENCY Q= V=1
 	echo
 fi
 
