@@ -14,6 +14,7 @@ ARCHITECTURE=
 RUBY_VERSION=${RUBY_VERSIONS[0]}
 CONCURRENCY=$CPUCOUNT
 GEMFILE="$SELFDIR/../shared/gemfiles"
+DEBUG_SHELL=none
 SETUP_SOURCE=true
 COMPILE=true
 SANITY_CHECK_OUTPUT=true
@@ -34,6 +35,8 @@ function usage()
 	echo
 	echo "  -j NUMBER   Set build concurrency. Default: $CPUCOUNT"
 	echo "  -g PATH     Build gems as specified by the given Gemfile"
+	echo "  -d          Open a debugging shell before installing gems"
+	echo "  -D          Open a debugging shell after installing gems"
 	echo "  -h          Show this help"
 }
 
@@ -41,7 +44,7 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "a:r:ECGj:g:h" opt; do
+	while getopts "a:r:ECGj:g:dDh" opt; do
 		case "$opt" in
 		a)
 			ARCHITECTURE=$OPTARG
@@ -63,6 +66,12 @@ function parse_options()
 			;;
 		g)
 			GEMFILE="$OPTARG"
+			;;
+		d)
+			DEBUG_SHELL=before
+			;;
+		D)
+			DEBUG_SHELL=after
 			;;
 		h)
 			usage
@@ -123,8 +132,14 @@ if [[ "$GEMFILE" != "" ]]; then
 		fi
 	fi
 fi
+if [[ "$DEBUG_SHELL" = none ]]; then
+	TTY_ARGS=
+else
+	TTY_ARGS="-t -i"
+fi
 
 exec docker run \
+	$TTY_ARGS \
 	--rm \
 	--cap-add SYS_ADMIN --cap-add SYS_CHROOT \
 	-v "$SELFDIR/internal:/system:ro" \
@@ -141,6 +156,7 @@ exec docker run \
 	-e "SETUP_SOURCE=$SETUP_SOURCE" \
 	-e "COMPILE=$COMPILE" \
 	-e "SANITY_CHECK_OUTPUT=$SANITY_CHECK_OUTPUT" \
+	-e "DEBUG_SHELL=$DEBUG_SHELL" \
 	phusion/traveling-ruby-builder \
 	/system/my_init --quiet --skip-runit --skip-startup-files -- \
 	/system/build-ruby

@@ -29,6 +29,7 @@ echo $CONCURRENCY > $ROOT/system/CONCURRENCY
 echo $SETUP_SOURCE > $ROOT/system/SETUP_SOURCE
 echo $COMPILE > $ROOT/system/COMPILE
 echo $SANITY_CHECK_OUTPUT > $ROOT/system/SANITY_CHECK_OUTPUT
+echo $DEBUG_SHELL > $ROOT/system/DEBUG_SHELL
 echo "Entering mock chroot"
 run /system/setuser app /usr/bin/mock \
 	-r $CHROOT_NAME \

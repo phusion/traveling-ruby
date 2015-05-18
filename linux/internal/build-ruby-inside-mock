@@ -12,6 +12,7 @@ CONCURRENCY=`cat /system/CONCURRENCY`
 SETUP_SOURCE=`cat /system/SETUP_SOURCE`
 COMPILE=`cat /system/COMPILE`
 SANITY_CHECK_OUTPUT=`cat /system/SANITY_CHECK_OUTPUT`
+DEBUG_SHELL=`cat /system/DEBUG_SHELL`
 
 # Ensure that our static libraries are used first.
 export CFLAGS=-I/usr/local/override/include
@@ -103,20 +104,6 @@ exec "\$ROOT/bin.real/$NAME" "\$@"
 EOF
 	fi
 	chmod +x "$FILE"
-}
-
-function debug_shell()
-{
-	(
-		cd /tmp/ruby/lib/ruby/gems/*/gems
-		export PATH=/tmp/ruby/bin:$PATH
-		export TERM=xterm
-		export DEFAULT_LDFLAGS=`/tmp/ruby/bin/ruby -rrbconfig -e 'puts RbConfig::CONFIG["LDFLAGS"]'`
-		yum install -y nano
-		echo "Debugging shell activated"
-		sh
-	)
-	[[ $? == 0 ]]
 }
 
 cd /tmp
@@ -215,14 +202,8 @@ cat "/system/rbconfig_patch.rb" >> /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/$RUBY
 # removing explicitly gems.
 run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/{test-unit,rdoc}-*
 
-if [[ -e /system/gemfiles ]]; then
-	run /tmp/ruby/bin/gem install bundler -v $BUNDLER_VERSION --no-rdoc --no-ri
-
-	DEFAULT_LDFLAGS=`/tmp/ruby/bin/ruby -rrbconfig -e 'puts RbConfig::CONFIG["LDFLAGS"]'`
-	export BUNDLE_BUILD__CHARLOCK_HOLMES=--with-ldflags="'$DEFAULT_LDFLAGS -Wl,--whole-archive -licui18n -licuuc -licudata -Wl,--no-whole-archive -lstdc++'"
-	export BUNDLE_BUILD__RUGGED=--with-ldflags="'$DEFAULT_LDFLAGS -Wl,--whole-archive -lssl -lcrypto -Wl,--no-whole-archive'"
-	export BUNDLE_BUILD__PUMA=--with-ldflags="'$DEFAULT_LDFLAGS -Wl,--whole-archive -lssl -lcrypto -lz -Wl,--no-whole-archive'"
-
+function install_gems()
+{
 	for GEMFILE in /system/gemfiles/*/Gemfile; do
 		run cp "$GEMFILE" /tmp/ruby/
 		if [[ -e "$GEMFILE.lock" ]]; then
@@ -238,6 +219,45 @@ if [[ -e /system/gemfiles ]]; then
 		echo "+ Leaving /tmp/ruby"
 		popd >/dev/null
 	done
+}
+
+function open_debug_shell()
+{
+	export EDITOR=nano
+	export TERM=xterm-256color
+	export PATH=/tmp/ruby/bin:$PATH
+	unset PROMPT_COMMAND
+	if [[ ! -e /usr/bin/nano ]]; then
+		echo
+		echo "----------- Preparing debugging shell -----------"
+		run yum install -y nano
+	fi
+	echo
+	echo "-------------------------------------------"
+	echo "A debugging shell will be opened for you."
+	pushd /tmp/ruby/lib/ruby/gems/* >/dev/null
+	bash || true
+	popd >/dev/null
+}
+
+export DEFAULT_LDFLAGS=`/tmp/ruby/bin/ruby -rrbconfig -e 'puts RbConfig::CONFIG["LDFLAGS"]'`
+export BUNDLE_BUILD__CHARLOCK_HOLMES=--with-ldflags="'$DEFAULT_LDFLAGS -Wl,--whole-archive -licui18n -licuuc -licudata -Wl,--no-whole-archive -lstdc++'"
+export BUNDLE_BUILD__RUGGED=--with-ldflags="'$DEFAULT_LDFLAGS -Wl,--whole-archive -lssl -lcrypto -Wl,--no-whole-archive'"
+export BUNDLE_BUILD__PUMA=--with-ldflags="'$DEFAULT_LDFLAGS -Wl,--whole-archive -lssl -lcrypto -lz -Wl,--no-whole-archive'"
+
+if [[ "$DEBUG_SHELL" = before ]]; then
+	open_debug_shell
+fi
+if [[ -e /system/gemfiles ]]; then
+	run /tmp/ruby/bin/gem install bundler -v $BUNDLER_VERSION --no-rdoc --no-ri
+	if [[ "$DEBUG_SHELL" = after ]]; then
+		install_gems || true
+	else
+		install_gems
+	fi
+fi
+if [[ "$DEBUG_SHELL" = after ]]; then
+	open_debug_shell
 fi
 
 # Strip binaries and remove unnecessary files.
