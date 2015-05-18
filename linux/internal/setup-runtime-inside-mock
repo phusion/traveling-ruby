@@ -42,7 +42,6 @@ POSTGRESQL_VERSION=9.3.5
 ICU_VERSION=54.1
 ICU_DIR_VERSION=54_1
 LIBSSH2_VERSION=1.4.3
-NCURSES_VERSION=5.9
 
 
 echo "----- chroot entered -----"
@@ -56,7 +55,7 @@ for F in *; do
 done
 run rpm --rebuilddb
 run yum install -y @development-tools gcc gcc-c++ wget sudo zlib-devel \
-	readline-devel ccache
+	readline-devel ncurses-devel ccache
 run mkdir -p /ccache
 echo
 
@@ -290,28 +289,5 @@ if [[ ! -e /usr/local/override/lib/libssh2.a ]]; then
 	echo "Leaving source directory"
 	popd >/dev/null
 	run rm -rf libssh2-$LIBSSH2_VERSION
-fi
-echo
-
-header "Installing ncurses..."
-if [[ ! -e /usr/local/override/lib/libncurses.a ]]; then
-	download_and_extract ncurses-$NCURSES_VERSION.tar.gz \
-		http://ftp.gnu.org/gnu/ncurses/ncurses-$NCURSES_VERSION.tar.gz
-	echo "Entering ncurses-$NCURSES_VERSION"
-	pushd ncurses-$NCURSES_VERSION >/dev/null
-
-	run ./configure --prefix=/usr/local/override --without-shared --without-debug \
-		--without-normal --without-cxx --without-cxx-binding \
-		--without-ada --without-manpages --without-progs --without-tests \
-		--enable-pc-files --without-develop --disable-ext-funcs \
-		CFLAGS='-O2 -fPIC -fvisibility=hidden'
-	# For some reason run_tic.sh freezes, so we remove it.
-	echo '#!/bin/true' > misc/run_tic.sh
-	run make -j$CONCURRENCY
-	run make install
-
-	echo "Leaving source directory"
-	popd >/dev/null
-	run rm -rf ncurses-$NCURSES_VERSION
 fi
 echo

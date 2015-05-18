@@ -56,6 +56,9 @@ echo ORIG_RUBYLIB=\"$RUBYLIB\"
 echo LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH:$ROOT/lib\"
 echo SSL_CERT_FILE=\"$ROOT/lib/ca-bundle.crt\"
 echo RUBYOPT=\"-r$ROOT/lib/restore_environment\"
+for DIR in "$ROOT"/lib/ruby/gems/*/deplibs/*/*; do
+	echo LD_LIBRARY_PATH=\"\$LD_LIBRARY_PATH:$DIR\"
+done
 EOF
 	echo "echo GEM_HOME=\"\$ROOT/lib/ruby/gems/$RUBY_COMPAT_VERSION\"" >> "$FILE"
 	echo "echo GEM_PATH=\"\$ROOT/lib/ruby/gems/$RUBY_COMPAT_VERSION\"" >> "$FILE"
@@ -149,6 +152,8 @@ fi
 if $COMPILE; then
 	header "Compiling"
 	run sed -i 's|dir_config("openssl")|$libs << " -lz "; dir_config("openssl")|' ext/openssl/extconf.rb
+	# Do not link to ncurses. We want it to link to libtermcap instead, which is much smaller.
+	run sed -i '/ncurses/d' ext/readline/extconf.rb
 	run make -j$CONCURRENCY Q= V=1 exts.mk
 	run make -j$CONCURRENCY Q= V=1
 	echo
@@ -192,6 +197,12 @@ echo $RUBY_COMPAT_VERSION > /tmp/ruby/info/RUBY_COMPAT_VERSION
 echo $RUBY_ARCH > /tmp/ruby/info/RUBY_ARCH
 echo $GEM_PLATFORM > /tmp/ruby/info/GEM_PLATFORM
 echo $GEM_EXTENSION_API_VERSION > /tmp/ruby/info/GEM_EXTENSION_API_VERSION
+
+# Install gem-specific library dependencies.
+run mkdir -p /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/deplibs/$GEM_PLATFORM
+pushd /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/deplibs/$GEM_PLATFORM
+run mkdir curses && run cp $USRLIBDIR/libncursesw.so.5 curses/
+popd
 
 echo "Patching rbconfig.rb"
 echo >> /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/$RUBY_ARCH/rbconfig.rb
@@ -308,7 +319,7 @@ if $SANITY_CHECK_OUTPUT; then
 	(
 		SYSTEM_LIBRARIES="(linux-gate|linux-vdso|libpthread|librt|libdl|libcrypt|libm|libc"
 		SYSTEM_LIBRARIES="$SYSTEM_LIBRARIES|ld-linux.*|libutil|libnsl|libgcc_s|libstdc\+\+"
-		SYSTEM_LIBRARIES="$SYSTEM_LIBRARIES|libz|libtermcap|libffi)\.so"
+		SYSTEM_LIBRARIES="$SYSTEM_LIBRARIES|libz|libtermcap|libreadline|libncursesw|libffi)\.so"
 		ERROR=false
 		set -o pipefail
 		for F in /tmp/ruby/bin.real/ruby `find /tmp/ruby -name '*.so'`; do

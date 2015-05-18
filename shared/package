@@ -8,7 +8,6 @@ BUNDLER_VERSION=`cat "$SELFDIR/../BUNDLER_VERSION.txt"`
 
 BUILD_OUTPUT_DIR=
 RUBY_PACKAGE=
-GEM_NATIVE_EXTENSIONS_PACKAGE=
 GEM_NATIVE_EXTENSIONS_DIR=
 
 function load_ruby_info()
@@ -42,8 +41,7 @@ function usage()
 	echo
 	echo "Options:"
 	echo "  -r PATH    Package Ruby into given file"
-	echo "  -e PATH    Package gem native extensions into a single file"
-	echo "  -E DIR     Package gem native extensions into separate files in the given directory"
+	echo "  -E DIR     Package gem native extensions into the given directory"
 	echo "  -h         Show this help"
 }
 
@@ -51,13 +49,10 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "r:e:E:h" opt; do
+	while getopts "r:E:h" opt; do
 		case "$opt" in
 		r)
 			RUBY_PACKAGE="$OPTARG"
-			;;
-		e)
-			GEM_NATIVE_EXTENSIONS_PACKAGE="$OPTARG"
 			;;
 		E)
 			GEM_NATIVE_EXTENSIONS_DIR="$OPTARG"
@@ -80,8 +75,8 @@ function parse_options()
 		usage
 		exit 1
 	fi
-	if [[ "$RUBY_PACKAGE" = "" && "$GEM_NATIVE_EXTENSIONS_PACKAGE" = "" && "$GEM_NATIVE_EXTENSIONS_DIR" = "" ]]; then
-		echo "ERROR: you must specify either a Ruby package path (-r), a gem native extensions package (-e) or a gem native extensions directory (-E)."
+	if [[ "$RUBY_PACKAGE" = "" && "$GEM_NATIVE_EXTENSIONS_DIR" = "" ]]; then
+		echo "ERROR: you must specify either a Ruby package path (-r) or a gem native extensions directory (-E)."
 		exit 1
 	fi
 	if [[ ! -e "$BUILD_OUTPUT_DIR" ]]; then
@@ -108,6 +103,7 @@ if [[ "$RUBY_PACKAGE" != "" ]]; then
 		--exclude "lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/*" \
 		--exclude "lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*" \
 		--exclude "lib/ruby/gems/$RUBY_COMPAT_VERSION/specifications/*" \
+		--exclude "lib/ruby/gems/$RUBY_COMPAT_VERSION/deplibs/*" \
 		.
 	run tar -rf "$RUBY_PACKAGE.tmp" -C "$BUILD_OUTPUT_DIR" \
 		"./lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/bundler-$BUNDLER_VERSION" \
@@ -118,25 +114,26 @@ if [[ "$RUBY_PACKAGE" != "" ]]; then
 	run rm "$RUBY_PACKAGE.tmp"
 fi
 
-if [[ "$GEM_NATIVE_EXTENSIONS_PACKAGE" != "" ]]; then
-	echo
-	header "Packaging gem native extensions..."
-	if [[ ${#NATIVE_GEMS[@]} -eq 0 ]]; then
-		echo "There are no gems with native extensions."
-	else
-		run tar -czf "$GEM_NATIVE_EXTENSIONS_PACKAGE" -C "$BUILD_OUTPUT_DIR/lib/ruby/gems" "$RUBY_COMPAT_VERSION/extensions"
-	fi
-elif [[ "$GEM_NATIVE_EXTENSIONS_DIR" != "" ]]; then
+if [[ "$GEM_NATIVE_EXTENSIONS_DIR" != "" ]]; then
 	echo
 	header "Packaging gem native extensions..."
 	if [[ ${#NATIVE_GEMS[@]} -eq 0 ]]; then
 		echo "There are no gems with native extensions."
 	else
 		run mkdir -p "$GEM_NATIVE_EXTENSIONS_DIR"
+		NATIVE_GEMS=(curses-1.0.1)
 		for GEM_NAME in "${NATIVE_GEMS[@]}"; do
-			run tar -czf "$GEM_NATIVE_EXTENSIONS_DIR/$GEM_NAME.tar.gz" \
+			GEM_NAME_WITHOUT_VERSION=`echo "$GEM_NAME" | sed -E 's/(.*)-.*/\1/'`
+			run tar -cf "$GEM_NATIVE_EXTENSIONS_DIR/$GEM_NAME.tar" \
 				-C "$BUILD_OUTPUT_DIR/lib/ruby/gems" \
 				"$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/$GEM_NAME"
+			if [[ -e "$BUILD_OUTPUT_DIR/lib/ruby/gems/$RUBY_COMPAT_VERSION/deplibs/$GEM_PLATFORM/$GEM_NAME_WITHOUT_VERSION" ]]; then
+				run tar -rf "$GEM_NATIVE_EXTENSIONS_DIR/$GEM_NAME.tar" \
+					-C "$BUILD_OUTPUT_DIR/lib/ruby/gems" \
+					"$RUBY_COMPAT_VERSION/deplibs/$GEM_PLATFORM/$GEM_NAME_WITHOUT_VERSION"
+			fi
+			run rm -f "$GEM_NATIVE_EXTENSIONS_DIR/$GEM_NAME.tar.gz"
+			run gzip --best --no-name "$GEM_NATIVE_EXTENSIONS_DIR/$GEM_NAME.tar"
 		done
 	fi
 fi
