@@ -121,7 +121,6 @@ if [[ "$GEM_NATIVE_EXTENSIONS_DIR" != "" ]]; then
 		echo "There are no gems with native extensions."
 	else
 		run mkdir -p "$GEM_NATIVE_EXTENSIONS_DIR"
-		NATIVE_GEMS=(curses-1.0.1)
 		for GEM_NAME in "${NATIVE_GEMS[@]}"; do
 			GEM_NAME_WITHOUT_VERSION=`echo "$GEM_NAME" | sed -E 's/(.*)-.*/\1/'`
 			run tar -cf "$GEM_NATIVE_EXTENSIONS_DIR/$GEM_NAME.tar" \
