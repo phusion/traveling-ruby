@@ -5,6 +5,7 @@
  * Upgraded bundler gem to version 1.9.9.
  * Upgraded mysql2 gem to version 0.3.11.
  * Upgraded pg gem to version 0.18.2.
+ * Upgraded bundler gem to version 1.9.9.
  * The sqlite3, pg, rugged and charlock_holmes gems are now smaller because they are now compiled with better compiler optimizations. The total reduction of all these gems together is 4 MB uncompressed.
 
 ## Version 20150210
