@@ -171,7 +171,7 @@ Yes. OS X versions up to 10.8 Mountain Lion ship Ruby 1.8. Only starting from 10
 
 <a name="windows_support"></a>
 
-### Why does Traveling Ruby support Windows?
+### Does Traveling Ruby support Windows?
 
 [Yes](TUTORIAL-4.md), but with some [caveats](#caveats).
 
