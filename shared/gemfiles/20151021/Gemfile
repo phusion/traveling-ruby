@@ -1,0 +1,12 @@
+source 'https://rubygems.org'
+
+gem 'json'
+gem 'nokogiri'
+gem 'blockenspiel'
+gem 'eventmachine'
+gem 'redcarpet'
+gem 'thin'
+gem 'sqlite3'
+gem 'mysql2'
+gem 'pg'
+

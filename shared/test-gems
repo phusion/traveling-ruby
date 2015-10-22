@@ -56,7 +56,7 @@ parse_options "$@"
 GEMS=(openssl readline rugged charlock_holmes unf_ext bcrypt RedCloth github/markdown
 	eventmachine escape_utils json nokogiri mysql2 ffi pg posix-spawn
 	thin sqlite3 yajl puma/puma_http11 kgio raindrops fast-stemmer
-	hitimes redcarpet snappy curses)
+	hitimes redcarpet snappy curses blockenspiel)
 
 header "Testing gems..."
 export LD_BIND_NOW=1
