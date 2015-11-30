@@ -1,3 +1,9 @@
+## Version 20150715
+
+Upgrading to this version is strongly recommended because of the OpenSSL upgrade, which fixes some security vulnerabilities!
+
+ * Upgraded to OpenSSL 1.0.2d.
+
 ## Version 20150517
 
  * The Ruby versions that we now support are: 2.1.6 and 2.2.2.
