@@ -1,0 +1,17 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    cool.io (1.4.2)
+    http_parser.rb (0.6.0)
+    msgpack (0.5.12)
+    string-scrub (0.0.5)
+
+PLATFORMS
+  ruby
+  x86-mingw32
+
+DEPENDENCIES
+  cool.io
+  http_parser.rb
+  msgpack
+  string-scrub

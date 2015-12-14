@@ -7,10 +7,11 @@ function download_and_extract()
 {
 	local BASENAME="$1"
 	local URL="$2"
+	local OPTS="$3"
 	local regex='\.bz2$'
 
 	run rm -f "$BASENAME"
-	run wget -O "$BASENAME" "$URL"
+	run wget ${OPTS} -O "$BASENAME" "$URL"
 	if [[ "$URL" =~ $regex ]]; then
 		run tar xjf "$BASENAME"
 	else
@@ -34,7 +35,7 @@ AUTOCONF_VERSION=2.69
 AUTOMAKE_VERSION=1.15
 LIBTOOL_VERSION=2.4.6
 CMAKE_VERSION=3.0.2
-OPENSSL_VERSION=1.0.2d
+OPENSSL_VERSION=1.0.2e
 FFI_VERSION=3.2.1
 SQLITE3_VERSION=3080702
 MYSQL_LIB_VERSION=6.1.5
@@ -123,7 +124,7 @@ echo
 header "Installing CMake..."
 if [[ ! -e /usr/local/override/bin/cmake ]]; then
 	download_and_extract cmake-$CMAKE_VERSION.tar.gz \
-		http://www.cmake.org/files/v3.0/cmake-$CMAKE_VERSION.tar.gz
+		http://www.cmake.org/files/v3.0/cmake-$CMAKE_VERSION.tar.gz --no-check-certificate
 	echo "Entering cmake-$CMAKE_VERSION"
 	pushd cmake-$CMAKE_VERSION >/dev/null
 

@@ -1,0 +1,6 @@
+source 'https://rubygems.org'
+
+gem 'cool.io'
+gem 'string-scrub'
+gem 'http_parser.rb'
+gem 'msgpack'
