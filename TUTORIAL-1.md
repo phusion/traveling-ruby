@@ -155,7 +155,8 @@ Going through all of the above steps on every release is a hassle, so you should
 
 ```Ruby
 PACKAGE_NAME = "hello"
-VERSION = "1.0.0"
+PACKAGE_VERSION = "1.0.0"
+PACKAGE_MAIN = "hello.rb"
 TRAVELING_RUBY_VERSION = "20150210-2.1.5"
 
 desc "Package your app"
@@ -193,14 +194,15 @@ file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz" do
 end
 
 def create_package(target)
-  package_dir = "#{PACKAGE_NAME}-#{VERSION}-#{target}"
+  package_dir = "#{PACKAGE_NAME}-#{PACKAGE_VERSION}-#{target}"
   sh "rm -rf #{package_dir}"
   sh "mkdir -p #{package_dir}/lib/app"
-  sh "cp hello.rb #{package_dir}/lib/app/"
-  sh "mkdir #{package_dir}/lib/ruby"
+  sh "cp #{PACKAGE_MAIN} #{package_dir}/lib/app/"
+  sh "mkdir -p #{package_dir}/lib/ruby"
+  sh "mkdir -p packaging/"
   sh "tar -xzf packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz -C #{package_dir}/lib/ruby"
-  sh "cp packaging/wrapper.sh #{package_dir}/hello"
-  if !ENV['DIR_ONLY']
+  sh "cp packaging/wrapper.sh #{package_dir}/#{PACKAGE_NAME}"
+  if !ENV["DIR_ONLY"]
     sh "tar -czf #{package_dir}.tar.gz #{package_dir}"
     sh "rm -rf #{package_dir}"
   end
