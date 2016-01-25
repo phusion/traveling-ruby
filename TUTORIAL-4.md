@@ -53,17 +53,17 @@ We must update the `create_package` method so that it generates the package slig
 def create_package(target, os_type = :unix)
 ```
 
-This method contains a line which copies `wrapper.sh`, but we'll want to copy `wrapper.bat` when creating Windows packages. 
+This method contains a line which copies `wrapper.sh`, but we'll want to copy `wrapper.bat` when creating Windows packages.
 
 ```Ruby
 # Look for:
-sh "cp packaging/wrapper.sh #{package_dir}/hello"
+sh "cp packaging/wrapper.sh #{package_dir}/#{PACKAGE_NAME}"
 
 # Replace it with:
 if os_type == :unix
-  sh "cp packaging/wrapper.sh #{package_dir}/hello"
+  sh "cp packaging/wrapper.sh #{package_dir}/#{PACKAGE_NAME}"
 else
-  sh "cp packaging/wrapper.bat #{package_dir}/hello.bat"
+  sh "cp packaging/wrapper.bat #{package_dir}/#{PACKAGE_NAME}.bat"
 end
 ```
 
