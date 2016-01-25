@@ -128,7 +128,7 @@ hello world
 
 We update the Rakefile so that all of the above steps are automated by running `rake package`. The `package:bundle_install` task has been updated to remove any locally compiled native extensions. The various packaging tasks have been updated to extract platform-specific native extension binaries.
 
-```bash
+```ruby
 # For Bundler.with_clean_env
 require 'bundler/setup'
 
