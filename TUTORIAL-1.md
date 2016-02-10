@@ -38,14 +38,14 @@ mkdir -p hello-1.0.0-osx/lib/app/
 cp hello.rb hello-1.0.0-osx/lib/app/
 ```
 
-Next, create a `packaging` directory and download Traveling Ruby binaries for each platform into that directory. Then extract these binaries into each packaging directory. You can find a list of binaries at [the Traveling Ruby Amazon S3 bucket](http://traveling-ruby.s3-us-west-2.amazonaws.com/list.html). For faster download times, use the CloudFront domain "http://d6r77u77i8pq3.cloudfront.net". In this tutorial we're extracting version 20141215-2.1.5.
+Next, create a `packaging` directory and download Traveling Ruby binaries for each platform into that directory. Then extract these binaries into each packaging directory. You can find a list of binaries at [the Traveling Ruby Amazon S3 bucket](https://traveling-ruby.s3-us-west-2.amazonaws.com/list.html). For faster download times, use the CloudFront domain "https://d6r77u77i8pq3.cloudfront.net". In this tutorial we're extracting version 20141215-2.1.5.
 
 ```Bash
 mkdir packaging
 cd packaging
-curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141215-2.1.5-linux-x86.tar.gz
-curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141215-2.1.5-linux-x86_64.tar.gz
-curl -L -O --fail http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141215-2.1.5-osx.tar.gz
+curl -L -O --fail https://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141215-2.1.5-linux-x86.tar.gz
+curl -L -O --fail https://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141215-2.1.5-linux-x86_64.tar.gz
+curl -L -O --fail https://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-20141215-2.1.5-osx.tar.gz
 cd ..
 
 mkdir hello-1.0.0-linux-x86/lib/ruby && tar -xzf packaging/traveling-ruby-20141215-2.1.5-linux-x86.tar.gz -C hello-1.0.0-linux-x86/lib/ruby
@@ -208,7 +208,7 @@ end
 
 def download_runtime(target)
   sh "cd packaging && curl -L -O --fail " +
-    "http://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz"
+    "https://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-#{TRAVELING_RUBY_VERSION}-#{target}.tar.gz"
 end
 ```
 
