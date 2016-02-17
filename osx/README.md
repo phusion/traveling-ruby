@@ -11,13 +11,11 @@ You can view all tasks by running `rake -T`.
 
 ## Installing the OS X 10.8 SDK
 
-The OS X 10.8 SDK is included in Xcode 5. If you are using a newer version of Xcode then you can install it as follows.
+You are required to use an older version of Xcode as you need to have the OS X 10.8 SDK installed locally. You can install Xcode 5.1.1 as follows.
 
 ### 1. Download Xcode 5.1.1
 
-![](https://raw.githubusercontent.com/phusion/traveling-ruby/master/doc/download_xcode.jpg)
-
-Go to the Apple Developer website and download Xcode 5.1.1.
+Open the [Developer Portal download page](https://developer.apple.com/downloads/) and login with your Apple account. When you see the list of downloads, just open the [xcode_5.1.1.dmg link](http://adcdownload.apple.com/Developer_Tools/xcode_5.1.1/xcode_5.1.1.dmg) in your browser.
 
 ### 2. Show Xcode package contents
 
