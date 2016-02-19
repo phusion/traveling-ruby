@@ -34,7 +34,7 @@ AUTOCONF_VERSION=2.69
 AUTOMAKE_VERSION=1.15
 LIBTOOL_VERSION=2.4.6
 CMAKE_VERSION=3.0.2
-OPENSSL_VERSION=1.0.2d
+OPENSSL_VERSION=1.0.2f
 FFI_VERSION=3.2.1
 SQLITE3_VERSION=3080702
 MYSQL_LIB_VERSION=6.1.5
@@ -140,7 +140,7 @@ echo
 header "Installing OpenSSL"
 if [[ ! -e /usr/local/override/bin/openssl ]]; then
 	download_and_extract openssl-$OPENSSL_VERSION.tar.gz \
-		http://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz
+		https://www.openssl.org/source/openssl-$OPENSSL_VERSION.tar.gz
 	echo "Entering openssl-$OPENSSL_VERSION"
 	pushd openssl-$OPENSSL_VERSION >/dev/null
 
