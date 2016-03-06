@@ -62,18 +62,30 @@ ruby -v
 # => ruby 2.1.x [...]
 ```
 
-Next, install the gem bundle for packaging. We do this by copying the Gemfile to a temporary directory and running Bundler there, because passing `--path` and `--without` to Bundler will change its configuration file. We don't want to persist such changes in our development Bundler config.
+Next, install the gem bundle for packaging.
+
+We do this by copying the Gemfile to one new directory `packaging/vendor`.
 
 ```Bash
-mkdir packaging/tmp
-cp Gemfile Gemfile.lock packaging/tmp/
-cd packaging/tmp
-BUNDLE_IGNORE_CONFIG=1 bundle install --path ../vendor --without development
-cd ../..
-rm -rf packaging/tmp
+mkdir -p packaging/vendor/.bundle
+cp Gemfile Gemfile.lock packaging/vendor
 ```
 
-Note that we passed `--without development` so that Rake isn't installed. In the final packages there is no need to include Rake.
+And add a bundler config file for this Gemfile.
+create `packaging/vendor/.bundle/config` which contains:
+
+```Bash
+BUNDLE_PATH: .
+BUNDLE_WITHOUT: development
+BUNDLE_DISABLE_SHARED_GEMS: '1'
+```
+
+Then, we need entering vendor directory, and run `bundle`.
+
+```Bash
+cd packaging/vendor
+bundle
+```
 
 Bundler also stores various cache files, which we also don't need to package, so we remove them:
 
@@ -97,30 +109,6 @@ Copy over your Gemfile and Gemfile.lock into each gem directory inside the packa
 cp Gemfile Gemfile.lock hello-1.0.0-linux-x86/lib/vendor/
 cp Gemfile Gemfile.lock hello-1.0.0-linux-x86_64/lib/vendor/
 cp Gemfile Gemfile.lock hello-1.0.0-osx/lib/vendor/
-```
-
-## Bundler config file
-
-We must create a Bundler config file for each of the gem directories inside the packages. This Bundler config file tells Bundler that gems are to be found in the same directory that the Gemfile resides in, and that gems in the "development" group should not be loaded.
-
-First, create `packaging/bundler-config` which contains:
-
-```Bash
-BUNDLE_PATH: .
-BUNDLE_WITHOUT: development
-BUNDLE_DISABLE_SHARED_GEMS: '1'
-```
-
-Then copy the file into `.bundle` directories inside the gem directories inside the packages;
-
-```Bash
-mkdir hello-1.0.0-linux-x86/lib/vendor/.bundle
-mkdir hello-1.0.0-linux-x86_64/lib/vendor/.bundle
-mkdir hello-1.0.0-osx/lib/vendor/.bundle
-
-cp packaging/bundler-config hello-1.0.0-linux-x86/lib/vendor/.bundle/config
-cp packaging/bundler-config hello-1.0.0-linux-x86_64/lib/vendor/.bundle/config
-cp packaging/bundler-config hello-1.0.0-osx/lib/vendor/.bundle/config
 ```
 
 ## Wrapper script
