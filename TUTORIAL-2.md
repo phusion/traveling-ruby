@@ -103,14 +103,6 @@ cp -pR packaging/vendor hello-1.0.0-linux-x86_64/lib/
 cp -pR packaging/vendor hello-1.0.0-osx/lib/
 ```
 
-Copy over your Gemfile and Gemfile.lock into each gem directory inside the packages:
-
-```Bash
-cp Gemfile Gemfile.lock hello-1.0.0-linux-x86/lib/vendor/
-cp Gemfile Gemfile.lock hello-1.0.0-linux-x86_64/lib/vendor/
-cp Gemfile Gemfile.lock hello-1.0.0-osx/lib/vendor/
-```
-
 ## Wrapper script
 
 Modify the wrapper script `packaging/wrapper.sh`, which we originally created in [tutorial 1](TUTORIAL-1.md). It should be modified to perform two more things:
