@@ -34,13 +34,13 @@ puts "Hello #{Faker::Name.name}, database file modified."
 
 Then install your gem bundle:
 
-```Bash
+```
 $ bundle install
 ```
 
 Verify that the modified program works:
 
-```Bash
+```
 $ bundle exec ruby hello.rb
 Hello Freida Walker, database file modified.
 $ sqlite3 hello.sqlite3
@@ -56,13 +56,13 @@ Recall that the idea is that we create a package for every platform, and that we
 
 Using the Rakefile from tutorial 2, create the gem bundle which is to be included in packages:
 
-```Bash
+```
 $ rake package:bundle_install
 ```
 
 Run these to remove any native extensions and compilation products from that bundle:
 
-```Bash
+```
 $ rm -rf packaging/vendor/ruby/*/extensions
 $ find packaging/vendor/ruby/*/gems -name '*.so' | xargs rm -f
 $ find packaging/vendor/ruby/*/gems -name '*.bundle' | xargs rm -f
@@ -73,13 +73,13 @@ $ find packaging/vendor/ruby/*/gems -name '*.o' | xargs rm -f
 
 Now you are ready to drop platform-specific native extensions inside the packages. First, create the package directories:
 
-```Bash
+```
 $ rake package DIR_ONLY=1
 ```
 
 Next you must download the necessary native extensions, and extract them into `<PACKAGE DIR>/lib/vendor`. You can find native extensions at [the Traveling Ruby Amazon S3 bucket](https://traveling-ruby.s3-us-west-2.amazonaws.com/list.html). Suppose that you're using Traveling Ruby version 20141215-2.1.5, which supplies sqlite3 version 1.3.9. Download and extract the precompiled binaries as follows. Remember that we're using CloudFront domain "https://d6r77u77i8pq3.cloudfront.net" to speed up downloads.
 
-```Bash
+```
 $ cd hello-1.0.0-linux-x86/lib/vendor/ruby
 $ curl -L -O --fail https://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-gems-20141215-2.1.5-linux-x86/sqlite3-1.3.9.tar.gz
 $ tar xzf sqlite3-1.3.9.tar.gz
@@ -103,7 +103,7 @@ $ cd ../../../..
 
 Package the directories and finalize the packages:
 
-```Bash
+```
 $ tar -czf hello-1.0.0-linux-x86.tar.gz hello-1.0.0-linux-x86
 $ tar -czf hello-1.0.0-linux-x86_64.tar.gz hello-1.0.0-linux-x86_64
 $ tar -czf hello-1.0.0-osx.tar.gz hello-1.0.0-osx
@@ -114,7 +114,7 @@ $ rm -rf hello-1.0.0-osx
 
 Now you can test whether it works. Suppose that you're developing on OS X. Extract the OS X package and test it:
 
-```Bash
+```
 $ tar xzf hello-1.0.0-osx.tar.gz
 $ cd hello-1.0.0-osx
 $ ./hello
