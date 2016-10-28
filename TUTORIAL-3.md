@@ -6,7 +6,7 @@ Normally, native extensions need to be compiled. But the goal of Traveling Ruby 
 
 So instead, the Traveling Ruby project supplies a number of precompiled native extensions that you can drop into your packages. Only specific versions are supplied, so your Gemfile must match the versions of the native extension gems that we supply.
 
-**Windows notes**: native extenstions are not yet supported in Windows! See the [caveats](README.md#caveats).
+**Windows notes**: native extensions are not yet supported in Windows! See the [caveats](README.md#caveats).
 
 ## Preparation
 
