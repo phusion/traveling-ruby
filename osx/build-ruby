@@ -48,10 +48,10 @@ echo ORIG_RUBYLIB=\"$RUBYLIB\"
 
 echo TERMINFO=/usr/share/terminfo
 echo SSL_CERT_FILE=\"$ROOT/lib/ca-bundle.crt\"
-echo RUBYOPT=\"-r$ROOT/lib/restore_environment\"
+echo RUBYOPT=\"-rrestore_environment\"
 EOF
-	echo "echo GEM_HOME=\"\$ROOT/lib/ruby/gems/$RUBY_COMPAT_VERSION\"" >> "$FILE"
-	echo "echo GEM_PATH=\"\$ROOT/lib/ruby/gems/$RUBY_COMPAT_VERSION\"" >> "$FILE"
+	echo "echo GEM_HOME=\\\"\$ROOT/lib/ruby/gems/$RUBY_COMPAT_VERSION\\\"" >> "$FILE"
+	echo "echo GEM_PATH=\\\"\$ROOT/lib/ruby/gems/$RUBY_COMPAT_VERSION\\\"" >> "$FILE"
 
 	cat >> "$FILE" <<EOF
 echo RUBYLIB=\"$LOAD_PATHS\"
@@ -296,7 +296,7 @@ pushd "$TMPBUILDROOT" >/dev/null
 
 # Copy over various useful files.
 run cp -pR "$RUNTIME_DIR"/lib/*.dylib* lib/
-run cp "$SELFDIR/internal/restore_environment.rb" lib/
+run cp "$SELFDIR/internal/restore_environment.rb" lib/ruby/site_ruby/
 run cp "$SELFDIR/../shared/ca-bundle.crt" lib/
 export SSL_CERT_FILE="$TMPBUILDROOT/lib/ca-bundle.crt"
 
