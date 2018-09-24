@@ -99,6 +99,7 @@ For the OS X build system, see [osx/README.md](osx/README.md).
  * Native extensions support for Windows. We're currently blocked by the fact that [the RubyInstaller project](http://rubyinstaller.org/) hasn't been updated for Ruby 2.2.0 yet.
  * Document the Windows build system.
  * Support for creating a single executable instead of a directory.
+ * Draw inspiration from [enclose.io](http://enclose.io/)/[ruby-packer](https://github.com/pmq20/ruby-packer). See [this Hacker News comment](https://news.ycombinator.com/item?id=18056048) for my comparison analysis.
 
 ## FAQ
 
