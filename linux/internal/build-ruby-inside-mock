@@ -13,6 +13,7 @@ SETUP_SOURCE=`cat /system/SETUP_SOURCE`
 COMPILE=`cat /system/COMPILE`
 SANITY_CHECK_OUTPUT=`cat /system/SANITY_CHECK_OUTPUT`
 DEBUG_SHELL=`cat /system/DEBUG_SHELL`
+CA_CERT_URL = 'https://curl.haxx.se/ca/cacert.pem' # from cURL
 
 # Ensure that our static libraries are used first.
 export CFLAGS=-I/usr/local/override/include
@@ -182,7 +183,7 @@ run cp $LIBDIR/libz.so.1 /tmp/ruby/lib/
 run cp $LIBDIR/libtermcap.so.2 /tmp/ruby/lib/
 run cp $USRLIBDIR/libreadline.so.5 /tmp/ruby/lib/
 run cp $FFILIBDIR/libffi.so.6 /tmp/ruby/lib/
-run cp /system/ca-bundle.crt /tmp/ruby/lib/
+run curl -o /tmp/ruby/lib/ca-bundle.crt "$CA_CERT_URL"
 run cp /system/restore_environment.rb /tmp/ruby/lib/
 export SSL_CERT_FILE=/tmp/ruby/lib/ca-bundle.crt
 

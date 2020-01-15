@@ -14,6 +14,7 @@ CACHE_DIR=
 OUTPUT_DIR=
 ARCHITECTURE=x86
 RUBY_VERSION=${RUBY_VERSIONS[$LAST_RUBY_VERSION_INDEX]}
+CA_CERT_URL = 'https://curl.haxx.se/ca/cacert.pem' # from cURL
 
 function usage()
 {
@@ -187,7 +188,7 @@ header "Postprocessing..."
 echo "+ Entering $OUTPUT_DIR"
 pushd "$OUTPUT_DIR"
 
-run cp "$SELFDIR/../shared/ca-bundle.crt" lib/
+run curl -o lib/ca-bundle.crt "$CA_CERT_URL"
 
 run rm bin/{erb,rdoc,ri}*
 run rm -f bin/testrb* # Only Ruby 2.1 has it

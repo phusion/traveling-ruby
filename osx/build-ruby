@@ -7,6 +7,7 @@ source "$SELFDIR/internal/reset_environment.sh"
 source "$SELFDIR/../shared/library.sh"
 BUNDLER_VERSION=`cat "$SELFDIR/../BUNDLER_VERSION.txt"`
 RUBY_VERSIONS=(`cat "$SELFDIR/../RUBY_VERSIONS.txt"`)
+CA_CERT_URL = 'https://curl.haxx.se/ca/cacert.pem' # from cURL
 
 GEMFILES=()
 
@@ -297,7 +298,7 @@ pushd "$TMPBUILDROOT" >/dev/null
 # Copy over various useful files.
 run cp -pR "$RUNTIME_DIR"/lib/*.dylib* lib/
 run cp "$SELFDIR/internal/restore_environment.rb" lib/
-run cp "$SELFDIR/../shared/ca-bundle.crt" lib/
+run curl -o lib/ca-bundle.crt "$CA_CERT_URL"
 export SSL_CERT_FILE="$TMPBUILDROOT/lib/ca-bundle.crt"
 
 # Dump various information about the Ruby binaries.
