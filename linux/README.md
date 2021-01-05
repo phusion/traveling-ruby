@@ -25,7 +25,7 @@ But there is a problem with Docker: we cannot create Mock chroots within a Docke
 
 ### The runtime setup phase
 
-![](https://raw.githubusercontent.com/phusion/traveling-ruby/master/doc/linux_build_system_setup_runtime.png)<br>
+![](https://raw.githubusercontent.com/phusion/traveling-ruby/main/doc/linux_build_system_setup_runtime.png)<br>
 _The `setup-runtime` script creates Mock chroots inside the Docker container._
 
 The Rakefile begins by invoking the `setup-runtime` script. This script:
@@ -42,7 +42,7 @@ The runtime is saved to the `runtime` directory.
 
 ### The build phase
 
-![](https://raw.githubusercontent.com/phusion/traveling-ruby/master/doc/linux_build_system_build.png)<br>
+![](https://raw.githubusercontent.com/phusion/traveling-ruby/main/doc/linux_build_system_build.png)<br>
 _The `build-ruby` script uses the Mock chroots inside the Docker container to invoke the compiler, which produces out binaries._
 
 Once the runtime is setup, the Rakefile proceeds with invoking the `build-ruby` script. This script runs the compiler inside the Mock chroot environments to produce binaries. The script:

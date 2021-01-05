@@ -30,7 +30,7 @@ When filing a bug report, please ensure that you include the following informati
  * What is the expected output? What do you see instead?
  * What does your environment looks like (operating system, language, configuration, infrastructure)
 
- For a more detailed guide, please refer to our [issue template](https://github.com/phusion/traveling-ruby/blob/master/issue_template.md).
+ For a more detailed guide, please refer to our [issue template](https://github.com/phusion/traveling-ruby/blob/main/issue_template.md).
 
 <a name="contrib_docs"></a>
 ## Contributing documentation
@@ -67,6 +67,6 @@ Traveling Ruby is mostly written in Shell, but makes use of Ruby gems and enviro
 <a name="pull_requests"></a>
 ## Pull Requests
 
-Pull requests should normally be submitted against the latest stable branch (e.g. master), because once tested & accepted, we want users to benefit from the work as soon as possible.
+Pull requests should normally be submitted against the latest stable branch (e.g. main), because once tested & accepted, we want users to benefit from the work as soon as possible.
 
-For more information, please refer to our [template for Pull Requests](https://github.com/phusion/traveling-ruby/blob/master/pull_request_template.md).
+For more information, please refer to our [template for Pull Requests](https://github.com/phusion/traveling-ruby/blob/main/pull_request_template.md).
