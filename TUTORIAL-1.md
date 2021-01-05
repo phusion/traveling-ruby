@@ -109,7 +109,7 @@ SELFDIR="`dirname \"$0\"`"
 SELFDIR="`cd \"$SELFDIR\" && pwd`"
 
 # Run the actual app using the bundled Ruby interpreter.
-exec "$SELFDIR/lib/ruby/bin/ruby" "$SELFDIR/lib/app/hello.rb"
+exec "$SELFDIR/lib/ruby/bin/ruby" "$SELFDIR/lib/app/hello.rb" "$@"
 ```
 
 Save this file as `packaging/wrapper.sh` in your project's root directory. Then you can copy it to each of your package directories and name it `hello`:
