@@ -30,7 +30,7 @@ _The `setup-runtime` script creates Mock chroots inside the Docker container._
 
 The Rakefile begins by invoking the `setup-runtime` script. This script:
 
- * Pulls the Docker image. 
+ * Pulls the Docker image.
  * Runs Mock inside the container to create the Mock chroots.
  * Installs necessary tools (such as compilers) and libraries inside the Mock chroots.
 

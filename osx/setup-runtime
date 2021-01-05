@@ -440,7 +440,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libncurses.5.dylib" ]] || $FORCE_NCURSES; then
 		--without-develop
 	run make -j$CONCURRENCY
 	run make install
-	
+
 	echo "Leaving source directory"
 	popd >/dev/null
 	run rm -rf ncurses-$NCURSES_VERSION
@@ -472,7 +472,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libedit.0.dylib" ]] || $FORCE_LIBEDIT; then
 	run ./configure --prefix="$RUNTIME_DIR" --disable-static --enable-widec
 	run make -j$CONCURRENCY
 	run make install-strip
-	
+
 	echo "Leaving source directory"
 	popd >/dev/null
 	run rm -rf libedit-$LIBEDIT_DIR_VERSION
@@ -501,7 +501,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libgmp.10.dylib" ]] || $FORCE_GMP; then
 	run ./configure --prefix="$RUNTIME_DIR" --disable-static --without-readline
 	run make -j$CONCURRENCY
 	run make install-strip
-	
+
 	echo "Leaving source directory"
 	popd >/dev/null
 	run rm -rf gmp-$GMP_DIR_VERSION
@@ -528,7 +528,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libffi.6.dylib" ]] || $FORCE_LIBFFI; then
 		./configure --prefix="$RUNTIME_DIR" --disable-static --enable-portable-binary
 	run make -j$CONCURRENCY
 	run make install-strip
-	
+
 	echo "Leaving source directory"
 	popd >/dev/null
 	run rm -rf libffi-$LIBFFI_VERSION
@@ -552,7 +552,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libyaml-0.2.dylib" ]] || $FORCE_LIBYAML; then
 	run ./configure --prefix="$RUNTIME_DIR" --disable-static
 	run make -j$CONCURRENCY
 	run make install-strip
-	
+
 	echo "Leaving source directory"
 	popd >/dev/null
 	run rm -rf yaml-$LIBYAML_VERSION
