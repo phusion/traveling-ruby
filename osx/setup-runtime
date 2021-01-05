@@ -209,7 +209,7 @@ function parse_options()
 parse_options "$@"
 mkdir -p "$RUNTIME_DIR"
 RUNTIME_DIR="`cd \"$RUNTIME_DIR\" && pwd`"
-"$SELFDIR/internal/check_sdk"
+"$SELFDIR/internal/check_requirements"
 
 
 #######################################
@@ -441,18 +441,24 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libncurses.5.dylib" ]] || $FORCE_NCURSES; then
 	run make -j$CONCURRENCY
 	run make install
 
+	run install_name_tool -id "@executable_path/../lib/libncurses.5.dylib" \
+		"$RUNTIME_DIR/lib/libncurses.5.dylib"
+	# Relink libform against the modified libncurses
+	run make -C form install.libs
+	run install_name_tool -id "@executable_path/../lib/libform.5.dylib" \
+		"$RUNTIME_DIR/lib/libform.5.dylib"
+
 	echo "Leaving source directory"
 	popd >/dev/null
 	run rm -rf ncurses-$NCURSES_VERSION
 
-	run rm -f "$RUNTIME_DIR/lib"/{libpanel,libmenu,libform}*
-	run rm -f "$RUNTIME_DIR/lib"/*.a
+	run rm -f "$RUNTIME_DIR/lib"/{libpanel,libmenu}*
+	run rm -f "$RUNTIME_DIR/lib"/{libncurses,libform}.a
 	run strip -S "$RUNTIME_DIR/lib/libncurses.5.dylib"
+	run strip -S "$RUNTIME_DIR/lib/libform.5.dylib"
 	pushd "$RUNTIME_DIR/lib" >/dev/null
 	run ln -sf libncurses.5.dylib libtermcap.dylib
 	popd >/dev/null
-	run install_name_tool -id "@executable_path/../lib/libncurses.5.dylib" \
-		"$RUNTIME_DIR/lib/libncurses.5.dylib"
 else
 	echo "Already installed."
 fi

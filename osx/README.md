@@ -1,6 +1,6 @@
 # Traveling Ruby OS X build system
 
-The build system requires the Developer Commandline Tools to be installed, as well as the OS X 10.8 SDK.
+The build system requires the Developer Commandline Tools to be installed, as well as a number of other things. See the "System requirements" section.
 
 To build binary packages, run:
 
@@ -9,45 +9,84 @@ To build binary packages, run:
 
 You can view all tasks by running `rake -T`.
 
-## Installing the OS X 10.8 SDK
+## System requirements
 
-You are required to use an older version of Xcode as you need to have the OS X 10.8 SDK installed locally. You can install Xcode 5.1.1 as follows.
+### MacOS 10.14 SDK
 
-### The automated way
+You are required to install the macOS 10.14 SDK so that we can build binaries that run on older macOS versions.
 
-Install [xcode-install](https://github.com/neonichu/xcode-install) using
+ 1. Download the SDK at [phracker/MacOSX-SDKs](https://github.com/phracker/MacOSX-SDKs).
+ 2. Extract with: `sudo tar -xf MacOSX10.14.sdk.tar.xz -C "$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs"`
+ 3. Modify the XCode MacOSX.Platform/Info.plist file.
 
-```
-[sudo] gem install xcode-install
-```
+     1. Make the file and its containing directory writable by non-root:
 
-```
-xcversion update
-xcversion install 5.1.1
-```
+        ~~~bash
+        sudo chown "$(id -u)" "$(xcode-select -p)/Platforms/MacOSX.platform/Info.plist"
+        sudo chown "$(id -u)" "$(xcode-select -p)/Platforms/MacOSX.platform"
+        ~~~
 
-This will install the old Xcode release in `/Applications/Xcode-5.1.1.app`.
+     2. Open the file in Xcode:
 
-To copy over the SDK from the old Xcode to the new one, just run
+        ~~~bash
+        open "$(xcode-select -p)/Platforms/MacOSX.platform/Info.plist"
+        ~~~
 
-```
-rake install_sdk
-```
+     3. Set `MinimumSDKVersion` to 10.14 or lower.
 
-### The manual way
+     4. Restore original permissions:
 
-#### 1. Download Xcode 5.1.1
+        ~~~bash
+        sudo chown root "$(xcode-select -p)/Platforms/MacOSX.platform/Info.plist"
+        sudo chown root "$(xcode-select -p)/Platforms/MacOSX.platform"
+        ~~~
 
-Open the [Developer Portal download page](https://developer.apple.com/downloads/) and login with your Apple account. When you see the list of downloads, just open the [xcode_5.1.1.dmg link](http://adcdownload.apple.com/Developer_Tools/xcode_5.1.1/xcode_5.1.1.dmg) in your browser.
+### Clearing certain paths
 
-#### 2. Show Xcode package contents
+To prevent pollution of the build environment, you must ensure that the following files/directory do not exist while building:
 
-![](https://raw.githubusercontent.com/phusion/traveling-ruby/master/doc/xcodepackage.jpg)
+ * ~/.bundle/config
+ * /usr/local/include
+ * /usr/local/lib
 
-Open the Xcode .dmg file. Right click on Xcode.app and choose "Show Package Contents".
+You can temporary rename these paths before building...
 
-#### 3. Locate OS X 10.8 SDK and copy it to the system
+~~~bash
+rake stash_conflicting_paths
+~~~
 
-![](https://raw.githubusercontent.com/phusion/traveling-ruby/master/doc/sdk.jpg)
+...then restoring them after building:
 
-Locate the OS X 10.8 SDK inside the Xcode package contents. Copy this directory to /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/.
+~~~bash
+rake unstash_conflicting_paths
+~~~
+
+### Disabling System Integrity Protection
+
+Our build system depends on `DYLD_FALLBACK_LIBRARY_PATH`. This [doesn't work while System Integrity Protection is enabled](https://stackoverflow.com/a/35570229/20816), so you must disable it before building. You may re-enable it after building.
+
+ 1. Reboot your system into recovery mode (hold ⌘+R on reboot)
+
+ 2. When the "macOS Utilities" screen appears, pull down the "Utilities" menu at the top of the screen instead, and choose "Terminal".
+
+ 3. Disable System Integrity Protection, then reboot back into normal mode:
+
+    ~~~bash
+    csrutil disable
+    reboot
+    ~~~
+
+ 4. Verify that System Integrity Protection is disabled. Run `csrutil status`, which should output:
+
+    ~~~
+    System Integrity Protection status: disabled.
+    ~~~
+
+ 5. When you're done building Traveling Ruby, go back to recovery mode and run this in its terminal to fully reenable System Integrity Protection:
+
+    ~~~bash
+    csrutil enable
+    reboot
+    ~~~
+
+Note: we've verified that *partially* disabling System Integrity Protected is not enough to make `DYLD_*` variables work. Only *fully* disabling it seems to do the job.

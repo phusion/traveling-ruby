@@ -31,22 +31,37 @@ task :clean do
   sh "rm -rf output"
 end
 
-desc "Installs the SDK"
-task :install_sdk do
-  from = "/Applications/Xcode-5.1.1.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.8.sdk"
-  to = "/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs"
-
-  command = "sudo cp -R '#{from}' '#{to}'"
-  puts command
-  puts `#{command}`
-
-  puts "Successfully added the 10.8 SDK"
-end
-
 desc "Clean everything, including the runtime"
 task "clean-all" => :clean do
   sh "rm -rf runtime"
 end
+
+desc "Stash away files/directories conflicting with the build process"
+task :stash_conflicting_paths do
+  if File.exist?(File.expand_path("~/.bundle/config"))
+    sh "sudo mv -n ~/.bundle/config ~/.bundle/config.renamed"
+  end
+  if File.exist?("/usr/local/include")
+    sh "sudo mv -n /usr/local/include /usr/local/include.renamed"
+  end
+  if File.exist?("/usr/local/lib")
+    sh "sudo mv -n /usr/local/lib /usr/local/lib.renamed"
+  end
+end
+
+desc "Restore the stash away files/directories"
+task :unstash_conflicting_paths do
+  if File.exist?(File.expand_path("~/.bundle/config.renamed"))
+    sh "sudo mv -n ~/.bundle/config.renamed ~/.bundle/config"
+  end
+  if File.exist?("/usr/local/include.renamed")
+    sh "sudo mv -n /usr/local/include.renamed /usr/local/include"
+  end
+  if File.exist?("/usr/local/lib.renamed")
+    sh "sudo mv -n /usr/local/lib.renamed /usr/local/lib"
+  end
+end
+
 
 RUBY_VERSIONS.each do |ruby_version|
   package = "traveling-ruby-#{VERSION}-#{ruby_version}-osx.tar.gz"

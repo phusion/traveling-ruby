@@ -1,0 +1,36 @@
+#!/bin/bash
+set -e
+
+XCODEPATH=$(xcode-select -p)
+
+if [[ ! -e "$XCODEPATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk" ]]; then
+	echo "*** ERROR: the macOS 10.14 SDK is required. Please refer to" \
+		"https://github.com/phusion/traveling-ruby/blob/main/osx/README.md" \
+		"for installation instructions." >&2
+	exit 1
+fi
+
+SUBPROCESS_DYLD_PATH=$(DYLD_LIBRARY_PATH=/foo /bin/sh -c 'echo $DYLD_LIBRARY_PATH')
+if [[ -z "$SUBPROCESS_DYLD_PATH" ]]; then
+	echo "*** ERROR: System Integrity Protection (SIP) is enabled." \
+		"Traveling Ruby cannot be built while SIP is enabled. Please refer to" \
+		"https://github.com/phusion/traveling-ruby/blob/main/osx/README.md" \
+		"for instructions on how to temporarily disable it." >&2
+	exit 1
+fi
+
+if [[ -e /usr/local/include ]]; then
+	echo "*** ERROR: /usr/local/include exists, which may pollute the" \
+		"build environment. Please temporarily rename it away:" >&2
+	echo >&2
+	echo "    rake stash_conflicting_paths" >&2
+	exit 1
+fi
+
+if [[ -e /usr/local/lib ]]; then
+	echo "*** ERROR: /usr/local/lib exists, which may pollute the" \
+		"build environment. Please temporarily rename it away:" >&2
+	echo >&2
+	echo "    rake stash_conflicting_paths" >&2
+	exit 1
+fi
