@@ -39,7 +39,7 @@ This makes the release process much simpler. Instead of having to create more th
 
 However, distributing a precompiled Ruby interpreter that works for all end users, is more easily said than done. [Read this section](#why_precompiled_binary_difficult) to learn why it's difficult.
 
-Traveling Ruby aims to solve the problem of supplying precompiled **Ruby 2.1** binaries that work for all end users.
+Traveling Ruby aims to solve the problem of supplying precompiled **Ruby 2.4** binaries that work for all end users.
 
 ## Getting started
 
@@ -82,7 +82,7 @@ Windows support:
  * Traveling Ruby supports creating packages *for* Windows, but it does not yet support creating packages *on* Windows. That is, the Traveling Ruby tutorials and the documentation do not work when you are a Ruby developer on Windows. To create Windows packages, you must use OS X or Linux.
 
    This is because in our documentation we make heavy use of standard Unix tools. Tools which are not available on Windows. In the future we may replace the use of such tools with Ruby tools so that the documentation works on Windows too.
- * Traveling Ruby currently supports Ruby 2.1.5 and Ruby 2.2.0 for Linux and OS X. But for Windows, only Ruby 2.1.5 is supported. This is because [the RubyInstaller project](http://rubyinstaller.org/) hasn't released Ruby 2.2.0 binaries yet.
+ * Traveling Ruby currently supports Ruby 2.4.10.
  * Native extensions are not yet supported.
 
 ## Building binaries
