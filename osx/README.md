@@ -60,33 +60,3 @@ rake stash_conflicting_paths
 ~~~bash
 rake unstash_conflicting_paths
 ~~~
-
-### Disabling System Integrity Protection
-
-Our build system depends on `DYLD_FALLBACK_LIBRARY_PATH`. This [doesn't work while System Integrity Protection is enabled](https://stackoverflow.com/a/35570229/20816), so you must disable it before building. You may re-enable it after building.
-
- 1. Reboot your system into recovery mode (hold ⌘+R on reboot)
-
- 2. When the "macOS Utilities" screen appears, pull down the "Utilities" menu at the top of the screen instead, and choose "Terminal".
-
- 3. Disable System Integrity Protection, then reboot back into normal mode:
-
-    ~~~bash
-    csrutil disable
-    reboot
-    ~~~
-
- 4. Verify that System Integrity Protection is disabled. Run `csrutil status`, which should output:
-
-    ~~~
-    System Integrity Protection status: disabled.
-    ~~~
-
- 5. When you're done building Traveling Ruby, go back to recovery mode and run this in its terminal to fully reenable System Integrity Protection:
-
-    ~~~bash
-    csrutil enable
-    reboot
-    ~~~
-
-Note: we've verified that *partially* disabling System Integrity Protected is not enough to make `DYLD_*` variables work. Only *fully* disabling it seems to do the job.

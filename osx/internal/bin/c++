@@ -17,7 +17,11 @@ if [[ "$@" =~ $REGEX ]]; then
 	exec "${CXX[@]}" "${ARGS[@]}" "$@"
 else
 	if [[ "$RUNTIME_DIR" != "" ]]; then
-		ARGS+=("-L$RUNTIME_DIR/lib")
+		ARGS+=(-rpath "$RUNTIME_DIR/lib" "-L$RUNTIME_DIR/lib")
 	fi
-	exec "${CXX[@]}" -Wl,-headerpad_max_install_names "${ARGS[@]}" "$@"
+	exec "${CXX[@]}" \
+		-Wl,-headerpad_max_install_names \
+		-rpath "@executable_path/../lib" \
+		-rpath "@loader_path" \
+		"${ARGS[@]}" "$@"
 fi

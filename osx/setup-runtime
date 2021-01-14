@@ -248,7 +248,6 @@ ICU_FILE_VERSION=68_2
 LIBSSH2_VERSION=1.9.0
 export PATH="$RUNTIME_DIR/bin:$PATH"
 export LIBRARY_PATH="$RUNTIME_DIR/lib"
-export DYLD_FALLBACK_LIBRARY_PATH="$RUNTIME_DIR/lib"
 export PKG_CONFIG_PATH="$RUNTIME_DIR/lib/pkgconfig:/usr/lib/pkgconfig"
 export RUNTIME_DIR
 export DEAD_STRIP=true
@@ -416,12 +415,13 @@ elif [[ ! -e "$RUNTIME_DIR/lib/openssl-ok" ]] || $FORCE_OPENSSL; then
 	run strip bin/openssl
 	run strip -S lib/libcrypto.dylib
 	run strip -S lib/libssl.dylib
-	run install_name_tool -id "@executable_path/../lib/libssl.1.0.0.dylib" \
+	run install_name_tool -id "@rpath/libssl.1.0.0.dylib" \
 		"$RUNTIME_DIR/lib/libssl.1.0.0.dylib"
 	run install_name_tool -change \
-		"$RUNTIME_DIR/lib/libcrypto.1.0.0.dylib" "@executable_path/../lib/libcrypto.1.0.0.dylib" \
+		"$RUNTIME_DIR/lib/libcrypto.1.0.0.dylib" \
+		"@rpath/libcrypto.1.0.0.dylib" \
 		"$RUNTIME_DIR/lib/libssl.1.0.0.dylib"
-	run install_name_tool -id "@executable_path/../lib/libcrypto.1.0.0.dylib" \
+	run install_name_tool -id "@rpath/libcrypto.1.0.0.dylib" \
 		"$RUNTIME_DIR/lib/libcrypto.1.0.0.dylib"
 
 	run sed -i '' 's/^Libs\.private:.*/Libs.private: -L\${libdir} -lssl -lcrypto -lz/' "$RUNTIME_DIR/lib/pkgconfig/openssl.pc"
@@ -449,21 +449,24 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libncurses.5.dylib" ]] || $FORCE_NCURSES; then
 	run make -j$CONCURRENCY
 	run make install
 
-	run install_name_tool -id "@executable_path/../lib/libncurses.5.dylib" \
-		"$RUNTIME_DIR/lib/libncurses.5.dylib"
-	# Relink libform against the modified libncurses
-	run make -C form install.libs
-	run install_name_tool -id "@executable_path/../lib/libform.5.dylib" \
-		"$RUNTIME_DIR/lib/libform.5.dylib"
-
 	echo "Leaving source directory"
 	popd >/dev/null
 	run rm -rf ncurses-$NCURSES_VERSION
 
 	run rm -f "$RUNTIME_DIR/lib"/{libpanel,libmenu}*
-	run rm -f "$RUNTIME_DIR/lib"/{libncurses,libform}.a
+	run rm -f "$RUNTIME_DIR/lib"/{libncurses,libform}*.a
 	run strip -S "$RUNTIME_DIR/lib/libncurses.5.dylib"
 	run strip -S "$RUNTIME_DIR/lib/libform.5.dylib"
+	run install_name_tool -id \
+		"@rpath/libncurses.5.dylib" \
+		"$RUNTIME_DIR/lib/libncurses.5.dylib"
+	run install_name_tool -id \
+		"@rpath/libform.5.dylib" \
+		"$RUNTIME_DIR/lib/libform.5.dylib"
+	run install_name_tool -change \
+		"$RUNTIME_DIR/lib/libncurses.5.dylib" \
+		"@rpath/libform.5.dylib" \
+		"$RUNTIME_DIR/lib/libform.5.dylib"
 	pushd "$RUNTIME_DIR/lib" >/dev/null
 	run ln -sf libncurses.5.dylib libtermcap.dylib
 	popd >/dev/null
@@ -494,7 +497,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libedit.0.dylib" ]] || $FORCE_LIBEDIT; then
 	pushd "$RUNTIME_DIR/lib" >/dev/null
 	run ln -sf libedit.0.dylib libreadline.dylib
 	popd >/dev/null
-	run install_name_tool -id "@executable_path/../lib/libedit.0.dylib" \
+	run install_name_tool -id "@rpath/libedit.0.dylib" \
 		"$RUNTIME_DIR/lib/libedit.0.dylib"
 else
 	echo "Already installed."
@@ -520,7 +523,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libgmp.10.dylib" ]] || $FORCE_GMP; then
 	popd >/dev/null
 	run rm -rf gmp-$GMP_DIR_VERSION
 
-	run install_name_tool -id "@executable_path/../lib/libgmp.10.dylib" \
+	run install_name_tool -id "@rpath/libgmp.10.dylib" \
 		"$RUNTIME_DIR/lib/libgmp.10.dylib"
 else
 	echo "Already installed."
@@ -547,7 +550,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libffi.6.dylib" ]] || $FORCE_LIBFFI; then
 	popd >/dev/null
 	run rm -rf libffi-$LIBFFI_VERSION
 
-	run install_name_tool -id "@executable_path/../lib/libffi.6.dylib" \
+	run install_name_tool -id "@rpath/libffi.6.dylib" \
 		"$RUNTIME_DIR/lib/libffi.6.dylib"
 else
 	echo "Already installed."
@@ -571,7 +574,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libyaml-0.2.dylib" ]] || $FORCE_LIBYAML; then
 	popd >/dev/null
 	run rm -rf yaml-$LIBYAML_VERSION
 
-	run install_name_tool -id "@executable_path/../lib/libyaml-0.2.dylib" \
+	run install_name_tool -id "@rpath/libyaml-0.2.dylib" \
 		"$RUNTIME_DIR/lib/libyaml-0.2.dylib"
 else
 	echo "Already installed."
@@ -618,7 +621,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/liblzma.5.dylib" ]] || $FORCE_LIBLZMA; then
 	popd >/dev/null
 	run rm -rf xz-$XZ_VERSION
 
-	run install_name_tool -id "@executable_path/../lib/liblzma.5.dylib" \
+	run install_name_tool -id "@rpath/liblzma.5.dylib" \
 		"$RUNTIME_DIR/lib/liblzma.5.dylib"
 else
 	echo "Already installed."

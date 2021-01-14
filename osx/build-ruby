@@ -39,7 +39,6 @@ function create_environment_file() {
 ROOT=`dirname "$0"`
 ROOT=`cd "$ROOT/.." && pwd`
 
-echo ORIG_DYLD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\"
 echo ORIG_TERMINFO=\"$TERMINFO\"
 echo ORIG_SSL_CERT_DIR=\"$SSL_CERT_DIR\"
 echo ORIG_SSL_CERT_FILE=\"$SSL_CERT_FILE\"
@@ -56,14 +55,12 @@ EOF
 	cat >> "$FILE" <<EOF
 echo RUBYLIB=\"$LOAD_PATHS\"
 
-echo export ORIG_DYLD_LIBRARY_PATH
 echo export ORIG_TERMINFO
 echo export ORIG_SSL_CERT_DIR
 echo export ORIG_SSL_CERT_FILE
 echo export ORIG_RUBYOPT
 echo export ORIG_RUBYLIB
 
-echo unset  DYLD_LIBRARY_PATH
 echo export TERMINFO
 echo unset  SSL_CERT_DIR
 echo export SSL_CERT_FILE
@@ -235,7 +232,6 @@ header "Preparing Ruby source code..."
 
 export PATH="$RUNTIME_DIR/bin:$PATH"
 export LIBRARY_PATH="$RUNTIME_DIR/lib"
-export DYLD_FALLBACK_LIBRARY_PATH="$RUNTIME_DIR/lib"
 export PKG_CONFIG_PATH="$RUNTIME_DIR/lib/pkgconfig:/usr/lib/pkgconfig"
 export CCACHE_DIR="$RUNTIME_DIR/ccache"
 export CCACHE_COMPRESS=1
@@ -380,6 +376,21 @@ run rm -f lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
 run rm -f lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out,mkmf.log}
 run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
 run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/*.{c,h}
+
+# Remove absolute rpaths to the runtime
+echo "Removing absolute rpaths to the runtime..."
+(
+	set -o pipefail
+	BINARIES=$(find . -name '*.bundle' && find . -name '*.dylib')
+	BINARIES="bin/ruby $BINARIES"
+	for BINARY in $BINARIES; do
+		RPATHS=$(otool -l "$BINARY" | (grep LC_RPATH -A2 || true) | (grep ' path ' || true) | awk '{ print $2 }')
+		if grep -qF "$RUNTIME_DIR/lib" <<<"$RPATHS"; then
+			run install_name_tool -delete_rpath "$RUNTIME_DIR/lib" "$BINARY"
+		fi
+	done
+)
+[[ $? == 0 ]]
 
 if [[ "$GEMFILE" != "" ]]; then
 	echo "Entering Bundler gem directory"
