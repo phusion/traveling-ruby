@@ -46,6 +46,10 @@ FORCE_ICU=false
 SKIP_ICU=false
 FORCE_LIBSSH2=false
 SKIP_LIBSSH2=false
+FORCE_LIBXML2=false
+SKIP_LIBXML2=false
+FORCE_LIBXSLT=false
+SKIP_LIBXSLT=false
 
 function _cleanup()
 {
@@ -102,6 +106,10 @@ function usage()
 	echo "  -I      Skip installing ICU"
 	echo "  -b      Force installing libssh2"
 	echo "  -B      Skip installing libssh2"
+	echo "  -x      Force installing libxml2"
+	echo "  -X      Skip installing libxml2"
+	echo "  -t      Force installing libxslt2"
+	echo "  -T      Skip installing libxslt2"
 	echo
 	echo "  -j NUM  Compilation concurrency. Default: 4"
 	echo "  -h      Show this help"
@@ -111,7 +119,7 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "cCoOnNeEgGfFyYsSzZmMpPiIbBj:h" opt; do
+	while getopts "cCoOnNeEgGfFyYsSzZmMpPiIbBxXtTj:h" opt; do
 		case "$opt" in
 		c)
 			FORCE_CMAKE=true
@@ -191,6 +199,18 @@ function parse_options()
 		B)
 			SKIP_LIBSSH2=true
 			;;
+		x)
+			FORCE_LIBXML2=true
+			;;
+		X)
+			SKIP_LIBXML2=true
+			;;
+		t)
+			FORCE_LIBXSLT=true
+			;;
+		T)
+			SKIP_LIBXSLT=true
+			;;
 		j)
 			CONCURRENCY=$OPTARG
 			;;
@@ -224,7 +244,7 @@ RUNTIME_DIR="`cd \"$RUNTIME_DIR\" && pwd`"
 
 
 TOTAL_TOOLS=6
-TOTAL_LIBS=12
+TOTAL_LIBS=14
 CCACHE_VERSION=3.7.12
 CMAKE_VERSION=3.9.6
 PKG_CONFIG_VERSION=0.28
@@ -246,6 +266,8 @@ POSTGRESQL_VERSION=13.1
 ICU_RELEASE_VERSION=68-2
 ICU_FILE_VERSION=68_2
 LIBSSH2_VERSION=1.9.0
+LIBXML2_VERSION=2.9.10
+LIBXSLT_VERSION=1.1.34
 export PATH="$RUNTIME_DIR/bin:$PATH"
 export LIBRARY_PATH="$RUNTIME_DIR/lib"
 export PKG_CONFIG_PATH="$RUNTIME_DIR/lib/pkgconfig:/usr/lib/pkgconfig"
@@ -744,6 +766,56 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libssh2.a" ]] || $FORCE_LIBSSH2; then
 	echo "Leaving source directory"
 	popd >/dev/null
 	run rm -rf libssh2-$LIBSSH2_VERSION
+else
+	echo "Already installed."
+fi
+echo
+
+header "Compiling runtime libraries 13/$TOTAL_LIBS: libxml2..."
+if $SKIP_LIBXML2; then
+	echo "Skipped."
+elif [[ ! -e "$RUNTIME_DIR/lib/libxml2.a" ]] || $FORCE_LIBXML2; then
+	download_and_extract libxml2-$LIBXML2_VERSION.tar.gz \
+		ftp://xmlsoft.org/libxml2/libxml2-$LIBXML2_VERSION.tar.gz
+	echo "Entering $RUNTIME_DIR/libxml2-$LIBXML2_VERSION"
+	pushd libxml2-$LIBXML2_VERSION >/dev/null
+
+	run ./configure --prefix="$RUNTIME_DIR" --disable-shared --enable-static \
+		--without-python --without-readline --without-debug \
+		--with-c14n --with-threads \
+		CFLAGS="-O2 -fPIC -fvisibility=hidden" \
+		CXXFLAGS="-O2 -fPIC -fvisibility=hidden"
+	run make -j$CONCURRENCY
+	run make install-strip -j$CONCURRENCY
+
+	echo "Leaving source directory"
+	popd >/dev/null
+	run rm -rf libxml2-$LIBSSH2_VERSION
+else
+	echo "Already installed."
+fi
+echo
+
+header "Compiling runtime libraries 14/$TOTAL_LIBS: libxslt..."
+if $SKIP_LIBXSLT; then
+	echo "Skipped."
+elif [[ ! -e "$RUNTIME_DIR/lib/libxslt.a" ]] || $FORCE_LIBXSLT; then
+	download_and_extract libxslt-$LIBXSLT_VERSION.tar.gz \
+		ftp://xmlsoft.org/libxml2/libxslt-$LIBXSLT_VERSION.tar.gz
+	echo "Entering $RUNTIME_DIR/libxslt-$LIBXSLT_VERSION"
+	pushd libxslt-$LIBXSLT_VERSION >/dev/null
+
+	run ./configure --prefix="$RUNTIME_DIR" --disable-shared --enable-static \
+		--without-python --without-debug --without-debugger \
+		--without-profiler \
+		CFLAGS="-O2 -fPIC -fvisibility=hidden" \
+		CXXFLAGS="-O2 -fPIC -fvisibility=hidden"
+	run make -j$CONCURRENCY
+	run make install-strip -j$CONCURRENCY
+
+	echo "Leaving source directory"
+	popd >/dev/null
+	run rm -rf libxslt-$LIBSSH2_VERSION
 else
 	echo "Already installed."
 fi
