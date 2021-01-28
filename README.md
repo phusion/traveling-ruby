@@ -2,7 +2,7 @@
 
 ![](https://openclipart.org/image/300px/svg_to_png/181225/Travel_backpacks.png)
 
-Traveling Ruby is a project which supplies self-contained, "portable" Ruby binaries: Ruby binaries that can run on any Linux distribution and any OS X machine. It also has Windows support [(with some caveats)](#caveats). This allows Ruby app developers to bundle these binaries with their Ruby app, so that they can distribute a single package to end users, without needing end users to first install Ruby or gems.
+Traveling Ruby is a project which supplies self-contained, "portable" Ruby binaries: Ruby binaries that can run on any Linux distribution and any macOS machine. It also has Windows support [(with some caveats)](#caveats). This allows Ruby app developers to bundle these binaries with their Ruby app, so that they can distribute a single package to end users, without needing end users to first install Ruby or gems.
 
 [![](https://raw.githubusercontent.com/phusion/traveling-ruby/main/doc/video.png)](https://vimeo.com/phusionnl/review/113827942/ceca7e70da)
 
@@ -16,8 +16,8 @@ However, distributing such Ruby apps to inexperienced end users or non-Ruby-prog
 
 One solution is to build OS-specific installation packages, e.g. DEBs, RPMs, .pkgs, etc. However, this has two disadvantages:
 
- 1. It requires a lot of work. You not only have to build separate packages for each OS, but also each OS *version*. And in the context of Linux, you have to treat each distribution as another OS, further increasing the number of combinations. Suppose that you want to support ~2 versions of CentOS/RHEL, ~2 versions of Debian, ~3 versions of Ubuntu, ~2 recent OS X releases, on both x86 and x86_64. You'll have to create `(2 + 2 + 3) * 2 + 2 = 16` packages.
- 2. Because you typically cannot build an OS-specific installation package using anything but that OS, you need heavyweight tooling, e.g. a fleet of VMs. For example, you can only build Ubuntu 14.04 DEBs on Ubuntu 14.04; you cannot build them from your OS X developer laptop.
+ 1. It requires a lot of work. You not only have to build separate packages for each OS, but also each OS *version*. And in the context of Linux, you have to treat each distribution as another OS, further increasing the number of combinations. Suppose that you want to support ~2 versions of CentOS/RHEL, ~2 versions of Debian, ~3 versions of Ubuntu, ~2 recent macOS releases. You'll have to create `2 + 2 + 3 + 2 = 9` packages.
+ 2. Because you typically cannot build an OS-specific installation package using anything but that OS, you need heavyweight tooling, e.g. a fleet of VMs. For example, you can only build Ubuntu 18.04 DEBs on Ubuntu 18.04; you cannot build them from your macOS developer laptop.
 
 This is exactly the approach that Chef has chosen. They built [Omnibus](https://github.com/opscode/omnibus), an automation system which spawns an army of VMs for building platform-specific packages. It works, but it's heavyweight and a big hassle. You need a big build machine for that if you want to have reasonable build time. And be prepared to make 20 cups of coffee.
 
@@ -30,11 +30,10 @@ The solution that Traveling Ruby advocates, is to distribute your app as a singl
  * A tar.gz/zip file can be created on any platform using small and simple tools.
  * You can create packages for any OS, regardless of which OS you are using.
 
-This makes the release process much simpler. Instead of having to create more than 10 packages using a fleet of VMs, you just create 3 packages quickly and easily from your developer laptop. These 3 packages cover all the major platforms that your end users are on:
+This makes the release process much simpler. Instead of having to create almost 10 packages using a fleet of VMs, you just create 3 packages quickly and easily from your developer laptop. These 3 packages cover all the major platforms that your end users are on:
 
- * Linux x86.
- * Linux x86_64.
- * OS X.
+ * Linux x86\_64.
+ * macOS.
  * Windows. But see [the Windows-specific caveats](#caveats).
 
 However, distributing a precompiled Ruby interpreter that works for all end users, is more easily said than done. [Read this section](#why_precompiled_binary_difficult) to learn why it's difficult.
@@ -79,7 +78,7 @@ Native extensions:
 
 Windows support:
 
- * Traveling Ruby supports creating packages *for* Windows, but it does not yet support creating packages *on* Windows. That is, the Traveling Ruby tutorials and the documentation do not work when you are a Ruby developer on Windows. To create Windows packages, you must use OS X or Linux.
+ * Traveling Ruby supports creating packages *for* Windows, but it does not yet support creating packages *on* Windows. That is, the Traveling Ruby tutorials and the documentation do not work when you are a Ruby developer on Windows. To create Windows packages, you must use macOS or Linux.
 
    This is because in our documentation we make heavy use of standard Unix tools. Tools which are not available on Windows. In the future we may replace the use of such tools with Ruby tools so that the documentation works on Windows too.
  * Traveling Ruby currently supports Ruby 2.4.10.
@@ -91,12 +90,12 @@ The Traveling Ruby project supplies binaries that application developers can use
 
 For the Linux build system, see [linux/README.md](linux/README.md).
 
-For the OS X build system, see [osx/README.md](osx/README.md).
+For the macOS build system, see [osx/README.md](osx/README.md).
 
 ## Future work
 
  * Provide a Rails example.
- * Native extensions support for Windows. We're currently blocked by the fact that [the RubyInstaller project](http://rubyinstaller.org/) hasn't been updated for Ruby 2.2.0 yet.
+ * Native extensions support for Windows.
  * Document the Windows build system.
  * Support for creating a single executable instead of a directory.
  * Draw inspiration from [enclose.io](http://enclose.io/)/[ruby-packer](https://github.com/pmq20/ruby-packer). See [this Hacker News comment](https://news.ycombinator.com/item?id=18056048) for my comparison analysis.
@@ -120,7 +119,7 @@ Assuming that your binary doesn't use *any* libraries besides the C standard lib
 
 There is no way to tell the compiler and linker to use older symbol versions unless you want to manually specify the version for each and every symbol, which is an undoable task.
 
-The only sane way to get around the glibc symbol problem, and to prevent accidental linking to unwanted libraries, is to create a tightly controlled build environment. On Linux, this build environment with come with an old glibc version. This tightly controlled build environment is sometimes called a "holy build box".
+The only sane way to get around the glibc symbol problem, and to prevent accidental linking to unwanted libraries, is to create a tightly controlled build environment. On Linux, this build environment with come with an old glibc version. This tightly controlled build environment is sometimes called a ["holy build box"](http://phusion.github.io/holy-build-box/).
 
 The Traveling Ruby project provides such a holy build box.
 
@@ -166,9 +165,9 @@ Or you can just use Traveling Ruby and be done with it. We can't do it for Phusi
 
 Yes. These problems can put off your users from installing your app at all and can give you a bad reputation. Especially Chef has suffered a lot from this. A lot of people have had bad experience in the past with installing Chef through RubyGems. Chef has solved this problem for years by supplying platform-specific packages for years (DEBs, RPMs, etc), but the reputation stuck: there are still people out there who shun Chef because they think they have to install Ruby and use RubyGems.
 
-#### I target OS X, which already ships Ruby. Should I still bundle a Ruby interpreter?
+#### I target macOS, which already ships Ruby. Should I still bundle a Ruby interpreter?
 
-Yes. OS X versions up to 10.8 Mountain Lion ship Ruby 1.8. Only starting from 10.9 Mavericks does it ship Ruby 2.0. There are significant compatibility differences between Ruby 1.8 and 2.0. Future OS X versions might ship yet another Ruby version. Only by bundling Ruby can you be sure that OS upgrades won't break your app.
+Yes. Different macOS versions ship different Ruby versions. There can be significant compatibility differences between even minor Ruby versions. One of the biggest issues is the [keyword argument changes](https://juanitofatas.com/ruby-3-keyword-arguments) introduced in Ruby 2.7 and later. Only by bundling Ruby can you be sure that OS upgrades won't break your app.
 
 <a name="windows_support"></a>
 
