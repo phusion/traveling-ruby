@@ -8,10 +8,10 @@ source "$SELFDIR/../shared/library.sh"
 CPUCOUNT=`"$SELFDIR/internal/cpucount"`
 RUBY_VERSIONS=(`cat "$SELFDIR/../RUBY_VERSIONS.txt"`)
 
-RUNTIME_DIR=
 OUTPUT_DIR=
-ARCHITECTURE=
+IMAGE=
 RUBY_VERSION=${RUBY_VERSIONS[0]}
+CACHE_DIR=
 CONCURRENCY=$CPUCOUNT
 GEMFILE="$SELFDIR/../shared/gemfiles"
 DEBUG_SHELL=none
@@ -22,12 +22,13 @@ GEMFILE_MOUNT=()
 
 function usage()
 {
-	echo "Usage: ./build-ruby [options] <RUNTIME DIR> <OUTPUT_DIR>"
+	echo "Usage: ./build-ruby [options] <OUTPUT_DIR>"
 	echo "Build Traveling Ruby binaries."
 	echo
 	echo "Options:"
-	echo "  -a NAME     Architecture to setup (x86, x86_64)"
+	echo "  -i IMAGE    Docker image to use (e.g. phusion/traveling-ruby-builder-x64_64:1.0)"
 	echo "  -r VERSION  Ruby version to build. Default: $RUBY_VERSION"
+	echo "  -c DIR      Cache directory to use"
 	echo
 	echo "  -E          Do not setup source"
 	echo "  -C          Do not compile Ruby"
@@ -44,13 +45,16 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "a:r:ECGj:g:dDh" opt; do
+	while getopts "i:r:c:ECGj:g:dDh" opt; do
 		case "$opt" in
-		a)
-			ARCHITECTURE=$OPTARG
+		i)
+			IMAGE=$OPTARG
 			;;
 		r)
 			RUBY_VERSION=$OPTARG
+			;;
+		c)
+			CACHE_DIR=$OPTARG
 			;;
 		E)
 			SETUP_SOURCE=false
@@ -85,35 +89,34 @@ function parse_options()
 
 	(( OPTIND -= 1 )) || true
 	shift $OPTIND || true
-	RUNTIME_DIR="$1"
-	OUTPUT_DIR="$2"
+	OUTPUT_DIR="$1"
 
-	if [[ "$RUNTIME_DIR" = "" || "$OUTPUT_DIR" = "" ]]; then
+	if [[ "$OUTPUT_DIR" = "" ]]; then
 		usage
-		exit 1
-	fi
-	if [[ ! -e "$RUNTIME_DIR" ]]; then
-		echo "ERROR: $RUNTIME_DIR doesn't exist."
 		exit 1
 	fi
 	if [[ ! -e "$OUTPUT_DIR" ]]; then
 		echo "ERROR: $OUTPUT_DIR doesn't exist."
 		exit 1
 	fi
-	if [[ "$ARCHITECTURE" = "" ]]; then
-		echo "ERROR: please specify an architecture with -a."
+	if [[ "$IMAGE" = "" ]]; then
+		echo "ERROR: please specify a Docker image with -i."
+		exit 1
+	fi
+	if [[ "$CACHE_DIR" = "" ]]; then
+		echo "ERROR: please specify a cache directory with -c."
+		exit 1
+	fi
+	if [[ ! -e "$CACHE_DIR" ]]; then
+		echo "ERROR: $CACHE_DIR doesn't exist."
 		exit 1
 	fi
 }
 
 
 parse_options "$@"
-RUNTIME_DIR=`cd "$RUNTIME_DIR" && pwd`
 OUTPUT_DIR=`cd "$OUTPUT_DIR" && pwd`
-if [[ ! -e "$RUNTIME_DIR/mock" ]]; then
-	echo "ERROR: runtime directory $RUNTIME_DIR not set up. Please run ./setup-runtime first."
-	exit 1
-fi
+CACHE_DIR=`cd "$CACHE_DIR" && pwd`
 if [[ "$GEMFILE" != "" ]]; then
 	GEMFILE="`absolute_path \"$GEMFILE\"`"
 	if [[ -d "$GEMFILE" ]]; then
@@ -133,19 +136,23 @@ if [[ "$GEMFILE" != "" ]]; then
 	fi
 fi
 if [[ "$DEBUG_SHELL" = none ]]; then
-	TTY_ARGS=
+	if tty -s; then
+		TTY_ARGS=(-ti)
+	else
+		TTY_ARGS=()
+	fi
 else
-	TTY_ARGS="-t -i"
+	TTY_ARGS=(-ti)
 fi
 
 exec docker run \
-	$TTY_ARGS \
+	"${TTY_ARGS[@]}" \
 	--rm \
-	--cap-add SYS_ADMIN --cap-add SYS_CHROOT \
+	--init \
 	-v "$SELFDIR/internal:/system:ro" \
 	-v "$SELFDIR/../shared:/system_shared:ro" \
-	-v "$RUNTIME_DIR/mock:/var/lib/mock" \
 	-v "$OUTPUT_DIR:/output" \
+	-v "$CACHE_DIR:/cache" \
 	"${GEMFILE_MOUNT[@]}" \
 	-e "APP_UID=`id -u`" \
 	-e "APP_GID=`id -g`" \
@@ -157,6 +164,5 @@ exec docker run \
 	-e "COMPILE=$COMPILE" \
 	-e "SANITY_CHECK_OUTPUT=$SANITY_CHECK_OUTPUT" \
 	-e "DEBUG_SHELL=$DEBUG_SHELL" \
-	phusion/traveling-ruby-builder \
-	/system/my_init --quiet --skip-runit --skip-startup-files -- \
+	"$IMAGE" \
 	/system/build-ruby
