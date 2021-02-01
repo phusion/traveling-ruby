@@ -251,7 +251,7 @@ PKG_CONFIG_VERSION=0.28
 AUTOCONF_VERSION=2.69
 AUTOMAKE_VERSION=1.15
 LIBTOOL_VERSION=2.4.6
-OPENSSL_VERSION=1.0.2u
+OPENSSL_VERSION=1.1.1i
 NCURSES_VERSION=5.9
 LIBEDIT_VERSION=20141030-3.1
 LIBEDIT_DIR_VERSION=20141029-3.1
@@ -259,7 +259,7 @@ GMP_VERSION=6.2.1
 GMP_DIR_VERSION=6.2.1
 LIBFFI_VERSION=3.2.1
 LIBYAML_VERSION=0.1.5
-SQLITE3_VERSION=3080702
+SQLITE3_VERSION=3340000
 XZ_VERSION=5.0.8
 MYSQL_LIB_VERSION=6.1.5
 POSTGRESQL_VERSION=13.1
@@ -437,17 +437,17 @@ elif [[ ! -e "$RUNTIME_DIR/lib/openssl-ok" ]] || $FORCE_OPENSSL; then
 	run strip bin/openssl
 	run strip -S lib/libcrypto.dylib
 	run strip -S lib/libssl.dylib
-	run install_name_tool -id "@rpath/libssl.1.0.0.dylib" \
-		"$RUNTIME_DIR/lib/libssl.1.0.0.dylib"
+	run install_name_tool -id "@rpath/libssl.1.1.dylib" \
+		"$RUNTIME_DIR/lib/libssl.1.1.dylib"
 	run install_name_tool -change \
-		"$RUNTIME_DIR/lib/libcrypto.1.0.0.dylib" \
-		"@rpath/libcrypto.1.0.0.dylib" \
-		"$RUNTIME_DIR/lib/libssl.1.0.0.dylib"
-	run install_name_tool -id "@rpath/libcrypto.1.0.0.dylib" \
-		"$RUNTIME_DIR/lib/libcrypto.1.0.0.dylib"
+		"$RUNTIME_DIR/lib/libcrypto.1.1.dylib" \
+		"@rpath/libcrypto.1.1.dylib" \
+		"$RUNTIME_DIR/lib/libssl.1.1.dylib"
+	run install_name_tool -id "@rpath/libcrypto.1.1.dylib" \
+		"$RUNTIME_DIR/lib/libcrypto.1.1.dylib"
 
-	run sed -i '' 's/^Libs\.private:.*/Libs.private: -L\${libdir} -lssl -lcrypto -lz/' "$RUNTIME_DIR/lib/pkgconfig/openssl.pc"
-	run sed -i '' 's/^Libs\.private:.*/Libs.private: -L\${libdir} -lssl -lcrypto -lz/' "$RUNTIME_DIR/lib/pkgconfig/libssl.pc"
+	run sed -i '' 's/^Libs:.*/Libs: -L${libdir} -lcrypto -lz -ldl -lpthread/' "$RUNTIME_DIR"/lib/pkgconfig/libcrypto.pc
+	run sed -i '' '/^Libs.private:.*/d' "$RUNTIME_DIR"/lib/pkgconfig/libcrypto.pc
 	touch "$RUNTIME_DIR/lib/openssl-ok"
 else
 	echo "Already installed."
@@ -608,7 +608,7 @@ if $SKIP_SQLITE3; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libsqlite3.a" ]] || $FORCE_SQLITE3; then
 	download_and_extract sqlite-autoconf-$SQLITE3_VERSION.tar.gz \
-		http://www.sqlite.org/2014/sqlite-autoconf-$SQLITE3_VERSION.tar.gz
+		http://www.sqlite.org/2020/sqlite-autoconf-$SQLITE3_VERSION.tar.gz
 	echo "Entering $RUNTIME_DIR/sqlite-autoconf-$SQLITE3_VERSION"
 	pushd sqlite-autoconf-$SQLITE3_VERSION >/dev/null
 
