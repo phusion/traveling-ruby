@@ -343,7 +343,7 @@ if [[ "$GEMFILE" != "" ]]; then
 		if [[ -e "$GEMFILE.lock" ]]; then
 			run cp "$GEMFILE.lock" ./
 		fi
-		run bundle config set force_ruby_platform true --local
+		run bundle config --local force_ruby_platform true
 		# We set -j to 1 because of this bug:
 		# https://github.com/bundler/bundler/issues/3660
 		# When it is solved, we can set -j to $CONCURRENCY.
