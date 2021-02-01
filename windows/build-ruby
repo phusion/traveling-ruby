@@ -12,31 +12,36 @@ LAST_RUBY_VERSION_INDEX=$((N_RUBY_VERSIONS - 1))
 
 CACHE_DIR=
 OUTPUT_DIR=
-ARCHITECTURE=x86
+ARCHITECTURE=x86_64
 RUBY_VERSION=${RUBY_VERSIONS[$LAST_RUBY_VERSION_INDEX]}
+RELEASE_NUM=1
 
 function usage()
 {
-	echo "Usage: ./setup-ruby [options] <CACHE DIR> <OUTPUT DIR>"
+	echo "Usage: ./build-ruby [options] <CACHE DIR> <OUTPUT DIR>"
 	echo "Build Ruby binaries."
 	echo
 	echo "Options:"
-	echo "  -a NAME     Architecture to setup (x86, x86_64)"
-	echo "  -r VERSION  Ruby version to build. Default: $RUBY_VERSION"
-	echo "  -h          Show this help"
+	echo "  -a NAME        Architecture to setup (e.g. x86_64)"
+	echo "  -r VERSION     Ruby version to build. Default: $RUBY_VERSION"
+	echo "  -e RELEASENUM  RubyInstaller release number. Default: $RELEASE_NUM"
+	echo "  -h             Show this help"
 }
 
 function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "a:r:h" opt; do
+	while getopts "a:r:e:h" opt; do
 		case "$opt" in
 		a)
 			ARCHITECTURE=$OPTARG
 			;;
 		r)
 			RUBY_VERSION=$OPTARG
+			;;
+		e)
+			RELEASE_NUM=$OPTARG
 			;;
 		h)
 			usage
@@ -120,10 +125,10 @@ OUTPUT_DIR=`cd "$OUTPUT_DIR" && pwd`
 if [[ "$ARCHITECTURE" = "x86_64" ]]; then
 	RUBY_FILE_ARCH=x64
 else
-	RUBY_FILE_ARCH=i386
+	RUBY_FILE_ARCH="$ARCHITECTURE"
 fi
-RUBY_FILE="ruby-$RUBY_VERSION-$RUBY_FILE_ARCH-mingw32.7z"
-RUBY_URL="http://dl.bintray.com/oneclick/rubyinstaller/$RUBY_FILE?direct"
+RUBY_FILE="rubyinstaller-$RUBY_VERSION-$RELEASE_NUM-$RUBY_FILE_ARCH.7z"
+RUBY_URL="https://github.com/oneclick/rubyinstaller2/releases/download/RubyInstaller-$RUBY_VERSION-$RELEASE_NUM/$RUBY_FILE"
 
 
 header "Downloading Ruby..."
@@ -149,8 +154,8 @@ header "Extracting Ruby..."
 if [[ $? != 0 ]]; then
 	exit 1
 fi
-run mv "$OUTPUT_DIR/ruby-$RUBY_VERSION-$RUBY_FILE_ARCH-mingw32"/* "$OUTPUT_DIR/"
-run rm -rf "$OUTPUT_DIR/ruby-$RUBY_VERSION-$RUBY_FILE_ARCH-mingw32"
+run mv "$OUTPUT_DIR/rubyinstaller-$RUBY_VERSION-$RELEASE_NUM-$RUBY_FILE_ARCH"/* "$OUTPUT_DIR/"
+run rm -rf "$OUTPUT_DIR/rubyinstaller-$RUBY_VERSION-$RELEASE_NUM-$RUBY_FILE_ARCH"
 echo
 
 
@@ -160,7 +165,7 @@ if [[ "$OS" =~ Windows ]]; then
 fi
 RUBY_COMPAT_VERSION=`grep '"ruby_version"' "$OUTPUT_DIR"/lib/ruby/*/*/rbconfig.rb | sed -E 's/.*=//; s/.*"(.*)".*/\1/'`
 RUBY_ARCH=`grep '"arch"' "$OUTPUT_DIR"/lib/ruby/*/*/rbconfig.rb | sed -E 's/.*=//; s/.*"(.*)".*/\1/'`
-GEM_PLATFORM=`ruby -rubygems -e "puts Gem::Platform.new('$RUBY_ARCH').to_s"`
+GEM_PLATFORM=`ruby -rrubygems -e "puts Gem::Platform.new('$RUBY_ARCH').to_s"`
 GEM_EXTENSION_API_VERSION=$RUBY_COMPAT_VERSION
 run mkdir "$OUTPUT_DIR/info"
 echo "+ Dumping information about the Ruby binaries into /tmp/ruby/info"
@@ -173,10 +178,10 @@ echo
 
 header "Installing Bundler..."
 if [[ -e "$CACHE_DIR/bundler-$BUNDLER_VERSION.gem" ]]; then
-	run gem install "$CACHE_DIR/bundler-$BUNDLER_VERSION.gem" --no-rdoc --no-ri \
+	run gem install "$CACHE_DIR/bundler-$BUNDLER_VERSION.gem" --no-document \
 		--install-dir "$OUTPUT_DIR/lib/ruby/gems/$RUBY_COMPAT_VERSION"
 else
-	run gem install bundler -v $BUNDLER_VERSION --no-rdoc --no-ri \
+	run gem install bundler -v $BUNDLER_VERSION --no-document \
 		--install-dir "$OUTPUT_DIR/lib/ruby/gems/$RUBY_COMPAT_VERSION"
 fi
 run cp "$OUTPUT_DIR/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache"/*.gem "$CACHE_DIR/" || true
@@ -190,8 +195,6 @@ pushd "$OUTPUT_DIR"
 run cp "$SELFDIR/../shared/ca-bundle.crt" lib/
 
 run rm bin/{erb,rdoc,ri}*
-run rm -f bin/testrb* # Only Ruby 2.1 has it
-run rm bin/libgdbm* bin/tcl* bin/tk*
 run rm -rf include
 run rm -rf share
 run rm -f lib/*.a
