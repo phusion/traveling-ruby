@@ -5,6 +5,7 @@
  * On Windows, dropped support for x86. Only x64 is now supported.
  * The minimum supported macOS version is now 10.14 Mojave.
  * The minimum supported Linux version is now RHEL 7 / CentOS 7 / Debian 8 / Ubuntu 14.06 / glibc 2.17.
+ * Upgraded CA certificates from that of CentOS 5 to that of CentOS 8.
  * Upgraded OpenSSL to 1.1.1i.
  * Upgraded GMP to 6.2.1.
  * Upgraded libssh2 to 1.9.0.
