@@ -28,13 +28,13 @@ echo ORIG_RUBYLIB=\"$RUBYLIB\"
 
 echo LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH:$ROOT/lib\"
 echo SSL_CERT_FILE=\"$ROOT/lib/ca-bundle.crt\"
-echo RUBYOPT=\"-r$ROOT/lib/restore_environment\"
+echo RUBYOPT=\"-rtraveling_ruby_restore_environment\"
 for DIR in "$ROOT"/lib/ruby/gems/*/deplibs/*/*; do
 	echo LD_LIBRARY_PATH=\"\$LD_LIBRARY_PATH:$DIR\"
 done
 EOF
-	echo "echo GEM_HOME=\"\$ROOT/lib/ruby/gems/$RUBY_COMPAT_VERSION\"" >> "$FILE"
-	echo "echo GEM_PATH=\"\$ROOT/lib/ruby/gems/$RUBY_COMPAT_VERSION\"" >> "$FILE"
+	echo "echo GEM_HOME=\\\"\$ROOT/lib/ruby/gems/$RUBY_COMPAT_VERSION\\\"" >> "$FILE"
+	echo "echo GEM_PATH=\\\"\$ROOT/lib/ruby/gems/$RUBY_COMPAT_VERSION\\\"" >> "$FILE"
 
 	cat >> "$FILE" <<EOF
 echo RUBYLIB=\"$LOAD_PATHS\"
@@ -155,7 +155,7 @@ fi
 run cp $USRLIBDIR/libtinfo.so.5 /tmp/ruby/lib/
 run cp $USRLIBDIR/libreadline.so.6 /tmp/ruby/lib/
 run cp /system_shared/ca-bundle.crt /tmp/ruby/lib/
-run cp /system/restore_environment.rb /tmp/ruby/lib/
+run cp /system/traveling_ruby_restore_environment.rb /tmp/ruby/lib/ruby/site_ruby/
 export SSL_CERT_FILE=/tmp/ruby/lib/ca-bundle.crt
 
 # Dump various information about the Ruby binaries.
