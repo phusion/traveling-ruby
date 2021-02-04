@@ -1,3 +1,44 @@
+## Version TBD
+
+ * The Ruby version that we now support is: 2.4.10
+ * On Linux, dropped support for x86. Only x86\_64 is now supported.
+ * On Windows, dropped support for x86. Only x64 is now supported.
+ * The minimum supported macOS version is now 10.14 Mojave.
+ * The minimum supported Linux version is now RHEL 7 / CentOS 7 / Debian 8 / Ubuntu 14.06 / glibc 2.17.
+ * Upgraded OpenSSL to 1.1.1i.
+ * Upgraded GMP to 6.2.1.
+ * Upgraded libssh2 to 1.9.0.
+ * Upgraded bundler gem to version 1.17.3.
+ * Upgraded bcrypt gem to 3.1.16.
+ * Upgraded charlock\_holmes gem to 0.7.7.
+ * Upgraded curses gem to 1.4.0.
+ * Upgraded escape\_utils gem to 1.2.1.
+ * Upgraded fast-stemmer gem to 1.0.2.
+ * Upgraded ffi gem to 1.14.2.
+ * Upgraded hitimes gem to 2.0.0.
+ * Upgraded json gem to 2.5.1.
+ * Upgraded kgio gem to 2.11.3.
+ * Upgraded mysql2 gem to 0.5.3.
+ * Upgraded nokogiri gem to 1.10.10.
+    - On macOS: upgraded libxml2 to 2.9.10.
+    - On macOS: upgraded libxslt to 1.1.34.
+ * Upgraded nokogumbo gem to 1.5.0.
+ * Upgraded pg gem to 1.2.3.
+    - Upgraded libpq to 13.1.
+ * Upgraded posix-spawn gem 0.3.15.
+ * Upgraded puma gem to 5.1.1
+ * Upgraded raindrops gem to 0.19.1.
+ * Upgraded redcarpet gem to 3.5.1.
+ * Upgraded RedCloth gem to 4.3.2.
+ * Upgraded rugged gem to 1.1.0.
+ * Upgraded sqlite3 gem to 1.4.2.
+    - Upgraded libsqlite3 to 2020-3340000.
+ * Upgraded thin gem to 1.8.0.
+ * Upgraded unf\_ext gem to 0.0.7.7.
+ * Upgraded unicorn gem to 5.8.0.
+ * Upgraded yajl-ruby gem to 1.4.1.
+ * Dropped github-markdown gem.
+
 ## Version 20150715
 
 Upgrading to this version is strongly recommended because of the OpenSSL upgrade, which fixes some security vulnerabilities!
