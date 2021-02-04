@@ -21,7 +21,7 @@
  * Upgraded json gem to 2.5.1.
  * Upgraded kgio gem to 2.11.3.
  * Upgraded mysql2 gem to 0.5.3.
- * Upgraded nokogiri gem to 1.11.10.
+ * Upgraded nokogiri gem to 1.10.10.
     - On macOS: upgraded libxml2 to 2.9.10.
     - On macOS: upgraded libxslt to 1.1.34.
  * Upgraded nokogumbo gem to 1.5.0.
