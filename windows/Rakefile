@@ -51,7 +51,7 @@ RUBY_VERSIONS.each do |ruby_version|
 
   desc "Upload Ruby #{ruby_version} packages to the server"
   task "upload:#{ruby_version}" => [package] do
-    sh "s3cmd -P sync --no-preserve #{package} s3://traveling-ruby/releases/"
+    sh "aws s3 cp #{package} s3://traveling-ruby/releases/ --acl public-read"
   end
 
   desc "Clean Ruby #{ruby_version} packages and binaries, but not the runtime"
