@@ -1,4 +1,0 @@
-#!/bin/bash
-set -e
-cp /s3cfg /root/.s3cfg
-exec "$@"

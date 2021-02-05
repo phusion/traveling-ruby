@@ -20,17 +20,23 @@ if [[ $# == 0 ]]; then
 	exit 1
 fi
 
-if [[ ! -e ~/.s3cfg ]]; then
-	echo "~/.s3cfg doesn't exist; configuring one..."
+if [[ "$IMAGE_VERSION" = "" ]]; then
+	echo "ERROR: please set the IMAGE_VERSION environment variable."
+	exit 1
+fi
+
+if [[ ! -e ~/.aws ]]; then
+	echo "~/.aws doesn't exist; configuring one..."
 	TEMPDIR=`mktemp -d /tmp/traveling-ruby.XXXXXXXX`
-	touch "$TEMPDIR/s3cfg"
-	docker run --rm -t -i \
+	docker run --rm -t -i --init \
 		-v "$SELFDIR/internal:/system:ro" \
 		-v "$TEMPDIR:/work" \
-		phusion/traveling-ruby-builder \
-		/system/my_init --quiet --skip-runit --skip-startup-files -- \
-		/system/s3configure
-	cp "$TEMPDIR/s3cfg" ~/.s3cfg
+		-e "APP_UID=$(id -u)" \
+		-e "APP_GID=$(id -u)" \
+		"phusion/traveling-ruby-builder-x86_64:$IMAGE_VERSION" \
+		/system/awsconfigure
+	mkdir ~/.aws
+	cp -pR "$TEMPDIR/awscfg"/* ~/.aws/
 	rm -rf "$TEMPDIR"
 	TEMPDIR=
 	echo
@@ -42,7 +48,7 @@ DIR_BASENAMES=()
 for F in "$@"; do
 	BASENAME="`basename \"$F\"`"
 	F="`absolute_path \"$F\"`"
-	
+
 	MOUNTS+=(-v "$F:/$BASENAME:ro")
 	if [[ -f "$F" ]]; then
 		FILE_BASENAMES+=("$BASENAME")
@@ -52,26 +58,24 @@ for F in "$@"; do
 done
 
 header "Uploading `echo ${FILE_BASENAMES[@]}` to Amazon S3..."
-S3CFG="`echo ~/.s3cfg`"
+AWSCFG="`echo ~/.aws`"
 
-docker run --rm -t -i \
+docker run --rm -t -i --init \
 	"${MOUNTS[@]}" \
-	-v "$S3CFG:/s3cfg:ro" \
+	-v "$AWSCFG:/awscfg:ro" \
 	-v "$SELFDIR/internal:/system:ro" \
-	phusion/traveling-ruby-builder \
-	/system/my_init --quiet --skip-runit --skip-startup-files -- \
-	/system/s3init \
-	s3cmd -P sync --no-preserve "${FILE_BASENAMES[@]}" s3://traveling-ruby/releases/
+	"phusion/traveling-ruby-builder-x86_64:$IMAGE_VERSION" \
+	/system/awsinit \
+	aws s3 cp "${FILE_BASENAMES[@]}" s3://traveling-ruby/releases/ --acl public-read
 
 for DIR_BASENAME in "${DIR_BASENAMES[@]}"; do
 	echo
 	header "Uploading $DIR_BASENAME to Amazon S3..."
-	docker run --rm -t -i \
+	docker run --rm -t -i --init \
 		"${MOUNTS[@]}" \
-		-v "$S3CFG:/s3cfg:ro" \
+		-v "$AWSCFG:/awscfg:ro" \
 		-v "$SELFDIR/internal:/system:ro" \
-		phusion/traveling-ruby-builder \
-		/system/my_init --quiet --skip-runit --skip-startup-files -- \
-		/system/s3init \
-		s3cmd -P --delete-removed --no-preserve sync "$DIR_BASENAME/" "s3://traveling-ruby/releases/$DIR_BASENAME/"
+		"phusion/traveling-ruby-builder-x86_64:$IMAGE_VERSION" \
+		/system/awsinit \
+		aws s3 sync "$DIR_BASENAME" "s3://traveling-ruby/releases/$DIR_BASENAME/" --acl public-read --delete
 done

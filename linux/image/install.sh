@@ -20,6 +20,7 @@ echo "$ARCHITECTURE" > /ARCHITECTURE
 run yum install -y wget sudo readline-devel ncurses-devel s3cmd
 run mkdir -p /ccache
 run create_user app "App" 1000
+run pip install awscli==1.19.2
 
 
 ### MySQL

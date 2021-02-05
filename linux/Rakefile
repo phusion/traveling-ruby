@@ -102,7 +102,7 @@ ARCHITECTURES.each do |arch|
 
     desc "Upload Ruby #{ruby_version} #{arch} packages to the server"
     task "upload:#{ruby_version}:#{arch}" => [package, "#{gem_dir}/ok"] do
-      sh "./upload #{package} #{gem_dir}"
+      sh "env IMAGE_VERSION=#{IMAGE_VERSION} ./upload #{package} #{gem_dir}"
     end
 
     desc "Clean Ruby #{ruby_version} packages"
