@@ -1,4 +1,4 @@
-## Version TBD
+## Version 20210206
 
  * The Ruby version that we now support is: 2.4.10
  * On Linux, dropped support for x86. Only x86\_64 is now supported.
