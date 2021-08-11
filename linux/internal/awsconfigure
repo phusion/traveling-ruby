@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 /hbb/bin/setuser app aws configure
 cp -dpR ~app/.aws /work/awscfg

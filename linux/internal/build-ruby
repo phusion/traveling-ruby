@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 
 # shellcheck source=shared/library.sh
@@ -16,7 +16,7 @@ function create_environment_file() {
 	LOAD_PATHS=`/tmp/ruby/bin.real/ruby /system_shared/dump-load-paths.rb`
 
 	cat > "$FILE" <<'EOF'
-#!/bin/bash
+#!/usr/bin/env bash
 ROOT=`dirname "$0"`
 ROOT=`cd "$ROOT/.." && pwd`
 
@@ -64,7 +64,7 @@ function create_wrapper()
 	local IS_RUBY_SCRIPT="$3"
 
 	cat > "$FILE" <<'EOF'
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 ROOT=`dirname "$0"`
 ROOT=`cd "$ROOT/.." && pwd`
