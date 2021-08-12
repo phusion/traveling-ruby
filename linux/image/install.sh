@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 # shellcheck source=linux/image/functions.sh
 source /tr_build/functions.sh

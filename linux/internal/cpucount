@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -e
 set -o pipefail
 grep "`echo -en 'processor\t'`" /proc/cpuinfo | wc -l
