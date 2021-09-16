@@ -4,13 +4,13 @@
 
 Traveling Ruby is a project which supplies self-contained, "portable" Ruby binaries: Ruby binaries that can run on any Linux distribution and any macOS machine. It also has Windows support [(with some caveats)](#caveats). This allows Ruby app developers to bundle these binaries with their Ruby app, so that they can distribute a single package to end users, without needing end users to first install Ruby or gems.
 
-[![](https://raw.githubusercontent.com/phusion/traveling-ruby/main/doc/video.png)](https://vimeo.com/phusionnl/review/113827942/ceca7e70da)
+[![](https://raw.githubusercontent.com/FooBarWidget/traveling-ruby/main/doc/video.png)](https://vimeo.com/phusionnl/review/113827942/ceca7e70da)
 
 _Introduction in 2 minutes_
 
 ## Motivation
 
-Ruby is one of our favorite programming languages. Most people use it for web development, but Ruby is so much more. We at Phusion have been using Ruby for years for writing sysadmin automation scripts, developer command line tools and more. [Heroku's Toolbelt](https://toolbelt.heroku.com/) and [Chef](https://www.chef.io/) have also demonstrated that Ruby is an excellent language for these sorts of things.
+Ruby is one of our favorite programming languages. Most people use it for web development, but Ruby is so much more. I've been using Ruby for years for writing sysadmin automation scripts, developer command line tools and more. [Heroku's Toolbelt](https://toolbelt.heroku.com/) and [Chef](https://www.chef.io/) have also demonstrated that Ruby is an excellent language for these sorts of things.
 
 However, distributing such Ruby apps to inexperienced end users or non-Ruby-programmer end users is problematic. If users have to install Ruby first, or if they have to use RubyGems, [they can easily run into problems](#end_user_problems). Even if they already have Ruby installed, they [can still run into problems](#end_user_problems), e.g. by having the wrong Ruby version installed. The point is, it's a very real problem that [could harm your reputation](#end_user_problems).
 
@@ -119,7 +119,7 @@ Assuming that your binary doesn't use *any* libraries besides the C standard lib
 
 There is no way to tell the compiler and linker to use older symbol versions unless you want to manually specify the version for each and every symbol, which is an undoable task.
 
-The only sane way to get around the glibc symbol problem, and to prevent accidental linking to unwanted libraries, is to create a tightly controlled build environment. On Linux, this build environment with come with an old glibc version. This tightly controlled build environment is sometimes called a ["holy build box"](http://phusion.github.io/holy-build-box/).
+The only sane way to get around the glibc symbol problem, and to prevent accidental linking to unwanted libraries, is to create a tightly controlled build environment. On Linux, this build environment with come with an old glibc version. This tightly controlled build environment is sometimes called a ["holy build box"](http://FooBarWidget.github.io/holy-build-box/).
 
 The Traveling Ruby project provides such a holy build box.
 

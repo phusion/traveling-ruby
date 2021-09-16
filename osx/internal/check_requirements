@@ -5,7 +5,7 @@ XCODEPATH=$(xcode-select -p)
 
 if [[ ! -e "$XCODEPATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk" ]]; then
 	echo "*** ERROR: the macOS 10.14 SDK is required. Please refer to" \
-		"https://github.com/phusion/traveling-ruby/blob/main/osx/README.md" \
+		"https://github.com/FooBarWidget/traveling-ruby/blob/main/osx/README.md" \
 		"for installation instructions." >&2
 	exit 1
 fi

@@ -30,7 +30,7 @@ When filing a bug report, please ensure that you include the following informati
  * What is the expected output? What do you see instead?
  * What does your environment looks like (operating system, language, configuration, infrastructure)
 
- For a more detailed guide, please refer to our [issue template](https://github.com/phusion/traveling-ruby/blob/main/issue_template.md).
+ For a more detailed guide, please refer to our [issue template](https://github.com/FooBarWidget/traveling-ruby/blob/main/issue_template.md).
 
 <a name="contrib_docs"></a>
 ## Contributing documentation
@@ -40,7 +40,7 @@ Documentation and tutorials can be found in the README for this project.
 <a name="contrib_tiag"></a>
 ## Contributing by bug triaging
 
-Users [file bug reports](https://github.com/phusion/traveling-ruby/issues) on a regular basis, but not all bug reports contain sufficient information, persist with new releases, are equally important, etc. By helping with bug triaging you make the lives of the core developers a lot easier.
+Users [file bug reports](https://github.com/FooBarWidget/traveling-ruby/issues) on a regular basis, but not all bug reports contain sufficient information, persist with new releases, are equally important, etc. By helping with bug triaging you make the lives of the core developers a lot easier.
 
 To start contributing, please submit a comment on any bug report that needs triaging. This comment should contain triaging instructions, e.g. whether a report should be considered duplicate. If you contribute regularly we'll give you moderator access to the bug tracker so that you can apply triaging labels directly.
 
@@ -69,4 +69,4 @@ Traveling Ruby is mostly written in Shell, but makes use of Ruby gems and enviro
 
 Pull requests should normally be submitted against the latest stable branch (e.g. main), because once tested & accepted, we want users to benefit from the work as soon as possible.
 
-For more information, please refer to our [template for Pull Requests](https://github.com/phusion/traveling-ruby/blob/main/pull_request_template.md).
+For more information, please refer to our [template for Pull Requests](https://github.com/FooBarWidget/traveling-ruby/blob/main/pull_request_template.md).
