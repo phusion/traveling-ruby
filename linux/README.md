@@ -17,7 +17,7 @@ This will produce a `traveling-ruby-XXXXX.tar.gz` file which contains the Ruby b
 
 The build system runs inside a Docker container. The Docker image is called [phusion/traveling-ruby-builder](https://registry.hub.docker.com/r/phusion/traveling-ruby-builder/), and it's built from the sources in `linux/image/`.
 
-The image contains a controlled build environment with a specific compiler toolchain and specific libraries, allowing us to compile binaries that can run on a large number of Linux systems. It's based on [Holy Build Box](http://phusion.github.io/holy-build-box/).
+The image contains a controlled build environment with a specific compiler toolchain and specific libraries, allowing us to compile binaries that can run on a large number of Linux systems. It's based on [Holy Build Box](http://FooBarWidget.github.io/holy-build-box/).
 
 The image can be built with `rake image`.
 
