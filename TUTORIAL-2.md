@@ -88,7 +88,7 @@ Copy the Bundler gem bundle that you installed in the last step, into the packag
 ```Bash
 cp -pR packaging/vendor hello-1.0.0-linux-x86/lib/
 cp -pR packaging/vendor hello-1.0.0-linux-x86_64/lib/
-cp -pR packaging/vendor hello-1.0.0-macOS/lib/
+cp -pR packaging/vendor hello-1.0.0-osx/lib/
 ```
 
 Copy over your Gemfile and Gemfile.lock into each gem directory inside the packages:
@@ -96,7 +96,7 @@ Copy over your Gemfile and Gemfile.lock into each gem directory inside the packa
 ```Bash
 cp Gemfile Gemfile.lock hello-1.0.0-linux-x86/lib/vendor/
 cp Gemfile Gemfile.lock hello-1.0.0-linux-x86_64/lib/vendor/
-cp Gemfile Gemfile.lock hello-1.0.0-macOS/lib/vendor/
+cp Gemfile Gemfile.lock hello-1.0.0-osx/lib/vendor/
 ```
 
 ## Bundler config file
@@ -116,11 +116,11 @@ Then copy the file into `.bundle` directories inside the gem directories inside 
 ```Bash
 mkdir hello-1.0.0-linux-x86/lib/vendor/.bundle
 mkdir hello-1.0.0-linux-x86_64/lib/vendor/.bundle
-mkdir hello-1.0.0-macOS/lib/vendor/.bundle
+mkdir hello-1.0.0-osx/lib/vendor/.bundle
 
 cp packaging/bundler-config hello-1.0.0-linux-x86/lib/vendor/.bundle/config
 cp packaging/bundler-config hello-1.0.0-linux-x86_64/lib/vendor/.bundle/config
-cp packaging/bundler-config hello-1.0.0-macOS/lib/vendor/.bundle/config
+cp packaging/bundler-config hello-1.0.0-osx/lib/vendor/.bundle/config
 ```
 
 ## Wrapper script
@@ -153,14 +153,14 @@ Copy over this wrapper script to each of your package directories and finalize t
 ```Bash
 cp packaging/wrapper.sh hello-1.0.0-linux-x86/hello
 cp packaging/wrapper.sh hello-1.0.0-linux-x86_64/hello
-cp packaging/wrapper.sh hello-1.0.0-macOS/hello
+cp packaging/wrapper.sh hello-1.0.0-osx/hello
 
 tar -czf hello-1.0.0-linux-x86.tar.gz hello-1.0.0-linux-x86
 tar -czf hello-1.0.0-linux-x86_64.tar.gz hello-1.0.0-linux-x86_64
-tar -czf hello-1.0.0-macOS.tar.gz hello-1.0.0-macOS
+tar -czf hello-1.0.0-osx.tar.gz hello-1.0.0-osx
 rm -rf hello-1.0.0-linux-x86
 rm -rf hello-1.0.0-linux-x86_64
-rm -rf hello-1.0.0-macOS
+rm -rf hello-1.0.0-osx
 ```
 
 ## Automating the process using Rake
@@ -176,7 +176,7 @@ VERSION = "1.0.0"
 TRAVELING_RUBY_VERSION = "20150210-2.1.5"
 
 desc "Package your app"
-task :package => ['package:linux:x86', 'package:linux:x86_64', 'package:macOS']
+task :package => ['package:linux:x86', 'package:linux:x86_64', 'package:osx']
 
 namespace :package do
   namespace :linux do
@@ -191,9 +191,9 @@ namespace :package do
     end
   end
 
-  desc "Package your app for macOS"
-  task :macOS => [:bundle_install, "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-macOS.tar.gz"] do
-    create_package("macOS")
+  desc "Package your app for osx"
+  task :osx => [:bundle_install, "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz"] do
+    create_package("osx")
   end
 
   desc "Install gems to local directory"
@@ -220,8 +220,8 @@ file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86_64.tar.gz" do
   download_runtime("linux-x86_64")
 end
 
-file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-macOS.tar.gz" do
-  download_runtime("macOS")
+file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz" do
+  download_runtime("osx")
 end
 
 def create_package(target)

@@ -1,5 +1,5 @@
 linux/runtime
 linux/output
-macOS/runtime
-macOS/output
-macOS/work
+osx/runtime
+osx/output
+osx/work

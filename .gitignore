@@ -1,8 +1,8 @@
 /linux/runtime
 /linux/output
-/macOS/runtime
-/macOS/output
-/macOS/work
+/osx/runtime
+/osx/output
+/osx/work
 /windows/cache
 /windows/output
 *.sublime-workspace

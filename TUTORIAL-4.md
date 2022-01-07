@@ -84,7 +84,7 @@ end
 Finally, add the `package:win32` task to the `package` task's dependencies so that a `rake package` generates a Windows package too:
 
 ```Ruby
-task :package => ['package:linux:x86', 'package:linux:x86_64', 'package:macOS', 'package:win32']
+task :package => ['package:linux:x86', 'package:linux:x86_64', 'package:osx', 'package:win32']
 ```
 
 ## Creating and testing the package

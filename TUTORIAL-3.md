@@ -92,8 +92,8 @@ $ tar xzf sqlite3-1.3.9.tar.gz
 $ rm sqlite3-1.3.9.tar.gz
 $ cd ../../../..
 
-$ cd hello-1.0.0-macOS/lib/vendor/ruby
-$ curl -L -O --fail https://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-gems-20141215-2.1.5-macOS/sqlite3-1.3.9.tar.gz
+$ cd hello-1.0.0-osx/lib/vendor/ruby
+$ curl -L -O --fail https://d6r77u77i8pq3.cloudfront.net/releases/traveling-ruby-gems-20141215-2.1.5-osx/sqlite3-1.3.9.tar.gz
 $ tar xzf sqlite3-1.3.9.tar.gz
 $ rm sqlite3-1.3.9.tar.gz
 $ cd ../../../..
@@ -106,17 +106,17 @@ Package the directories and finalize the packages:
 ```
 $ tar -czf hello-1.0.0-linux-x86.tar.gz hello-1.0.0-linux-x86
 $ tar -czf hello-1.0.0-linux-x86_64.tar.gz hello-1.0.0-linux-x86_64
-$ tar -czf hello-1.0.0-macOS.tar.gz hello-1.0.0-macOS
+$ tar -czf hello-1.0.0-osx.tar.gz hello-1.0.0-osx
 $ rm -rf hello-1.0.0-linux-x86
 $ rm -rf hello-1.0.0-linux-x86_64
-$ rm -rf hello-1.0.0-macOS
+$ rm -rf hello-1.0.0-osx
 ```
 
 Now you can test whether it works. Suppose that you're developing on macOS. Extract the macOS package and test it:
 
 ```
-$ tar xzf hello-1.0.0-macOS.tar.gz
-$ cd hello-1.0.0-macOS
+$ tar xzf hello-1.0.0-osx.tar.gz
+$ cd hello-1.0.0-osx
 $ ./hello
 Database file modified. (in red)
 $ sqlite3 hello.sqlite3
@@ -140,7 +140,7 @@ TRAVELING_RUBY_VERSION = "20150210-2.1.5"
 SQLITE3_VERSION = "1.3.9"  # Must match Gemfile
 
 desc "Package your app"
-task :package => ['package:linux:x86', 'package:linux:x86_64', 'package:macOS']
+task :package => ['package:linux:x86', 'package:linux:x86_64', 'package:osx']
 
 namespace :package do
   namespace :linux do
@@ -161,12 +161,12 @@ namespace :package do
     end
   end
 
-  desc "Package your app for macOS"
-  task :macOS => [:bundle_install,
-    "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-macOS.tar.gz",
-    "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-macOS-sqlite3-#{SQLITE3_VERSION}.tar.gz"
+  desc "Package your app for osx"
+  task :osx => [:bundle_install,
+    "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz",
+    "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx-sqlite3-#{SQLITE3_VERSION}.tar.gz"
   ] do
-    create_package("macOS")
+    create_package("osx")
   end
 
   desc "Install gems to local directory"
@@ -197,8 +197,8 @@ file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86_64.tar.gz" do
   download_runtime("linux-x86_64")
 end
 
-file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-macOS.tar.gz" do
-  download_runtime("macOS")
+file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz" do
+  download_runtime("osx")
 end
 
 file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86-sqlite3-#{SQLITE3_VERSION}.tar.gz" do
@@ -209,8 +209,8 @@ file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-linux-x86_64-sqlite3-#{
   download_native_extension("linux-x86_64", "sqlite3-#{SQLITE3_VERSION}")
 end
 
-file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-macOS-sqlite3-#{SQLITE3_VERSION}.tar.gz" do
-  download_native_extension("macOS", "sqlite3-#{SQLITE3_VERSION}")
+file "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx-sqlite3-#{SQLITE3_VERSION}.tar.gz" do
+  download_native_extension("osx", "sqlite3-#{SQLITE3_VERSION}")
 end
 
 def create_package(target)

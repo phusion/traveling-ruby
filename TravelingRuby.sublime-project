@@ -7,8 +7,8 @@
 			[
 				"linux/runtime",
 				"linux/output",
-				"macOS/runtime",
-				"macOS/output"
+				"osx/runtime",
+				"osx/output"
 			]
 		}
 	]
