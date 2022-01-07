@@ -33,7 +33,7 @@ The solution that Traveling Ruby advocates, is to distribute your app as a singl
 This makes the release process much simpler. Instead of having to create almost 10 packages using a fleet of VMs, you just create 3 packages quickly and easily from your developer laptop. These 3 packages cover all the major platforms that your end users are on:
 
  * Linux x86\_64.
- * macOS.
+ * macOS - *This might also be referred to as OS X at points in this repo*
  * Windows. But see [the Windows-specific caveats](#caveats).
 
 However, distributing a precompiled Ruby interpreter that works for all end users, is more easily said than done. [Read this section](#why_precompiled_binary_difficult) to learn why it's difficult.
