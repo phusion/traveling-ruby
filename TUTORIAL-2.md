@@ -191,7 +191,7 @@ namespace :package do
     end
   end
 
-  desc "Package your app for OS X"
+  desc "Package your app for macOS"
   task :osx => [:bundle_install, "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz"] do
     create_package("osx")
   end

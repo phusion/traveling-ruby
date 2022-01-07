@@ -72,7 +72,7 @@ There are also some real-world examples of how people used Traveling Ruby to pac
 
 Native extensions:
 
- * Traveling Ruby only supports native extensions when creating Linux and OS X packages. Native extensions are currently not supported when creating Windows packages.
+ * Traveling Ruby only supports native extensions when creating Linux and macOS packages. Native extensions are currently not supported when creating Windows packages.
  * Traveling Ruby only supports a number of popular native extension gems, and only in some specific versions. You cannot use just any native extension gem.
  * Native extensions are covered in [tutorial 3](TUTORIAL-3.md).
 

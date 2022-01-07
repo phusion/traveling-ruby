@@ -1,6 +1,6 @@
 # Tutorial 1: hello world
 
-This tutorial teaches you, in 5 minutes, how to use Traveling Ruby to create self-contained packages of a hello world app. This app has no gem dependencies; dependency management is covered in [tutorial 2](TUTORIAL-2.md). We will be creating three packages, namely for Linux x86, Linux x86_64 and OS X.
+This tutorial teaches you, in 5 minutes, how to use Traveling Ruby to create self-contained packages of a hello world app. This app has no gem dependencies; dependency management is covered in [tutorial 2](TUTORIAL-2.md). We will be creating three packages, namely for Linux x86, Linux x86_64 and macOS.
 
 This tutorial **does not cover Windows**. This tutorial [will not work on Windows](README.md#caveats); nor will this tutorial generate packages for Windows. The creation of packages for Windows is covered in [tutorial 4](TUTORIAL-4.md).
 
@@ -85,7 +85,7 @@ Your directory structure will now look like this:
 
 ### Quick sanity testing
 
-Let's do a basic sanity test by running your app with a bundled Ruby interpreter. Suppose that you are developing on OS X. Run this:
+Let's do a basic sanity test by running your app with a bundled Ruby interpreter. Suppose that you are developing on macOS. Run this:
 
 ```Bash
 cd hello-1.0.0-osx
@@ -174,7 +174,7 @@ namespace :package do
     end
   end
 
-  desc "Package your app for OS X"
+  desc "Package your app for macOS"
   task :osx => "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz" do
     create_package("osx")
   end
