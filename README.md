@@ -90,7 +90,7 @@ The Traveling Ruby project supplies binaries that application developers can use
 
 For the Linux build system, see [linux/README.md](linux/README.md).
 
-For the macOS build system, see [osx/README.md](osx/README.md).
+For the macOS build system, see [macOS/README.md](macOS/README.md).
 
 ## Future work
 
