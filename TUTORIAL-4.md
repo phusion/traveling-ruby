@@ -8,7 +8,7 @@ You can find the end result of this tutorial at https://github.com/phusion/trave
 
 ## Creating a batch file
 
-Suppose that we want to create a Windows package for our hello world app from [tutorial 2](TUTORIAL-2.md). The first thing we need to create is a Windows wrapper script. We already have a Unix wrapper script in `packaging/wrapper.sh`, which works on Linux and OS X, but Windows doesn't support Unix shell scripts. For Windows we'll need to create a wrapper script in the DOS batch format.
+Suppose that we want to create a Windows package for our hello world app from [tutorial 2](TUTORIAL-2.md). The first thing we need to create is a Windows wrapper script. We already have a Unix wrapper script in `packaging/wrapper.sh`, which works on Linux and macOS, but Windows doesn't support Unix shell scripts. For Windows we'll need to create a wrapper script in the DOS batch format.
 
 Create `packaging/wrapper.bat`:
 
@@ -25,7 +25,7 @@ set BUNDLE_IGNORE_CONFIG=
 
 ## Modifying the Rakefile
 
-The next step is to add a Rake task for creating the Windows package. The Rakefile currently generates tar.gz packages for Linux and OS X, but tar.gz is not a common format on Windows. For Windows, we'll want to create a .zip package instead.
+The next step is to add a Rake task for creating the Windows package. The Rakefile currently generates tar.gz packages for Linux and macOS, but tar.gz is not a common format on Windows. For Windows, we'll want to create a .zip package instead.
 
 Add a `package:win32` task to your Rakefile:
 
@@ -89,7 +89,7 @@ task :package => ['package:linux:x86', 'package:linux:x86_64', 'package:osx', 'p
 
 ## Creating and testing the package
 
-Congratulations. The `rake package` command will now generate packages for Windows, Linux and OS X. But let's test the Windows package. Run the following command to generate a Windows package:
+Congratulations. The `rake package` command will now generate packages for Windows, Linux and macOS. But let's test the Windows package. Run the following command to generate a Windows package:
 
 ```Bash
 rake package:win32

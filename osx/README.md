@@ -1,4 +1,4 @@
-# Traveling Ruby OS X build system
+# Traveling Ruby macOS build system
 
 The build system requires the Developer Commandline Tools to be installed, as well as a number of other things. See the "System requirements" section.
 
