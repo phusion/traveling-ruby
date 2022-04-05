@@ -37,7 +37,7 @@ GEM
     unicorn (5.8.0)
       kgio (~> 2.6)
       raindrops (~> 0.7)
-    yajl-ruby (1.4.1)
+    yajl-ruby (1.4.2)
 
 PLATFORMS
   ruby
