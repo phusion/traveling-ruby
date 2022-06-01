@@ -1,9 +1,9 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    ffi (1.14.2)
-    json (2.5.1)
-    yajl-ruby (1.4.1)
+    ffi (1.15.5)
+    json (2.6.2)
+    yajl-ruby (1.4.3)
 
 PLATFORMS
   ruby
