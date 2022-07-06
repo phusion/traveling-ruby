@@ -9,7 +9,7 @@ source "$SELFDIR/../shared/library.sh"
 TEMPDIR=
 
 RUNTIME_DIR=
-CONCURRENCY=4
+CONCURRENCY=`sysctl -n hw.ncpu`
 FORCE_CCACHE=false
 SKIP_CCACHE=false
 FORCE_CMAKE=false
@@ -35,13 +35,13 @@ SKIP_LIBFFI=false
 FORCE_LIBYAML=false
 SKIP_LIBYAML=false
 FORCE_SQLITE3=false
-SKIP_SQLITE3=false
+SKIP_SQLITE3=true
 FORCE_LIBLZMA=false
 SKIP_LIBLZMA=false
 FORCE_MYSQL=false
-SKIP_MYSQL=false
+SKIP_MYSQL=true
 FORCE_POSTGRESQL=false
-SKIP_POSTGRESQL=false
+SKIP_POSTGRESQL=true
 FORCE_ICU=false
 SKIP_ICU=false
 FORCE_LIBSSH2=false
@@ -245,35 +245,34 @@ RUNTIME_DIR="`cd \"$RUNTIME_DIR\" && pwd`"
 
 TOTAL_TOOLS=6
 TOTAL_LIBS=14
-CCACHE_VERSION=3.7.12
-CMAKE_VERSION=3.9.6
-PKG_CONFIG_VERSION=0.28
-AUTOCONF_VERSION=2.69
-AUTOMAKE_VERSION=1.15
-LIBTOOL_VERSION=2.4.6
-OPENSSL_VERSION=1.1.1i
-NCURSES_VERSION=5.9
-LIBEDIT_VERSION=20141030-3.1
-LIBEDIT_DIR_VERSION=20141029-3.1
+CCACHE_VERSION=4.6.1
+CMAKE_VERSION=3.23.2
+PKG_CONFIG_VERSION=0.29.2
+AUTOCONF_VERSION=2.71
+AUTOMAKE_VERSION=1.16.5
+LIBTOOL_VERSION=2.4.7
+OPENSSL_VERSION=1.1.1p
+NCURSES_VERSION=6.1 # the newer 6.2 and 6.3 are not build on ARM64
+LIBEDIT_VERSION=20210910-3.1
+LIBEDIT_DIR_VERSION=20210910-3.1
 GMP_VERSION=6.2.1
 GMP_DIR_VERSION=6.2.1
-LIBFFI_VERSION=3.2.1
-LIBYAML_VERSION=0.1.5
+LIBFFI_VERSION=3.4.2
+LIBYAML_VERSION=0.2.5
 SQLITE3_VERSION=3340000
-XZ_VERSION=5.0.8
+XZ_VERSION=5.2.5
 MYSQL_LIB_VERSION=6.1.5
 POSTGRESQL_VERSION=13.1
-ICU_RELEASE_VERSION=68-2
-ICU_FILE_VERSION=68_2
-LIBSSH2_VERSION=1.9.0
-LIBXML2_VERSION=2.9.10
+ICU_RELEASE_VERSION=71-1
+ICU_FILE_VERSION=71_1
+LIBSSH2_VERSION=1.10.0
+LIBXML2_VERSION=2.9.12
 LIBXSLT_VERSION=1.1.34
 export PATH="$RUNTIME_DIR/bin:$PATH"
 export LIBRARY_PATH="$RUNTIME_DIR/lib"
 export PKG_CONFIG_PATH="$RUNTIME_DIR/lib/pkgconfig:/usr/lib/pkgconfig"
 export RUNTIME_DIR
 export DEAD_STRIP=true
-
 
 header "Initializing..."
 run mkdir -p "$RUNTIME_DIR"
@@ -285,28 +284,12 @@ echo "Entering $RUNTIME_DIR"
 cd "$RUNTIME_DIR"
 echo
 
-header "Installing tool 1/$TOTAL_TOOLS: ccache..."
-if $SKIP_CCACHE; then
-	echo "Skipped."
-elif [[ ! -e "$RUNTIME_DIR/bin/ccache" ]] || $FORCE_CCACHE; then
-	download_and_extract ccache-$CCACHE_VERSION.tar.gz \
-		https://github.com/ccache/ccache/releases/download/v$CCACHE_VERSION/ccache-$CCACHE_VERSION.tar.gz
-	echo "Entering $RUNTIME_DIR/ccache-$CCACHE_VERSION"
-	pushd ccache-$CCACHE_VERSION >/dev/null
+# To many warnings, suppress them all (disable in case of troubleshooting)
+export CPPFLAGS="-w"
+export CXXFLAGS="-w"
+export CFLAGS="-w"
 
-	run ./configure --prefix="$RUNTIME_DIR"
-	run make -j$CONCURRENCY
-	run make install
-
-	echo "Leaving source directory"
-	popd >/dev/null
-	run rm -rf ccache-$CCACHE_VERSION
-else
-	echo "Already installed."
-fi
-echo
-
-header "Installing tool 2/$TOTAL_TOOLS: CMake..."
+header "Installing tool 1/$TOTAL_TOOLS: CMake..."
 if $SKIP_CMAKE; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/bin/cmake" ]] || $FORCE_CMAKE; then
@@ -314,6 +297,10 @@ elif [[ ! -e "$RUNTIME_DIR/bin/cmake" ]] || $FORCE_CMAKE; then
 		https://github.com/Kitware/CMake/releases/download/v$CMAKE_VERSION/cmake-$CMAKE_VERSION.tar.gz
 	echo "Entering $RUNTIME_DIR/cmake-$CMAKE_VERSION"
 	pushd cmake-$CMAKE_VERSION >/dev/null
+
+	# FIXME: Only on ARM64?
+	echo "Removing some false positive checks in CMakeLists"
+	patch -u CMakeLists.txt -i $SELFDIR/internal/cmake-3.23.2.patch
 
 	run ./configure --prefix="$RUNTIME_DIR" --no-qt-gui --parallel=$CONCURRENCY
 	run make -j$CONCURRENCY
@@ -327,12 +314,35 @@ else
 fi
 echo
 
+header "Installing tool 2/$TOTAL_TOOLS: ccache..."
+if $SKIP_CCACHE; then
+	echo "Skipped."
+elif [[ ! -e "$RUNTIME_DIR/bin/ccache" ]] || $FORCE_CCACHE; then
+	download_and_extract ccache-$CCACHE_VERSION.tar.gz \
+		https://github.com/ccache/ccache/releases/download/v$CCACHE_VERSION/ccache-$CCACHE_VERSION.tar.gz
+	echo "Entering $RUNTIME_DIR/ccache-$CCACHE_VERSION"
+	pushd ccache-$CCACHE_VERSION >/dev/null
+
+	mkdir build
+	cd build
+	run cmake -DCMAKE_BUILD_TYPE=Release -DZSTD_FROM_INTERNET=ON -DHIREDIS_FROM_INTERNET=ON -DCMAKE_INSTALL_PREFIX="$RUNTIME_DIR" ..
+	run make -j$CONCURRENCY
+	run make install
+
+	echo "Leaving source directory"
+	popd >/dev/null
+	run rm -rf ccache-$CCACHE_VERSION
+else
+	echo "Already installed."
+fi
+echo
+
 header "Installing tool 3/$TOTAL_TOOLS: pkg-config..."
 if $SKIP_PKG_CONFIG; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/bin/pkg-config" ]] || $FORCE_PKG_CONFIG; then
 	download_and_extract pkg-config-$PKG_CONFIG_VERSION.tar.gz \
-		http://pkgconfig.freedesktop.org/releases/pkg-config-$PKG_CONFIG_VERSION.tar.gz
+		https://pkgconfig.freedesktop.org/releases/pkg-config-$PKG_CONFIG_VERSION.tar.gz
 	echo "Entering $RUNTIME_DIR/pkg-config-$PKG_CONFIG_VERSION"
 	pushd pkg-config-$PKG_CONFIG_VERSION >/dev/null
 
@@ -352,7 +362,7 @@ if $SKIP_AUTOCONF; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/bin/autoconf" ]] || $FORCE_AUTOCONF; then
 	download_and_extract autoconf-$AUTOCONF_VERSION.tar.gz \
-		http://ftp.gnu.org/gnu/autoconf/autoconf-$AUTOCONF_VERSION.tar.gz
+		https://ftp.gnu.org/gnu/autoconf/autoconf-$AUTOCONF_VERSION.tar.gz
 	echo "Entering $RUNTIME_DIR/autoconf-$AUTOCONF_VERSION"
 	pushd autoconf-$AUTOCONF_VERSION >/dev/null
 
@@ -372,7 +382,7 @@ if $SKIP_AUTOMAKE; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/bin/automake" ]] || $FORCE_AUTOMAKE; then
 	download_and_extract automake-$AUTOMAKE_VERSION.tar.gz \
-		http://ftp.gnu.org/gnu/automake/automake-$AUTOMAKE_VERSION.tar.gz
+		https://ftp.gnu.org/gnu/automake/automake-$AUTOMAKE_VERSION.tar.gz
 	echo "Entering $RUNTIME_DIR/automake-$AUTOMAKE_VERSION"
 	pushd automake-$AUTOMAKE_VERSION >/dev/null
 
@@ -392,7 +402,7 @@ if $SKIP_LIBTOOL; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/bin/libtoolize" ]] || $FORCE_LIBTOOL; then
 	download_and_extract libtool-$LIBTOOL_VERSION.tar.gz \
-		http://ftp.gnu.org/gnu/libtool/libtool-$LIBTOOL_VERSION.tar.gz
+		https://ftp.gnu.org/gnu/libtool/libtool-$LIBTOOL_VERSION.tar.gz
 	echo "Entering $RUNTIME_DIR/libtool-$LIBTOOL_VERSION"
 	pushd libtool-$LIBTOOL_VERSION >/dev/null
 
@@ -420,8 +430,9 @@ elif [[ ! -e "$RUNTIME_DIR/lib/openssl-ok" ]] || $FORCE_OPENSSL; then
 	echo "Entering $RUNTIME_DIR/openssl-$OPENSSL_VERSION"
 	pushd openssl-$OPENSSL_VERSION >/dev/null
 
-	run ./Configure darwin64-x86_64-cc --prefix="$RUNTIME_DIR" --openssldir="$RUNTIME_DIR/openssl" \
-		threads zlib shared no-sse2
+	run ./Configure darwin64-arm64-cc --prefix="$RUNTIME_DIR" --openssldir="$RUNTIME_DIR/openssl" threads zlib shared
+
+	# FIXME: maybe -j more than 1 will work in 2022?
 	# For some reason the -j1 is explicitly required. Otherwise, running `make -j2`
 	# on the Makefile which invoked setup-runtime could somehow pass the -j2 to sub-makes.
 	run make -j1
@@ -457,9 +468,9 @@ echo
 header "Compiling runtime libraries 2/$TOTAL_LIBS: ncurses..."
 if $SKIP_NCURSES; then
 	echo "Skipped."
-elif [[ ! -e "$RUNTIME_DIR/lib/libncurses.5.dylib" ]] || $FORCE_NCURSES; then
+elif [[ ! -e "$RUNTIME_DIR/lib/libncurses.6.dylib" ]] || $FORCE_NCURSES; then
 	run rm -f ncurses-$NCURSES_VERSION.tar.bz2
-	run curl --fail -L -O http://ftp.gnu.org/pub/gnu/ncurses/ncurses-$NCURSES_VERSION.tar.gz
+	run curl --fail -L -O https://ftp.gnu.org/pub/gnu/ncurses/ncurses-$NCURSES_VERSION.tar.gz
 	run tar xzf ncurses-$NCURSES_VERSION.tar.gz
 	run rm ncurses-$NCURSES_VERSION.tar.gz
 	echo "Entering $RUNTIME_DIR/ncurses-$NCURSES_VERSION"
@@ -477,20 +488,20 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libncurses.5.dylib" ]] || $FORCE_NCURSES; then
 
 	run rm -f "$RUNTIME_DIR/lib"/{libpanel,libmenu}*
 	run rm -f "$RUNTIME_DIR/lib"/{libncurses,libform}*.a
-	run strip -S "$RUNTIME_DIR/lib/libncurses.5.dylib"
-	run strip -S "$RUNTIME_DIR/lib/libform.5.dylib"
+	run strip -S "$RUNTIME_DIR/lib/libncurses.6.dylib"
+	run strip -S "$RUNTIME_DIR/lib/libform.6.dylib"
 	run install_name_tool -id \
-		"@rpath/libncurses.5.dylib" \
-		"$RUNTIME_DIR/lib/libncurses.5.dylib"
+		"@rpath/libncurses.6.dylib" \
+		"$RUNTIME_DIR/lib/libncurses.6.dylib"
 	run install_name_tool -id \
-		"@rpath/libform.5.dylib" \
-		"$RUNTIME_DIR/lib/libform.5.dylib"
+		"@rpath/libform.6.dylib" \
+		"$RUNTIME_DIR/lib/libform.6.dylib"
 	run install_name_tool -change \
-		"$RUNTIME_DIR/lib/libncurses.5.dylib" \
-		"@rpath/libncurses.5.dylib" \
-		"$RUNTIME_DIR/lib/libform.5.dylib"
+		"$RUNTIME_DIR/lib/libncurses.6.dylib" \
+		"@rpath/libncurses.6.dylib" \
+		"$RUNTIME_DIR/lib/libform.6.dylib"
 	pushd "$RUNTIME_DIR/lib" >/dev/null
-	run ln -sf libncurses.5.dylib libtermcap.dylib
+	run ln -sf libncurses.6.dylib libtermcap.dylib
 	popd >/dev/null
 else
 	echo "Already installed."
@@ -502,7 +513,7 @@ if $SKIP_LIBEDIT; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libedit.0.dylib" ]] || $FORCE_LIBEDIT; then
 	run rm -f libedit-$LIBEDIT_VERSION.tar.gz
-	run curl --fail -L -O http://thrysoee.dk/editline/libedit-$LIBEDIT_VERSION.tar.gz
+	run curl --fail -L -O https://thrysoee.dk/editline/libedit-$LIBEDIT_VERSION.tar.gz
 	run tar xzf libedit-$LIBEDIT_VERSION.tar.gz
 	run rm libedit-$LIBEDIT_VERSION.tar.gz
 	echo "Entering $RUNTIME_DIR/libedit-$LIBEDIT_VERSION"
@@ -555,9 +566,9 @@ echo
 header "Compiling runtime libraries 5/$TOTAL_LIBS: libffi..."
 if $SKIP_LIBFFI; then
 	echo "Skipped."
-elif [[ ! -e "$RUNTIME_DIR/lib/libffi.6.dylib" ]] || $FORCE_LIBFFI; then
+elif [[ ! -e "$RUNTIME_DIR/lib/libffi.8.dylib" ]] || $FORCE_LIBFFI; then
 	run rm -f libffi-$LIBFFI_VERSION.tar.bz2
-	run curl --fail -L -O ftp://sourceware.org/pub/libffi/libffi-$LIBFFI_VERSION.tar.gz
+	run curl --fail -L -O https://github.com/libffi/libffi/releases/download/v$LIBFFI_VERSION/libffi-$LIBFFI_VERSION.tar.gz
 	run tar xzf libffi-$LIBFFI_VERSION.tar.gz
 	run rm libffi-$LIBFFI_VERSION.tar.gz
 	echo "Entering $RUNTIME_DIR/libffi-$LIBFFI_VERSION"
@@ -572,8 +583,8 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libffi.6.dylib" ]] || $FORCE_LIBFFI; then
 	popd >/dev/null
 	run rm -rf libffi-$LIBFFI_VERSION
 
-	run install_name_tool -id "@rpath/libffi.6.dylib" \
-		"$RUNTIME_DIR/lib/libffi.6.dylib"
+	run install_name_tool -id "@rpath/libffi.8.dylib" \
+	  "$RUNTIME_DIR/lib/libffi.8.dylib"
 else
 	echo "Already installed."
 fi
@@ -584,7 +595,7 @@ if $SKIP_LIBYAML; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libyaml-0.2.dylib" ]] || $FORCE_LIBYAML; then
 	download_and_extract yaml-$LIBYAML_VERSION.tar.gz \
-		http://pyyaml.org/download/libyaml/yaml-$LIBYAML_VERSION.tar.gz
+		https://pyyaml.org/download/libyaml/yaml-$LIBYAML_VERSION.tar.gz
 	echo "Entering $RUNTIME_DIR/libyaml-$LIBYAML_VERSION"
 	pushd yaml-$LIBYAML_VERSION >/dev/null
 
@@ -608,7 +619,7 @@ if $SKIP_SQLITE3; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libsqlite3.a" ]] || $FORCE_SQLITE3; then
 	download_and_extract sqlite-autoconf-$SQLITE3_VERSION.tar.gz \
-		http://www.sqlite.org/2020/sqlite-autoconf-$SQLITE3_VERSION.tar.gz
+		https://www.sqlite.org/2020/sqlite-autoconf-$SQLITE3_VERSION.tar.gz
 	echo "Entering $RUNTIME_DIR/sqlite-autoconf-$SQLITE3_VERSION"
 	pushd sqlite-autoconf-$SQLITE3_VERSION >/dev/null
 
@@ -629,7 +640,7 @@ if $SKIP_LIBLZMA; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/liblzma.5.dylib" ]] || $FORCE_LIBLZMA; then
 	download_and_extract xz-$XZ_VERSION.tar.bz2 \
-		http://tukaani.org/xz/xz-$XZ_VERSION.tar.bz2
+		https://tukaani.org/xz/xz-$XZ_VERSION.tar.bz2
 	echo "Entering $RUNTIME_DIR/xz-$XZ_VERSION"
 	pushd xz-$XZ_VERSION >/dev/null
 
@@ -655,7 +666,7 @@ if $SKIP_MYSQL; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libmysqlclient.a" ]] || $FORCE_MYSQL; then
 	download_and_extract mysql-connector-c-$MYSQL_LIB_VERSION-src.tar.gz \
-		http://dev.mysql.com/get/Downloads/Connector-C/mysql-connector-c-$MYSQL_LIB_VERSION-src.tar.gz
+		https://dev.mysql.com/get/Downloads/Connector-C/mysql-connector-c-$MYSQL_LIB_VERSION-src.tar.gz
 	echo "Entering $RUNTIME_DIR/mysql-connector-c-$MYSQL_LIB_VERSION-src"
 	pushd mysql-connector-c-$MYSQL_LIB_VERSION-src >/dev/null
 
@@ -687,7 +698,7 @@ if $SKIP_POSTGRESQL; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libpq.a" ]] || $FORCE_POSTGRESQL; then
 	download_and_extract postgresql-$POSTGRESQL_VERSION.tar.bz2 \
-		http://ftp.postgresql.org/pub/source/v13.1/postgresql-$POSTGRESQL_VERSION.tar.bz2
+		https://ftp.postgresql.org/pub/source/v13.1/postgresql-$POSTGRESQL_VERSION.tar.bz2
 	echo "Entering $RUNTIME_DIR/postgresql-$POSTGRESQL_VERSION"
 	pushd postgresql-$POSTGRESQL_VERSION >/dev/null
 
@@ -734,8 +745,8 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libicudata.a" ]] || $FORCE_ICU; then
 
 	run ./configure --prefix="$RUNTIME_DIR" --disable-samples --disable-tests \
 		--enable-static --disable-shared --with-library-bits=64 \
-		CFLAGS="-O2 -fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0" \
-		CXXFLAGS="-O2 -fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0"
+		CFLAGS="-w -O2 -fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0" \
+		CXXFLAGS="-w -O2 -fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0"
 	run make -j$CONCURRENCY VERBOSE=1
 	run make install -j$CONCURRENCY
 
@@ -752,14 +763,14 @@ if $SKIP_LIBSSH2; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libssh2.a" ]] || $FORCE_LIBSSH2; then
 	download_and_extract libssh2-$LIBSSH2_VERSION.tar.gz \
-		http://www.libssh2.org/download/libssh2-$LIBSSH2_VERSION.tar.gz
+		https://www.libssh2.org/download/libssh2-$LIBSSH2_VERSION.tar.gz
 	echo "Entering $RUNTIME_DIR/libssh2-$LIBSSH2_VERSION"
 	pushd libssh2-$LIBSSH2_VERSION >/dev/null
 
 	run ./configure --prefix="$RUNTIME_DIR" --enable-static --disable-shared \
-		--with-openssl --with-libz --disable-examples-build --disable-debug \
-		CFLAGS="-O2 -fPIC -fvisibility=hidden" \
-		CXXFLAGS="-O2 -fPIC -fvisibility=hidden"
+		--with-crypto-openssl --with-libz --disable-examples-build --disable-debug \
+		CFLAGS="-w -O2 -fPIC -fvisibility=hidden" \
+		CXXFLAGS="-w -O2 -fPIC -fvisibility=hidden"
 	run make -j$CONCURRENCY
 	run make install-strip -j$CONCURRENCY
 
@@ -775,16 +786,17 @@ header "Compiling runtime libraries 13/$TOTAL_LIBS: libxml2..."
 if $SKIP_LIBXML2; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libxml2.a" ]] || $FORCE_LIBXML2; then
+	# FIXME: getting a "Certificate can't be trusted" error while using HTTPS protocol
 	download_and_extract libxml2-$LIBXML2_VERSION.tar.gz \
-		ftp://xmlsoft.org/libxml2/libxml2-$LIBXML2_VERSION.tar.gz
+		http://xmlsoft.org/download/libxml2-$LIBXML2_VERSION.tar.gz
 	echo "Entering $RUNTIME_DIR/libxml2-$LIBXML2_VERSION"
 	pushd libxml2-$LIBXML2_VERSION >/dev/null
 
 	run ./configure --prefix="$RUNTIME_DIR" --disable-shared --enable-static \
 		--without-python --without-readline --without-debug \
 		--with-c14n --with-threads \
-		CFLAGS="-O2 -fPIC -fvisibility=hidden" \
-		CXXFLAGS="-O2 -fPIC -fvisibility=hidden"
+		CFLAGS="-w -O2 -fPIC -fvisibility=hidden" \
+		CXXFLAGS="-w -O2 -fPIC -fvisibility=hidden"
 	run make -j$CONCURRENCY
 	run make install-strip -j$CONCURRENCY
 
@@ -800,16 +812,17 @@ header "Compiling runtime libraries 14/$TOTAL_LIBS: libxslt..."
 if $SKIP_LIBXSLT; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libxslt.a" ]] || $FORCE_LIBXSLT; then
+	# FIXME: getting a "Certificate can't be trusted" error while using HTTPS protocol
 	download_and_extract libxslt-$LIBXSLT_VERSION.tar.gz \
-		ftp://xmlsoft.org/libxml2/libxslt-$LIBXSLT_VERSION.tar.gz
+		http://xmlsoft.org/download/libxslt-$LIBXSLT_VERSION.tar.gz
 	echo "Entering $RUNTIME_DIR/libxslt-$LIBXSLT_VERSION"
 	pushd libxslt-$LIBXSLT_VERSION >/dev/null
 
 	run ./configure --prefix="$RUNTIME_DIR" --disable-shared --enable-static \
 		--without-python --without-debug --without-debugger \
 		--without-profiler \
-		CFLAGS="-O2 -fPIC -fvisibility=hidden" \
-		CXXFLAGS="-O2 -fPIC -fvisibility=hidden"
+		CFLAGS="-w -O2 -fPIC -fvisibility=hidden" \
+		CXXFLAGS="-w -O2 -fPIC -fvisibility=hidden"
 	run make -j$CONCURRENCY
 	run make install-strip -j$CONCURRENCY
 

@@ -230,6 +230,11 @@ fi
 
 header "Preparing Ruby source code..."
 
+# To many warnings, suppress them all (disable in case of troubleshooting)
+export CPPFLAGS="-w"
+export CXXFLAGS="-w"
+export CFLAGS="-w"
+
 export PATH="$RUNTIME_DIR/bin:$PATH"
 export LIBRARY_PATH="$RUNTIME_DIR/lib"
 export PKG_CONFIG_PATH="$RUNTIME_DIR/lib/pkgconfig:/usr/lib/pkgconfig"
@@ -255,12 +260,13 @@ echo
 
 if $SETUP_SOURCE; then
 	header "Configuring..."
+	# NOTE: the option --disable-install-doc is a conjunction of --disable-install-rdoc and --disable-install-capi
+	# NOTE: the options --disable-install-doc and --disable-install-rdoc have been removed
+	#       to support the presence of document coders
 	./configure \
 		--prefix "$TMPBUILDROOT" \
-		--disable-install-doc \
-		--disable-install-rdoc \
-		--disable-install-capi \
 		--with-out-ext=tk,sdbm,gdbm,dbm,dl,coverage \
+		--disable-install-capi \
 		--with-openssl-dir="$RUNTIME_DIR"
 	echo
 fi
@@ -325,9 +331,9 @@ if [[ "$GEMFILE" != "" ]]; then
 
 	# Install Bundler, either from cache or directly.
 	if [[ -e "$RUNTIME_DIR/vendor/cache/bundler-$BUNDLER_VERSION.gem" ]]; then
-		run "$TMPBUILDROOT/bin/gem" install "$RUNTIME_DIR/vendor/cache/bundler-$BUNDLER_VERSION.gem" --no-rdoc --no-ri
+		run "$TMPBUILDROOT/bin/gem" install "$RUNTIME_DIR/vendor/cache/bundler-$BUNDLER_VERSION.gem" --no-document
 	else
-		run "$TMPBUILDROOT/bin/gem" install bundler -v $BUNDLER_VERSION --no-rdoc --no-ri
+		run "$TMPBUILDROOT/bin/gem" install bundler -v $BUNDLER_VERSION --no-document
 		run mkdir -p "$RUNTIME_DIR/vendor/cache"
 		run cp "$TMPBUILDROOT"/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/bundler-$BUNDLER_VERSION.gem \
 			"$RUNTIME_DIR/vendor/cache/"
@@ -344,10 +350,8 @@ if [[ "$GEMFILE" != "" ]]; then
 			run cp "$GEMFILE.lock" ./
 		fi
 		run bundle config --local force_ruby_platform true
-		# We set -j to 1 because of this bug:
-		# https://github.com/bundler/bundler/issues/3660
-		# When it is solved, we can set -j to $CONCURRENCY.
-		run "$TMPBUILDROOT/bin/bundle" install --system --retry 3 --jobs 1
+		run "$TMPBUILDROOT/bin/bundle" config set --local system true
+		run "$TMPBUILDROOT/bin/bundle" install --retry 3 --jobs $CONCURRENCY
 		run "$TMPBUILDROOT/bin/bundle" package
 
 		# Cache gems.
@@ -372,7 +376,7 @@ run rm -f bin/testrb # Only Ruby 2.1 has it
 run rm -rf include
 run rm -rf share
 run rm -rf lib/{libruby-static.a,pkgconfig}
-run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
+#run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/ # don't remove the documentation generators
 run rm -f lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
 run rm -f lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out,mkmf.log}
 run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}

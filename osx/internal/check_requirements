@@ -3,8 +3,9 @@ set -e
 
 XCODEPATH=$(xcode-select -p)
 
-if [[ ! -e "$XCODEPATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk" ]]; then
-	echo "*** ERROR: the macOS 10.14 SDK is required. Please refer to" \
+# FIXME: determine the minimal version of SDK to use on ARM64
+if [[ ! -e "$XCODEPATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.1.sdk" ]]; then
+	echo "*** ERROR: the macOS 12.1 SDK is required. Please refer to" \
 		"https://github.com/FooBarWidget/traveling-ruby/blob/main/osx/README.md" \
 		"for installation instructions." >&2
 	exit 1

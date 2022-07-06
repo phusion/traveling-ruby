@@ -1,6 +1,8 @@
 export PATH="$SELFDIR/internal/bin":/usr/bin:/bin:/usr/sbin:/sbin
-export MACOSX_DEPLOYMENT_TARGET=10.14
-export MACOSX_COMPATIBLE_DEPLOYMENT_TARGETS="10.14 10.15 11.0 11.1 11.2 11.3 11.4 11.5"
+# FIXME: minimal supported deployment target on ARM64
+export MACOSX_DEPLOYMENT_TARGET=12.1
+# FIXME: a full list of deployment targets on ARM64
+export MACOSX_COMPATIBLE_DEPLOYMENT_TARGETS="10.14 10.15 11.0 11.1 11.2 11.3 11.4 11.5 11.6 12.0 12.1"
 export CC="$SELFDIR/internal/bin/cc"
 export CXX="$SELFDIR/internal/bin/c++"
 unset DYLD_LIBRARY_PATH
