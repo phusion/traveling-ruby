@@ -9,7 +9,7 @@ source "$SELFDIR/../shared/library.sh"
 TEMPDIR=
 
 RUNTIME_DIR=
-CONCURRENCY=`sysctl -n hw.ncpu`
+CONCURRENCY=$(sysctl -n hw.ncpu)
 FORCE_CCACHE=false
 SKIP_CCACHE=false
 FORCE_CMAKE=false
@@ -430,12 +430,17 @@ elif [[ ! -e "$RUNTIME_DIR/lib/openssl-ok" ]] || $FORCE_OPENSSL; then
 	echo "Entering $RUNTIME_DIR/openssl-$OPENSSL_VERSION"
 	pushd openssl-$OPENSSL_VERSION >/dev/null
 
-	run ./Configure darwin64-arm64-cc --prefix="$RUNTIME_DIR" --openssldir="$RUNTIME_DIR/openssl" threads zlib shared
-
-	# FIXME: maybe -j more than 1 will work in 2022?
-	# For some reason the -j1 is explicitly required. Otherwise, running `make -j2`
-	# on the Makefile which invoked setup-runtime could somehow pass the -j2 to sub-makes.
-	run make -j1
+	ARCH=$(uname -m)
+	if [[ "$ARCH" == "x86_64" ]]; then
+		BUILDTARGET="darwin64-x86_64-cc"
+	elif [[ "$ARCH" == "arm64" ]]; then
+		BUILDTARGET="darwin64-arm64-cc"
+	else
+		echo "*** ERROR: unknown architecture, don't know how to build"
+		exit 1
+	fi
+	run ./Configure "$BUILDTARGET" --prefix="$RUNTIME_DIR" --openssldir="$RUNTIME_DIR/openssl" threads zlib shared
+	run make -j$CONCURRENCY
 	run make install_sw
 
 	echo "Leaving source directory"

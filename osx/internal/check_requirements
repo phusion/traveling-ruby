@@ -1,14 +1,15 @@
 #!/bin/bash
+
 set -e
 
 XCODEPATH=$(xcode-select -p)
-
-# FIXME: determine the minimal version of SDK to use on ARM64
-if [[ ! -e "$XCODEPATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX12.1.sdk" ]]; then
-	echo "*** ERROR: the macOS 12.1 SDK is required. Please refer to" \
-		"https://github.com/FooBarWidget/traveling-ruby/blob/main/osx/README.md" \
-		"for installation instructions." >&2
-	exit 1
+if [[ "$XCODEPATH" == "/Library/Developer/CommandLineTools" ]]; then
+  XCODEPATH="$XCODEPATH/SDKs/MacOSX.sdk"
+elif [[ "$XCODEPATH" == "/Applications/Xcode.app/Contents/Developer" ]]; then
+  XCODEPATH="$XCODEPATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+else
+  echo "*** ERROR: unknown developer path \"$XCODEPATH\""
+  exit 1
 fi
 
 if [[ -e /usr/local/include ]]; then
