@@ -24,7 +24,7 @@ GEM
     posix-spawn (0.3.15)
     puma (5.1.1)
       nio4r (~> 2.0)
-    rack (2.2.3)
+    rack (2.2.6.2)
     raindrops (0.19.1)
     redcarpet (3.5.1)
     rugged (1.1.0)
