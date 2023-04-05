@@ -11,7 +11,7 @@ _Note:_ - This is a fork, which currently supports the following platforms and v
 | OSX    | 3.1.2     | x86_64       | ✅         |
 | OSX    | 3.1.2     | aarch64 (arm)| ✅         |
 | Linux  | 3.1.2   | x86_64       | ✅         |
-| Linux  | 3.1.2   | aarch64 (arm)| ❌         |
+| Linux  | 3.1.2   | aarch64 (arm)| ✅         |
 | Windows| 3.1.2 | x86_64       | ❌         |
 | Windows| 3.1.2 | aarch64 (arm)| ❌         |
 

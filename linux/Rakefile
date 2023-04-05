@@ -1,7 +1,7 @@
 IMAGE_VERSION = "1.0"
 VERSION       = File.read("../VERSION.txt").strip
 RUBY_VERSIONS = File.read("../RUBY_VERSIONS.txt").strip.split(/\s+/)
-ARCHITECTURES = ["x86_64"]
+ARCHITECTURES = ["x86_64",'arm64']
 CONCURRENCY   = `./internal/cpucount`.to_i + 1
 
 task :default => :package
@@ -41,7 +41,7 @@ ARCHITECTURES.each do |arch|
 
   desc "Build the #{arch} Docker image"
   task "image:#{arch}" do
-    sh "docker build --pull" \
+    sh "docker build" \
       " -t phusion/traveling-ruby-builder-#{arch}:#{IMAGE_VERSION}" \
       " -f image/Dockerfile-#{arch} image"
   end
