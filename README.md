@@ -4,6 +4,17 @@
 
 Traveling Ruby is a project which supplies self-contained, "portable" Ruby binaries: Ruby binaries that can run on any Linux distribution and any macOS machine. It also has Windows support [(with some caveats)](#caveats). This allows Ruby app developers to bundle these binaries with their Ruby app, so that they can distribute a single package to end users, without needing end users to first install Ruby or gems.
 
+_Note:_ - This is a fork, which currently supports the following platforms and versions
+
+| OS     | Ruby      | Architecture | Supported |
+| -------| ------- | ------------ | --------- |
+| OSX    | 3.1.2     | x86_64       | ✅         |
+| OSX    | 3.1.2     | aarch64 (arm)| ✅         |
+| Linux  | 3.1.2   | x86_64       | ✅         |
+| Linux  | 3.1.2   | aarch64 (arm)| ❌         |
+| Windows| 3.1.2 | x86_64       | ❌         |
+| Windows| 3.1.2 | aarch64 (arm)| ❌         |
+
 [![](https://raw.githubusercontent.com/FooBarWidget/traveling-ruby/main/doc/video.png)](https://vimeo.com/phusionnl/review/113827942/ceca7e70da)
 
 _Introduction in 2 minutes_
@@ -38,7 +49,7 @@ This makes the release process much simpler. Instead of having to create almost 
 
 However, distributing a precompiled Ruby interpreter that works for all end users, is more easily said than done. [Read this section](#why_precompiled_binary_difficult) to learn why it's difficult.
 
-Traveling Ruby aims to solve the problem of supplying precompiled **Ruby 2.4** binaries that work for all end users.
+Traveling Ruby aims to solve the problem of supplying precompiled **Ruby 3.1** binaries that work for all end users.
 
 ## Getting started
 
@@ -81,7 +92,7 @@ Windows support:
  * Traveling Ruby supports creating packages *for* Windows, but it does not yet support creating packages *on* Windows. That is, the Traveling Ruby tutorials and the documentation do not work when you are a Ruby developer on Windows. To create Windows packages, you must use macOS or Linux.
 
    This is because in our documentation we make heavy use of standard Unix tools. Tools which are not available on Windows. In the future we may replace the use of such tools with Ruby tools so that the documentation works on Windows too.
- * Traveling Ruby currently supports Ruby 2.4.10.
+ * Traveling Ruby currently supports Ruby 3.1.2.
  * Native extensions are not yet supported.
 
 ## Building binaries
