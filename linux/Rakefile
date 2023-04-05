@@ -2,7 +2,7 @@ IMAGE_VERSION = "1.0"
 VERSION       = File.read("../VERSION.txt").strip
 RUBY_VERSIONS = File.read("../RUBY_VERSIONS.txt").strip.split(/\s+/)
 ARCHITECTURES = ["x86_64"]
-CONCURRENCY   = `./internal/cpucount`.to_i
+CONCURRENCY   = `./internal/cpucount`.to_i + 1
 
 task :default => :package
 

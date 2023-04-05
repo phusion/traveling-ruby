@@ -1,0 +1,17 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    ffi (1.15.5)
+    json (2.6.2)
+    yajl-ruby (1.4.3)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  ffi
+  json
+  yajl-ruby
+
+BUNDLED WITH
+   2.3.14
