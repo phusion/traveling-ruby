@@ -2,8 +2,8 @@ name: Linux - x86_64 - build from dockerhub builder
 on:
   push:
     branches: [ main ]
-#   pull_request:
-#     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   make-ubuntu-x86_64:

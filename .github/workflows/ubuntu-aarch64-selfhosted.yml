@@ -2,8 +2,8 @@ name: Linux - aarch64 - self-hosted build from dockerhub builder
 on:
   push:
     branches: [ main ]
-#   pull_request:
-#     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   make-ubuntu-arm64-native:

@@ -2,8 +2,8 @@ name: MacOS x86_64
 on:
   push:
     branches: [ main ]
-#   pull_request:
-#     branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   make-osx-x86_64:
