@@ -1,6 +1,8 @@
 /linux/runtime
 /linux/output
 /linux/traveling-ruby-gems*
+/osx/traveling-ruby-gems*
+/windows/traveling-ruby-gems*
 /osx/runtime
 /osx/output
 /osx/work
@@ -9,3 +11,4 @@
 *.sublime-workspace
 *.tar.gz
 .DS_Store
+ok
