@@ -1,0 +1,32 @@
+name: Linux - x86_64 - build from dockerhub builder
+on:
+  push:
+    branches: [ main ]
+#   pull_request:
+#     branches: [ main ]
+
+jobs:
+  make-ubuntu-x86_64:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: "Set up Ruby"
+        uses: ruby/setup-ruby@v1
+        with:
+            ruby-version: 3.1.2
+      - name: package
+        run: |
+            cd linux
+            rake
+            ls
+        env:
+          ARCHITECTURES: "x86_64"
+      - name: 'Upload Artifact - linux x86_64'
+        uses: actions/upload-artifact@v3
+        with:
+          name: traveling-ruby-20230504-3.1.2-linux-x86_64.tar.gz
+          path: linux/traveling-ruby-20230504-3.1.2-linux-x86_64.tar.gz
