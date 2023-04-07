@@ -1,87 +1,3 @@
-# macos_instance:
-#   image: ghcr.io/cirruslabs/macos-ventura-base:latest
-
-# macosx-arm64_task:
-#   script:
-#     - echo "Hello World from macOS!"
-#     - uname -m
-#     - rm .ruby-version
-#     - ruby --version
-#     - rbenv install --list
-#     - rbenv versions
-#     - rbenv local system
-#     - sudo gem install bundler:2.3.17
-#     - rbenv local 3.0.5
-#     - softwareupdate --install-rosetta --agree-to-license
-#     - cd osx
-#     - rake stash_conflicting_paths
-#     - rake --trace
-#     - rake unstash_conflicting_paths
-#     - ls
-
-# macos_instance:
-#   image: ghcr.io/cirruslabs/macos-ventura-base:latest
-
-# macosx-x86_64_task:
-#   script:
-#     - echo "Hello World from macOS!"
-#     - uname -m
-#     - softwareupdate --install-rosetta --agree-to-license
-#     - arch -x86_64 uname -m
-#     - rm .ruby-version
-#     - ruby --version
-#     - rbenv install --list
-#     - rbenv versions
-#     - rbenv local system
-#     - arch -x86_64 sudo gem install bundler:2.3.17
-#     - rbenv local 3.0.5
-#     - cd osx
-#     - arch -x86_64 rake stash_conflicting_paths
-#     - arch -x86_64 rake --trace
-#     - arch -x86_64 rake unstash_conflicting_paths
-#     - ls
-
-# arm_container:
-#   image: ruby:3.1-slim-buster
-#   cpu: 4
-#   memory: 12G
-  
-# linux-aarch64_task:
-#   script:
-#     - cd linux
-#     - ARCHITECTURES="arm64" rake
-#     - ls
-
-
-# docker_builder:
-#   image: ruby:3.1-slim-buster
-#   cpu: 4
-#   memory: 12G
-  
-
-# linux-arm64_task:
-# docker_builder:
-#   env:
-#     CIRRUS_ARCH: arm64
-#   script:
-#     - cd linux
-#     - ARCHITECTURES="arm64" rake image
-#     - ARCHITECTURES="arm64" rake
-#     - ls
-
-# linux-x86_64_task:
-# docker_builder:
-#   script:
-#     - cd linux
-#     - ARCHITECTURES="x86_64" rake image
-#     - ARCHITECTURES="x86_64" rake
-#     - ls
-
-
-
-
-
-
 linux-arm64-task: 
   timeout_in: 90m
   compute_engine_instance:
@@ -114,7 +30,6 @@ macosx-x86_64_task:
   macos_instance:
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
   script:
-    - rm .ruby-version
     - rbenv local system
     - sudo gem install bundler:2.3.17
     - rbenv local 3.0.5
@@ -130,7 +45,6 @@ macosx-arm64-task:
   macos_instance:
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
   script:
-    - rm .ruby-version
     - rbenv local system
     - sudo gem install bundler:2.3.17
     - rbenv local 3.0.5

@@ -20,7 +20,6 @@ jobs:
             rbenv global 3.0.5
       - name: build arm64
         run: |
-            rm .ruby-version
             cd osx
             rake stash_conflicting_paths
             rake --trace

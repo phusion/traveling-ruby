@@ -18,7 +18,6 @@ jobs:
     steps:
       - checkout
       - run: |
-            rm .ruby-version
             rbenv local system
             sudo gem install bundler:2.3.17
             rbenv install 3.1.2

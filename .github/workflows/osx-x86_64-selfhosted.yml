@@ -21,7 +21,6 @@ jobs:
             # softwareupdate --install-rosetta --agree-to-license
       - name: build x86_64
         run: |
-            rm .ruby-version
             # env /usr/bin/arch -x86_64 /bin/bash
             uname -m
             cd osx
