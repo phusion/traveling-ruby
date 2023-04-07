@@ -1,0 +1,96 @@
+# Use the latest 2.1 version of CircleCI pipeline process engine.
+# See: https://circleci.com/docs/2.0/configuration-reference
+# For a detailed guide to building and testing on iOS, read the docs:
+# https://circleci.com/docs/2.0/testing-ios/
+version: 2.1
+
+# Define a job to be invoked later in a workflow.
+# See: https://circleci.com/docs/2.0/configuration-reference/#jobs
+jobs:
+  build-mac-x86_64:
+    # Specify the execution environment. You can specify an image from Dockerhub or use one of our Convenience Images from CircleCI's Developer Hub.
+    # See: https://circleci.com/docs/2.0/configuration-reference/#docker-machine-macos-windows-executor
+    macos:
+      xcode: "14.2.0"
+
+    # Add steps to the job
+    # See: https://circleci.com/docs/2.0/configuration-reference/#steps
+    steps:
+      - checkout
+      - run: |
+            rm .ruby-version
+            rbenv local system
+            sudo gem install bundler:2.3.17
+            rbenv install 3.1.2
+            rbenv global 3.1.2
+            cd osx
+            uname -m
+            rake stash_conflicting_paths
+            DEVELOPER_DIR=/Library/Developer/CommandLineTools rake --trace
+            ls
+      # - store_artifacts:
+      #     path: osx/traveling-ruby-20230504-3.1.2-osx-arm64.tar.gz
+      #     destination: traveling-ruby-20230504-3.1.2-osx-arm64.tar.gz
+      # - run: |
+      #       cd osx
+      #       softwareupdate --install-rosetta --agree-to-license
+      #       arch -x86_64 uname -m
+      #       rm -rf runtime output traveling-ruby-gems-20230504-3.1.2-osx-x86_64
+      #       arch -x86_64 DEVELOPER_DIR=/Library/Developer/CommandLineTools rake --trace
+      #       rake unstash_conflicting_paths
+      - store_artifacts:
+          path: osx/traveling-ruby-20230504-3.1.2-osx-x86_64.tar.gz
+          destination: traveling-ruby-20230504-3.1.2-osx-x86_64.tar.gz
+  build-linux-x86_64:
+    machine:
+      image: ubuntu-2204:2023.02.1
+    steps:
+      - checkout
+      - run: |
+            uname -m
+            cd linux
+            ARCHITECTURES="x86_64" rake image
+            ARCHITECTURES="x86_64" rake
+      - store_artifacts:
+          path: linux/traveling-ruby-20230504-3.1.2-linux-x86_64.tar.gz
+          destination: traveling-ruby-20230504-3.1.2-linux-x86_64.tar.gz
+  build-linux-arm64:
+    machine:
+      image: ubuntu-2204:2023.02.1
+    resource_class: arm.medium
+    steps:
+      - checkout
+      - run: |
+            uname -m
+            cd linux
+            ARCHITECTURES="arm64" rake image
+            ARCHITECTURES="arm64" rake
+      - store_artifacts:
+          path: linux/traveling-ruby-20230504-3.1.2-linux-arm64.tar.gz
+          destination: traveling-ruby-20230504-3.1.2-linux-arm64.tar.gz
+  build-windows:
+    machine:
+      image: 'windows-server-2022-gui:current'
+    resource_class: windows.medium
+    steps:
+      - checkout
+      - run: |
+            uname -m
+            cd windows
+            sh -c 'mkdir -p cache output/3.1.2'
+            sh -c './build-ruby -a x86_64 -r 3.1.2 cache output/3.1.2'
+            sh -c './package -r traveling-ruby-20230504-3.1.2-x86_64-win32.tar.gz output/3.1.2'
+            sh -c 'ls'
+      - store_artifacts:
+          path: windows/traveling-ruby-20230504-3.1.2-x86_64-win32.tar.gz
+          destination: traveling-ruby-20230504-3.1.2-x86_64-win32.tar.gz
+
+# Invoke jobs via workflows
+# See: https://circleci.com/docs/2.0/configuration-reference/#workflows
+workflows:
+  x-plat:
+    jobs:
+      - build-mac-x86_64
+      - build-linux-arm64
+      - build-linux-x86_64
+      - build-windows
