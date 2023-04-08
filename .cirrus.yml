@@ -36,7 +36,7 @@ macosx-x86_64_task:
     - softwareupdate --install-rosetta --agree-to-license
     - cd osx
     - rake stash_conflicting_paths
-    - rm -rf runtime output traveling-ruby-gems-20230504-3.1.2-osx-x86_64
+    - rm -rf runtime output traveling-ruby-gems-20230508-3.2.2-osx-x86_64
     - arch -x86_64 rake --trace
     - rake unstash_conflicting_paths
     - ls
@@ -58,7 +58,7 @@ windows_task:
     image: cirrusci/windowsservercore:2019
   script:
     - cd windows
-    - sh -c 'mkdir -p cache output/3.1.2'
-    - sh -c './build-ruby -a x86_64 -r 3.1.2 cache output/3.1.2'
-    - sh -c './package -r traveling-ruby-20230504-3.1.2-x86_64-win32.tar.gz output/3.1.2'
+    - sh -c 'mkdir -p cache output/3.2.2'
+    - sh -c './build-ruby -a x86_64 -r 3.2.2 cache output/3.2.2'
+    - sh -c './package -r traveling-ruby-20230508-3.2.2-x86_64-win32.tar.gz output/3.2.2'
     - sh -c 'ls'

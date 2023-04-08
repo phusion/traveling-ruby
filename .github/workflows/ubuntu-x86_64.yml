@@ -17,7 +17,7 @@ jobs:
       - name: "Set up Ruby"
         uses: ruby/setup-ruby@v1
         with:
-            ruby-version: 3.1.2
+            ruby-version: 3.2.2
       - name: package
         run: |
             cd linux
@@ -28,5 +28,5 @@ jobs:
       - name: 'Upload Artifact - linux x86_64'
         uses: actions/upload-artifact@v3
         with:
-          name: traveling-ruby-20230504-3.1.2-linux-x86_64.tar.gz
-          path: linux/traveling-ruby-20230504-3.1.2-linux-x86_64.tar.gz
+          name: traveling-ruby-20230508-3.2.2-linux-x86_64.tar.gz
+          path: linux/traveling-ruby-20230508-3.2.2-linux-x86_64.tar.gz

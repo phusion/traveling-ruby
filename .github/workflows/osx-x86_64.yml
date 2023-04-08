@@ -19,14 +19,14 @@ jobs:
       #     brew install rbenv
       #     rbenv versions
       #     ruby --version
-      #     rbenv global 3.1.2
+      #     rbenv global 3.2.2
       #     gem install bundler:2.3.17
-      #     rbenv install 3.1.2
+      #     rbenv install 3.2.2
       #     ls /Library/Ruby/Gems/2.6.0/gems/
       # - name: "Set up Ruby"
       #   uses: ruby/setup-ruby@v1
       #   with:
-      #       ruby-version: 3.1.2
+      #       ruby-version: 3.2.2
       - uses: maxim-lobanov/setup-xcode@v1
         with:
             xcode-version: '14.2'
@@ -49,5 +49,5 @@ jobs:
       - name: 'Upload Artifact- osx x86_64'
         uses: actions/upload-artifact@v3
         with:
-          name: traveling-ruby-20230504-3.1.2-osx-x86_64.tar.gz
-          path: osx/traveling-ruby-20230504-3.1.2-osx-x86_64.tar.gz
+          name: traveling-ruby-20230508-3.2.2-osx-x86_64.tar.gz
+          path: osx/traveling-ruby-20230508-3.2.2-osx-x86_64.tar.gz

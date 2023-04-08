@@ -20,26 +20,26 @@ jobs:
       - run: |
             rbenv local system
             sudo gem install bundler:2.3.17
-            rbenv install 3.1.2
-            rbenv global 3.1.2
+            rbenv install 3.2.2
+            rbenv global 3.2.2
             cd osx
             uname -m
             rake stash_conflicting_paths
             DEVELOPER_DIR=/Library/Developer/CommandLineTools rake --trace
             ls
       # - store_artifacts:
-      #     path: osx/traveling-ruby-20230504-3.1.2-osx-arm64.tar.gz
-      #     destination: traveling-ruby-20230504-3.1.2-osx-arm64.tar.gz
+      #     path: osx/traveling-ruby-20230508-3.2.2-osx-arm64.tar.gz
+      #     destination: traveling-ruby-20230508-3.2.2-osx-arm64.tar.gz
       # - run: |
       #       cd osx
       #       softwareupdate --install-rosetta --agree-to-license
       #       arch -x86_64 uname -m
-      #       rm -rf runtime output traveling-ruby-gems-20230504-3.1.2-osx-x86_64
+      #       rm -rf runtime output traveling-ruby-gems-20230508-3.2.2-osx-x86_64
       #       arch -x86_64 DEVELOPER_DIR=/Library/Developer/CommandLineTools rake --trace
       #       rake unstash_conflicting_paths
       - store_artifacts:
-          path: osx/traveling-ruby-20230504-3.1.2-osx-x86_64.tar.gz
-          destination: traveling-ruby-20230504-3.1.2-osx-x86_64.tar.gz
+          path: osx/traveling-ruby-20230508-3.2.2-osx-x86_64.tar.gz
+          destination: traveling-ruby-20230508-3.2.2-osx-x86_64.tar.gz
   build-linux-x86_64:
     machine:
       image: ubuntu-2204:2023.02.1
@@ -51,8 +51,8 @@ jobs:
             ARCHITECTURES="x86_64" rake image
             ARCHITECTURES="x86_64" rake
       - store_artifacts:
-          path: linux/traveling-ruby-20230504-3.1.2-linux-x86_64.tar.gz
-          destination: traveling-ruby-20230504-3.1.2-linux-x86_64.tar.gz
+          path: linux/traveling-ruby-20230508-3.2.2-linux-x86_64.tar.gz
+          destination: traveling-ruby-20230508-3.2.2-linux-x86_64.tar.gz
   build-linux-arm64:
     machine:
       image: ubuntu-2204:2023.02.1
@@ -65,8 +65,8 @@ jobs:
             ARCHITECTURES="arm64" rake image
             ARCHITECTURES="arm64" rake
       - store_artifacts:
-          path: linux/traveling-ruby-20230504-3.1.2-linux-arm64.tar.gz
-          destination: traveling-ruby-20230504-3.1.2-linux-arm64.tar.gz
+          path: linux/traveling-ruby-20230508-3.2.2-linux-arm64.tar.gz
+          destination: traveling-ruby-20230508-3.2.2-linux-arm64.tar.gz
   build-windows:
     machine:
       image: 'windows-server-2022-gui:current'
@@ -76,13 +76,13 @@ jobs:
       - run: |
             uname -m
             cd windows
-            sh -c 'mkdir -p cache output/3.1.2'
-            sh -c './build-ruby -a x86_64 -r 3.1.2 cache output/3.1.2'
-            sh -c './package -r traveling-ruby-20230504-3.1.2-x86_64-win32.tar.gz output/3.1.2'
+            sh -c 'mkdir -p cache output/3.2.2'
+            sh -c './build-ruby -a x86_64 -r 3.2.2 cache output/3.2.2'
+            sh -c './package -r traveling-ruby-20230508-3.2.2-x86_64-win32.tar.gz output/3.2.2'
             sh -c 'ls'
       - store_artifacts:
-          path: windows/traveling-ruby-20230504-3.1.2-x86_64-win32.tar.gz
-          destination: traveling-ruby-20230504-3.1.2-x86_64-win32.tar.gz
+          path: windows/traveling-ruby-20230508-3.2.2-x86_64-win32.tar.gz
+          destination: traveling-ruby-20230508-3.2.2-x86_64-win32.tar.gz
 
 # Invoke jobs via workflows
 # See: https://circleci.com/docs/2.0/configuration-reference/#workflows
