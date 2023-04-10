@@ -154,6 +154,8 @@ else
 fi
 run cp $USRLIBDIR/libtinfo.so.5 /tmp/ruby/lib/
 run cp $USRLIBDIR/libreadline.so.6 /tmp/ruby/lib/
+# run cp $USRLIBDIR/libyaml-0.so.2 /tmp/ruby/lib/
+# run cp $USRLIBDIR/libyaml-0.so.2.0.4 /tmp/ruby/lib/
 run cp /system_shared/ca-bundle.crt /tmp/ruby/lib/
 run cp /system/traveling_ruby_restore_environment.rb /tmp/ruby/lib/ruby/site_ruby/
 export SSL_CERT_FILE=/tmp/ruby/lib/ca-bundle.crt
@@ -174,6 +176,8 @@ echo $GEM_EXTENSION_API_VERSION > /tmp/ruby/info/GEM_EXTENSION_API_VERSION
 run mkdir -p /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/deplibs/$GEM_PLATFORM
 pushd /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/deplibs/$GEM_PLATFORM
 run mkdir curses && run cp $USRLIBDIR/{libncursesw.so.5,libmenuw.so.5,libformw.so.5} curses/
+run mkdir ffi && run cp $USRLIBDIR/{libffi.so.6,libffi.so.6.0.1} ffi/
+# run mkdir yaml && run cp $USRLIBDIR/{libyaml-0.so.2,libyaml-0.so.2.0.4} yaml/
 popd
 
 echo "Patching rbconfig.rb"
@@ -187,6 +191,14 @@ run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/{test-unit,rdoc}-*
 
 function install_gems()
 {
+	curl -LO https://github.com/yaml/libyaml/releases/download/0.2.5/yaml-0.2.5.tar.gz
+	mkdir -p /tmp/yaml
+	tar xvf yaml-0.2.5.tar.gz -C /tmp/yaml 
+	/tmp/ruby/bin/gem install psych -v 5.0.1 -- --with-libyaml-source-dir=/tmp/yaml/yaml-0.2.5/
+	rm yaml-0.2.5.tar.gz
+	rm -rf /tmp/yaml
+	rm /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/$RUBY_ARCH/psych.so
+	
 	for GEMFILE in /system_shared/gemfiles/*/Gemfile; do
 		run cp "$GEMFILE" /tmp/ruby/
 		if [[ -e "$GEMFILE.lock" ]]; then
@@ -289,7 +301,7 @@ echo
 
 if $SANITY_CHECK_OUTPUT; then
 	header "Sanity checking build output"
-	env LIBCHECK_ALLOW='libreadline|libtinfo|libformw|libmenuw|libncursesw' \
+	env LIBCHECK_ALLOW='libreadline|libtinfo|libformw|libmenuw|libncursesw|libffi' \
 		libcheck /tmp/ruby/bin.real/ruby $(find /tmp/ruby -name '*.so')
 fi
 

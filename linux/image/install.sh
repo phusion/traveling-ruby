@@ -17,7 +17,7 @@ ARCHITECTURE_BITS=64
 
 echo "$ARCHITECTURE" > /ARCHITECTURE
 
-run yum install -y wget sudo readline-devel ncurses-devel s3cmd
+run yum install -y wget sudo readline-devel ncurses-devel s3cmd libyaml-devel libffi-devel
 run mkdir -p /ccache
 run create_user app "App" 1000
 run pip install awscli==1.19.2
