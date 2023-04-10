@@ -2,9 +2,14 @@ name: MacOS arm64
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - '.circleci/**'
+      - '.cirrus.yml'
   pull_request:
     branches: [ main ]
-
+    paths-ignore:
+      - '.circleci/**'
+      - '.cirrus.yml'
 jobs:
   make-osx-arm64:
     strategy:
@@ -13,6 +18,10 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          all_but_latest: true
       - uses: actions/checkout@v3
       - run: |
             # rbenv local system

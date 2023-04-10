@@ -1,18 +1,28 @@
-name: Linux - aarch64 - self-hosted image builder
+name: Linux - arm64 - self-hosted build from dockerhub builder
 on:
   push:
     branches: [ main ]
+    paths-ignore:
+      - '.circleci/**'
+      - '.cirrus.yml'
   pull_request:
     branches: [ main ]
+    paths-ignore:
+      - '.circleci/**'
+      - '.cirrus.yml'
 
 jobs:
-  make-ubuntu-arm64-image-native:
+  make-ubuntu-arm64-native:
     strategy:
       matrix:
         os: [self-hosted]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          all_but_latest: true
       - uses: actions/checkout@v3
       - name: setup self-hosted deps
         run: |
@@ -32,7 +42,12 @@ jobs:
         run: |
             eval "$(/home/ubuntu/.rbenv/bin/rbenv init - bash)"
             cd linux
-            rake image
-            docker images
+            rake
+            ls
         env:
           ARCHITECTURES: "arm64"
+      - name: 'Upload Artifact - linux arm64'
+        uses: actions/upload-artifact@v3
+        with:
+          name: traveling-ruby-20230508-3.2.2-linux-arm64.tar.gz
+          path: linux/traveling-ruby-20230508-3.2.2-linux-arm64.tar.gz
