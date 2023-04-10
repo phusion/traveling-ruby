@@ -25,21 +25,6 @@ linux-x86_64_task:
     - ARCHITECTURES="x86_64" rake image
     - ARCHITECTURES="x86_64" rake
     - ls
-macosx-x86_64_task: 
-  timeout_in: 90m
-  macos_instance:
-    image: ghcr.io/cirruslabs/macos-ventura-base:latest
-  script:
-    - rbenv local system
-    - sudo gem install bundler:2.3.17
-    - rbenv local 3.0.5
-    - softwareupdate --install-rosetta --agree-to-license
-    - cd osx
-    - rake stash_conflicting_paths
-    - rm -rf runtime output traveling-ruby-gems-20230508-3.2.2-osx-x86_64
-    - arch -x86_64 rake --trace
-    - rake unstash_conflicting_paths
-    - ls
 macosx-arm64-task: 
   timeout_in: 90m
   macos_instance:
@@ -47,18 +32,42 @@ macosx-arm64-task:
   script:
     - rbenv local system
     - sudo gem install bundler:2.3.17
-    - rbenv local 3.0.5
+    - rbenv global 3.2.2
     - cd osx
     - rake stash_conflicting_paths
     - rake --trace
+    - ls
+macosx-x86_64_task: 
+  timeout_in: 90m
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-ventura-base:latest
+  script:
+    - rbenv local system
+    - sudo gem install bundler:2.3.17
+    - rbenv global 3.2.2
+    - softwareupdate --install-rosetta --agree-to-license
+    - cd osx
+    - rake stash_conflicting_paths
+    - arch -x86_64 rake --trace
+    - rake unstash_conflicting_paths
     - ls
 windows_task: 
   timeout_in: 90m
   windows_container:
     image: cirrusci/windowsservercore:2019
-  script:
-    - cd windows
-    - sh -c 'mkdir -p cache output/3.2.2'
-    - sh -c './build-ruby -a x86_64 -r 3.2.2 cache output/3.2.2'
-    - sh -c './package -r traveling-ruby-20230508-3.2.2-x86_64-win32.tar.gz output/3.2.2'
-    - sh -c 'ls'
+  script: |
+      uname -m
+      cd windows
+      sh -c 'mkdir -p cache output/3.2.2'
+      sh -c './build-ruby -a x86 -r 3.2.2 cache output/3.2.2'
+      sh -c './package -r traveling-ruby-20230508-3.2.2-x86-windows.tar.gz output/3.2.2'
+      sh -c 'ls'
+      sh -c 'rm -rf cache output/3.2.2'
+      sh -c 'mkdir -p cache output/3.2.2'
+      sh -c './build-ruby -a x86_64 -r 3.2.2 cache output/3.2.2'
+      sh -c './package -r traveling-ruby-20230508-3.2.2-x86_64-windows.tar.gz output/3.2.2'
+      sh -c 'ls'
+
+
+# skip: "changesInclude('.github/**','.circleci/**')"
+
