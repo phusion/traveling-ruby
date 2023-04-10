@@ -9,11 +9,23 @@ _Note:_ - This is a fork, which currently supports the following platforms and v
 | OS     | Ruby      | Architecture | Supported |
 | -------| ------- | ------------ | --------- |
 | OSX    | 3.2.2     | x86_64       | ✅         |
-| OSX    | 3.2.2     | aarch64 (arm)| ✅         |
+| OSX    | 3.2.2     | arm64| ✅         |
 | Linux  | 3.2.2   | x86_64       | ✅         |
-| Linux  | 3.2.2   | aarch64 (arm)| ✅         |
-| Windows| 3.2.2 | x86_64       | ❌         |
-| Windows| 3.2.2 | aarch64 (arm)| ❌         |
+| Linux  | 3.2.2   | arm64 | ✅         |
+| Windows| 3.2.2 | x86_64       | ✅         |
+| Windows| 3.2.2 | x86      | ✅         |
+| Windows| 3.2.2 | arm64 | ❌         |
+
+_note:_ 
+
+Windows On Arm can use either x86 or x86_64 with following caveats
+
+- x86_64
+  - User will experience `$EXITCODE` of `-1073741515` without following step.
+  - Requires installing of the [Microsoft Visual C++ Redistributable for Visual Studio 2019 for ARM64](https://aka.ms/vs/16/release/VC_redist.arm64.exe).
+- x86, see [post](https://patriksvensson.se/posts/2020/05/targeting-arm-for-windows-in-rust) - note is for rust, but same for Ruby apps.
+  - User will experience error `unexpected ucrtbase.dll` without following step.
+  - Requires installing of insiders build [25250](https://blogs.windows.com/windows-insider/2022/11/28/announcing-windows-11-insider-preview-build-25252/) or later, see [issue](https://github.com/msys2/MINGW-packages/issues/10896)
 
 [![](https://raw.githubusercontent.com/FooBarWidget/traveling-ruby/main/doc/video.png)](https://vimeo.com/phusionnl/review/113827942/ceca7e70da)
 

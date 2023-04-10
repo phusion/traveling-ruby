@@ -1,6 +1,6 @@
 VERSION       = File.read("../VERSION.txt").strip
 RUBY_VERSIONS = File.read("../RUBY_VERSIONS.txt").strip.split(/\s+/)
-ARCHITECTURE  = "x86_64"
+ARCHITECTURES = ENV['ARCHITECTURES'] ? [].push(ENV['ARCHITECTURES']) : ["x86_64","x86"]
 
 task :default => :package
 
@@ -25,37 +25,39 @@ task :clean do
 end
 
 RUBY_VERSIONS.each do |ruby_version|
-  package = "traveling-ruby-#{VERSION}-#{ruby_version}-#{ARCHITECTURE}-win32.tar.gz"
+  ARCHITECTURES.each do |arch|
+    package = "traveling-ruby-#{VERSION}-#{ruby_version}-windows-#{arch}.tar.gz"
 
-  task :package => "package:#{ruby_version}"
-  task :build   => "build:#{ruby_version}"
-  task :upload  => "upload:#{ruby_version}"
-  task :clean   => "clean:#{ruby_version}"
+    task :package => "package:#{ruby_version}"
+    task :build   => "build:#{ruby_version}"
+    task :upload  => "upload:#{ruby_version}"
+    task :clean   => "clean:#{ruby_version}"
 
-  desc "Create packages for Ruby #{ruby_version}"
-  task "package:#{ruby_version}" => [package]
+    desc "Create packages for Ruby #{ruby_version}"
+    task "package:#{ruby_version}" => [package]
 
-  desc "Build binaries for Ruby #{ruby_version}"
-  task "build:#{ruby_version}" => "output/#{ruby_version}/bin"
+    desc "Build binaries for Ruby #{ruby_version}"
+    task "build:#{ruby_version}" => "output/#{ruby_version}/#{arch}/bin"
 
-  file(package => "output/#{ruby_version}/bin") do
-    sh "./package -r #{package} output/#{ruby_version}"
-  end
+    file(package => "output/#{ruby_version}/#{arch}/bin") do
+      sh "./package -r #{package} \"output/#{ruby_version}/#{arch}\""
+    end
 
-  # We use 'file' instead of 'directory' here so that packages are updated
-  # whenever we update binaries.
-  file("output/#{ruby_version}/bin") do
-    sh "mkdir -p cache output/#{ruby_version}"
-    sh "./build-ruby -a #{ARCHITECTURE} -r #{ruby_version} cache output/#{ruby_version}"
-  end
+    # We use 'file' instead of 'directory' here so that packages are updated
+    # whenever we update binaries.
+    file("output/#{ruby_version}/#{arch}/bin") do
+      sh "mkdir -p cache \"output/#{ruby_version}/#{arch}\""
+      sh "./build-ruby -a #{arch} -r #{ruby_version} cache \"output/#{ruby_version}/#{arch}\""
+    end
 
-  desc "Upload Ruby #{ruby_version} packages to the server"
-  task "upload:#{ruby_version}" => [package] do
-    sh "aws s3 cp #{package} s3://traveling-ruby/releases/ --acl public-read"
-  end
-
-  desc "Clean Ruby #{ruby_version} packages and binaries, but not the runtime"
-  task "clean:#{ruby_version}" do
-    sh "rm -rf #{package} output/#{ruby_version}"
+    desc "Upload Ruby #{ruby_version} packages to the server"
+    task "upload:#{ruby_version}" => [package] do
+      sh "aws s3 cp #{package} s3://traveling-ruby/releases/ --acl public-read"
+    end
+    
+    desc "Clean Ruby #{ruby_version} packages and binaries and runtime"
+    task "clean:#{ruby_version}" do
+      sh "rm -rf \"#{package} \"output/#{ruby_version}/#{arch}\" cache\""
+    end
   end
 end

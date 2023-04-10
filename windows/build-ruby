@@ -149,6 +149,7 @@ header "Extracting Ruby..."
 	echo "+ In $OUTPUT_DIR:"
 	cd "$OUTPUT_DIR"
 	echo "+ 7z x $CACHE_DIR/$RUBY_FILE"
+	# brew install 7zip (on mac) and run as 7zz
 	7z x "$CACHE_DIR/$RUBY_FILE" >/dev/null
 )
 if [[ $? != 0 ]]; then
