@@ -197,7 +197,7 @@ function install_gems()
 	/tmp/ruby/bin/gem install psych -v 5.0.1 -- --with-libyaml-source-dir=/tmp/yaml/yaml-0.2.5/
 	rm yaml-0.2.5.tar.gz
 	rm -rf /tmp/yaml
-	rm /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/$RUBY_ARCH/psych.so
+	# rm /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/$RUBY_ARCH/psych.so
 	
 	for GEMFILE in /system_shared/gemfiles/*/Gemfile; do
 		run cp "$GEMFILE" /tmp/ruby/

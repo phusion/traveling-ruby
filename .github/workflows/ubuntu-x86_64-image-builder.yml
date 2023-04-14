@@ -28,11 +28,14 @@ jobs:
         uses: ruby/setup-ruby@v1
         with:
             ruby-version: 3.2.2
-      - name: package
+      - name: build image
         run: |
           docker run --privileged --rm tonistiigi/binfmt --install all
           cd linux
           rake image
           docker images
+      - name: build from image
+        run: |
+          rake
         env:
           ARCHITECTURES: "x86_64"
