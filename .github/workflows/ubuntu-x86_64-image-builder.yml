@@ -30,10 +30,11 @@ jobs:
             ruby-version: 3.2.2
       - name: build image
         run: |
-          docker run --privileged --rm tonistiigi/binfmt --install all
           cd linux
-          rake image
+          ARCHITECTURES="x86_64" rake image
           docker images
+        env:
+          ARCHITECTURES: "x86_64"
       - name: build from image
         run: |
           rake

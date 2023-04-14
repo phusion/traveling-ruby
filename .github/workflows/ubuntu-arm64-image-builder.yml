@@ -32,8 +32,10 @@ jobs:
         run: |
             docker run --privileged --rm tonistiigi/binfmt --install all
             cd linux
-            rake image
+            ARCHITECTURES="arm64" rake image
             docker images
+        env:
+          ARCHITECTURES: "arm64"
       - name: build from image
         run: |
           rake
