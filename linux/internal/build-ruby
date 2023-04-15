@@ -301,7 +301,7 @@ echo
 
 if $SANITY_CHECK_OUTPUT; then
 	header "Sanity checking build output"
-	env LIBCHECK_ALLOW='libreadline|libtinfo|libformw|libmenuw|libncursesw|libffi|psych|libyaml' \
+	env LIBCHECK_ALLOW='libreadline|libtinfo|libformw|libmenuw|libncursesw|libffi|psych|libyaml-0' \
 		libcheck /tmp/ruby/bin.real/ruby $(find /tmp/ruby -name '*.so')
 fi
 

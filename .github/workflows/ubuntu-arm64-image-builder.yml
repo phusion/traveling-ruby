@@ -38,6 +38,7 @@ jobs:
           ARCHITECTURES: "arm64"
       - name: build from image
         run: |
-          rake
+          cd linux
+          ARCHITECTURES="arm64" rake
         env:
           ARCHITECTURES: "arm64"

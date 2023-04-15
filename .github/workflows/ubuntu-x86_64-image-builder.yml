@@ -37,6 +37,7 @@ jobs:
           ARCHITECTURES: "x86_64"
       - name: build from image
         run: |
-          rake
+          cd linux
+          ARCHITECTURES="x86_64" rake
         env:
           ARCHITECTURES: "x86_64"
