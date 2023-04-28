@@ -10,7 +10,7 @@ parameters:
     default: 3.2.2
   PKG_DATE:
     type: integer
-    default: 20230508
+    default: 20230428
   BUNDLER_VERSION:
     type: string
     default: 2.3.17

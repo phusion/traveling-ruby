@@ -60,12 +60,12 @@ windows_task:
       cd windows
       sh -c 'mkdir -p cache output/3.2.2'
       sh -c './build-ruby -a x86 -r 3.2.2 cache output/3.2.2'
-      sh -c './package -r traveling-ruby-20230508-3.2.2-x86-windows.tar.gz output/3.2.2'
+      sh -c './package -r traveling-ruby-20230428-3.2.2-x86-windows.tar.gz output/3.2.2'
       sh -c 'ls'
       sh -c 'rm -rf cache output/3.2.2'
       sh -c 'mkdir -p cache output/3.2.2'
       sh -c './build-ruby -a x86_64 -r 3.2.2 cache output/3.2.2'
-      sh -c './package -r traveling-ruby-20230508-3.2.2-x86_64-windows.tar.gz output/3.2.2'
+      sh -c './package -r traveling-ruby-20230428-3.2.2-x86_64-windows.tar.gz output/3.2.2'
       sh -c 'ls'
 
 

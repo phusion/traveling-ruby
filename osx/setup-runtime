@@ -35,13 +35,13 @@ SKIP_LIBFFI=false
 FORCE_LIBYAML=false
 SKIP_LIBYAML=false
 FORCE_SQLITE3=false
-SKIP_SQLITE3=true
+SKIP_SQLITE3=false
 FORCE_LIBLZMA=false
 SKIP_LIBLZMA=false
 FORCE_MYSQL=false
-SKIP_MYSQL=true
+SKIP_MYSQL=false
 FORCE_POSTGRESQL=false
-SKIP_POSTGRESQL=true
+SKIP_POSTGRESQL=false
 FORCE_ICU=false
 SKIP_ICU=false
 FORCE_LIBSSH2=false
@@ -285,9 +285,9 @@ cd "$RUNTIME_DIR"
 echo
 
 # To many warnings, suppress them all (disable in case of troubleshooting)
-export CPPFLAGS="-w"
-export CXXFLAGS="-w"
-export CFLAGS="-w"
+# export CPPFLAGS="-w"
+# export CXXFLAGS="-w"
+# export CFLAGS="-w"
 
 header "Installing tool 1/$TOTAL_TOOLS: CMake..."
 if $SKIP_CMAKE; then

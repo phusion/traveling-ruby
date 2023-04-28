@@ -7,7 +7,7 @@ on:
 
 env:
   RB_VERSION: 3.2.2
-  PKG_DATE: 20230508
+  PKG_DATE: 20230428
 
 jobs:
   make-windows:

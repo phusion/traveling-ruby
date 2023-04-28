@@ -231,9 +231,9 @@ fi
 header "Preparing Ruby source code..."
 
 # To many warnings, suppress them all (disable in case of troubleshooting)
-export CPPFLAGS="-w"
-export CXXFLAGS="-w"
-export CFLAGS="-w"
+# export CPPFLAGS="-w"
+# export CXXFLAGS="-w"
+# export CFLAGS="-w"
 
 export PATH="$RUNTIME_DIR/bin:$PATH"
 export LIBRARY_PATH="$RUNTIME_DIR/lib"
@@ -260,13 +260,10 @@ echo
 
 if $SETUP_SOURCE; then
 	header "Configuring..."
-	# NOTE: the option --disable-install-doc is a conjunction of --disable-install-rdoc and --disable-install-capi
-	# NOTE: the options --disable-install-doc and --disable-install-rdoc have been removed
-	#       to support the presence of document coders
 	./configure \
 		--prefix "$TMPBUILDROOT" \
 		--with-out-ext=tk,sdbm,gdbm,dbm,dl,coverage \
-		--disable-install-capi \
+		--disable-install-doc \
 		--with-openssl-dir="$RUNTIME_DIR"
 	echo
 fi

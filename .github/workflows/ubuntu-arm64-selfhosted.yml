@@ -49,5 +49,5 @@ jobs:
       - name: 'Upload Artifact - linux arm64'
         uses: actions/upload-artifact@v3
         with:
-          name: traveling-ruby-20230508-3.2.2-linux-arm64.tar.gz
-          path: linux/traveling-ruby-20230508-3.2.2-linux-arm64.tar.gz
+          name: traveling-ruby-20230428-3.2.2-linux-arm64.tar.gz
+          path: linux/traveling-ruby-20230428-3.2.2-linux-arm64.tar.gz

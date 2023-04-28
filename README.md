@@ -4,7 +4,7 @@
 
 Traveling Ruby is a project which supplies self-contained, "portable" Ruby binaries: Ruby binaries that can run on any Linux distribution and any macOS machine. It also has Windows support [(with some caveats)](#caveats). This allows Ruby app developers to bundle these binaries with their Ruby app, so that they can distribute a single package to end users, without needing end users to first install Ruby or gems.
 
-_Note:_ - This is a fork, which currently supports the following platforms and versions
+ We currently support the following platforms and versions
 
 | OS     | Ruby      | Architecture | Supported |
 | -------| ------- | ------------ | --------- |
@@ -14,7 +14,9 @@ _Note:_ - This is a fork, which currently supports the following platforms and v
 | Linux  | 3.2.2   | arm64 | ✅         |
 | Windows| 3.2.2 | x86_64       | ✅         |
 | Windows| 3.2.2 | x86      | ✅         |
-| Windows| 3.2.2 | arm64 | ❌         |
+| Windows| 3.2.2 | arm64 | 🚧         |
+
+🚧 - Works under emulation with x86 or x64 packages on Windows on Arm.
 
 _note:_ 
 
