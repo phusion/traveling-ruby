@@ -27,9 +27,9 @@ The build script is the component that actually compiles Ruby. It assumes that t
 
 The build script consists of two parts:
 
- 1. `linux/build-ruby` is the entrypoint for users. It spawns a Docker container, based on the build environment Docker image. Inside the container, it runs `linux/internal/build-ruby`.
+ 1. `linux/build-ruby.sh` is the entrypoint for users. It spawns a Docker container, based on the build environment Docker image. Inside the container, it runs `linux/internal/build-ruby.sh`.
 
- 2. `linux/internal/build-ruby` is the script that contains most of the actual build logic. It:
+ 2. `linux/internal/build-ruby.sh` is the script that contains most of the actual build logic. It:
 
      * Builds Ruby. It extracts the Ruby source tarball and runs `./configure`, `make` and `make install`.
      * Builds the native extensions that Traveling Ruby supports. It runs `bundle install` on the Gemfile located in the `shared/` directory in the Traveling Ruby repository.

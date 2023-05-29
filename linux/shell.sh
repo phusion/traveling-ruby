@@ -8,7 +8,7 @@ RUNTIME_DIR=
 
 function usage()
 {
-	echo "Usage: ./shell [options] <RUNTIME DIR>"
+	echo "Usage: ./shell.sh [options] <RUNTIME DIR>"
 	echo "Open a shell for the specified runtime directory."
 	echo
 	echo "Options:"

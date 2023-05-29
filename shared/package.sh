@@ -36,7 +36,7 @@ function find_gems_containing_native_extensions()
 
 function usage()
 {
-	echo "Usage: ./package [options] <BUILD OUTPUT DIR>"
+	echo "Usage: ./package.sh [options] <BUILD OUTPUT DIR>"
 	echo "Package built Traveling Ruby binaries."
 	echo
 	echo "Options:"

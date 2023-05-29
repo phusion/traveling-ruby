@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -e
 
 SELFDIR=`dirname "$0"`
 SELFDIR=`cd "$SELFDIR" && pwd`
-exec "$SELFDIR/../shared/package" "$@"
+exec "$SELFDIR/../shared/package.sh" "$@"

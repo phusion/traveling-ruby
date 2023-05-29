@@ -15,7 +15,7 @@ function cleanup()
 }
 
 if [[ $# == 0 ]]; then
-	echo "Usage: ./upload <FILES>"
+	echo "Usage: ./upload.sh <FILES>"
 	echo "Uploads files to Amazon S3."
 	exit 1
 fi
@@ -34,7 +34,7 @@ if [[ ! -e ~/.aws ]]; then
 		-e "APP_UID=$(id -u)" \
 		-e "APP_GID=$(id -u)" \
 		"phusion/traveling-ruby-builder-x86_64:$IMAGE_VERSION" \
-		/system/awsconfigure
+		/system/awsconfigure.sh
 	mkdir ~/.aws
 	cp -pR "$TEMPDIR/awscfg"/* ~/.aws/
 	rm -rf "$TEMPDIR"
@@ -65,7 +65,7 @@ docker run --rm -t -i --init \
 	-v "$AWSCFG:/awscfg:ro" \
 	-v "$SELFDIR/internal:/system:ro" \
 	"phusion/traveling-ruby-builder-x86_64:$IMAGE_VERSION" \
-	/system/awsinit \
+	/system/awsinit.sh \
 	aws s3 cp "${FILE_BASENAMES[@]}" s3://traveling-ruby/releases/ --acl public-read
 
 for DIR_BASENAME in "${DIR_BASENAMES[@]}"; do
@@ -76,6 +76,6 @@ for DIR_BASENAME in "${DIR_BASENAMES[@]}"; do
 		-v "$AWSCFG:/awscfg:ro" \
 		-v "$SELFDIR/internal:/system:ro" \
 		"phusion/traveling-ruby-builder-x86_64:$IMAGE_VERSION" \
-		/system/awsinit \
+		/system/awsinit.sh \
 		aws s3 sync "$DIR_BASENAME" "s3://traveling-ruby/releases/$DIR_BASENAME/" --acl public-read --delete
 done
