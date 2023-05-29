@@ -1,0 +1,26 @@
+GIT
+  remote: https://github.com/ruby/fiddle
+  revision: 9bbc732aef266cfb538c679430e5aebacf60205c
+  specs:
+    fiddle (1.1.2)
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    ffi (1.15.5)
+    json (2.6.3)
+    rexml (3.2.5)
+    yajl-ruby (1.4.3)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  ffi
+  fiddle!
+  json
+  rexml
+  yajl-ruby
+
+BUNDLED WITH
+   2.4.10
