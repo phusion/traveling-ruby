@@ -59,19 +59,6 @@ ENV_CHECK_SCRIPT: &ENV_CHECK_SCRIPT
     echo "repo: $repo"
     echo "script: $script"
 
-  # build_script:
-  #     cd $PLATFORM && rake package:$ARCHITECTURES
-
-  # build_script: |
-  #   cd $PLATFORM && $script
-  # test_script: |
-  #   cd $PLATFORM && $test
-
-  # test_script: |
-  #   ./shared/test-all-gems.sh $PLATFORM
-  upload_script: |
-    gh release upload "${NEXT_TAG}" $PLATFORM/*.tar.gz --repo "${REPO}" --clobber
-
 BINARY_ATRIFACTS: &BINARY_ATRIFACTS
   binary_artifacts:
     path: "$PLATFORM/*.tar.gz"
@@ -81,6 +68,7 @@ BINARY_ATRIFACTS: &BINARY_ATRIFACTS
 ## of docker containers to ensure the binaries are working
 
 linux_arm64_matrix_docker_builder:
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-arm64\).*'
   env:
     CIRRUS_ARCH: arm64
     PLATFORM: linux
@@ -93,6 +81,7 @@ linux_arm64_matrix_docker_builder:
   <<: *BINARY_ATRIFACTS
 
 linux_x64_matrix_docker_builder:
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-x86_64\).*'
   env:
     CIRRUS_ARCH: amd64
     PLATFORM: linux
@@ -106,6 +95,7 @@ linux_x64_matrix_docker_builder:
 ## modified to build all versions of ruby in a single run and not fail
 
 linux_arm64_docker_builder:
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux-arm64\).*'
   env:
     CIRRUS_ARCH: arm64
     PLATFORM: linux
@@ -116,6 +106,7 @@ linux_arm64_docker_builder:
   <<: *BINARY_ATRIFACTS
 
 linux_x64_packager_docker_builder:
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux-x86_64\).*'
   env:
     CIRRUS_ARCH: amd64
     PLATFORM: linux
@@ -140,7 +131,7 @@ linux_x64_packager_docker_builder:
 ## download_task: Downloads the binaries from the release
 
 prerelease_task:
-  only_if: $CIRRUS_BRANCH == 'next'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(prerelease\).*'
   macos_instance:
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
   env:
@@ -148,7 +139,7 @@ prerelease_task:
   <<: *PRE_RELEASE_TASK
 
 upload_task:
-  only_if: $CIRRUS_BRANCH == 'next'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(upload\).*'
   macos_instance:
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
   env:
@@ -163,7 +154,7 @@ upload_task:
 #   <<: *RELEASE_TASK
 
 download_task:
-  only_if: $CIRRUS_BRANCH == 'next'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(download\).*'
   macos_instance:
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
   env:
