@@ -111,7 +111,7 @@ function debug_shell()
 
 function usage()
 {
-	echo "Usage: ./build-ruby [options] <RUNTIME DIR> <OUTPUT DIR>"
+	echo "Usage: ./build-ruby.sh [options] <RUNTIME DIR> <OUTPUT DIR>"
 	echo "Build Traveling Ruby binaries."
 	echo
 	echo "Options:"
@@ -209,7 +209,7 @@ if [[ -e ~/.bundle/config ]]; then
 		"~/.bundle/config first."
 	exit 1
 fi
-"$SELFDIR/internal/check_requirements"
+"$SELFDIR/internal/check_requirements.sh"
 
 
 #######################################
@@ -231,9 +231,9 @@ fi
 header "Preparing Ruby source code..."
 
 # To many warnings, suppress them all (disable in case of troubleshooting)
-export CPPFLAGS="-w"
-export CXXFLAGS="-w"
-export CFLAGS="-w"
+# export CPPFLAGS="-w"
+# export CXXFLAGS="-w"
+# export CFLAGS="-w"
 
 export PATH="$RUNTIME_DIR/bin:$PATH"
 export LIBRARY_PATH="$RUNTIME_DIR/lib"
@@ -260,13 +260,10 @@ echo
 
 if $SETUP_SOURCE; then
 	header "Configuring..."
-	# NOTE: the option --disable-install-doc is a conjunction of --disable-install-rdoc and --disable-install-capi
-	# NOTE: the options --disable-install-doc and --disable-install-rdoc have been removed
-	#       to support the presence of document coders
 	./configure \
 		--prefix "$TMPBUILDROOT" \
 		--with-out-ext=tk,sdbm,gdbm,dbm,dl,coverage \
-		--disable-install-capi \
+		--disable-install-doc \
 		--with-openssl-dir="$RUNTIME_DIR"
 	echo
 fi
@@ -331,12 +328,15 @@ if [[ "$GEMFILE" != "" ]]; then
 
 	# Install Bundler, either from cache or directly.
 	if [[ -e "$RUNTIME_DIR/vendor/cache/bundler-$BUNDLER_VERSION.gem" ]]; then
+		echo "install Bundler from cache"
 		run "$TMPBUILDROOT/bin/gem" install "$RUNTIME_DIR/vendor/cache/bundler-$BUNDLER_VERSION.gem" --no-document
 	else
+		echo "install Bundler directly"
 		run "$TMPBUILDROOT/bin/gem" install bundler -v $BUNDLER_VERSION --no-document
 		run mkdir -p "$RUNTIME_DIR/vendor/cache"
 		run cp "$TMPBUILDROOT"/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/bundler-$BUNDLER_VERSION.gem \
 			"$RUNTIME_DIR/vendor/cache/"
+		run "$TMPBUILDROOT/bin/gem" install "$RUNTIME_DIR/vendor/cache/bundler-$BUNDLER_VERSION.gem" --no-document
 	fi
 
 	export BUNDLE_BUILD__NOKOGIRI="--use-system-libraries"
@@ -349,9 +349,13 @@ if [[ "$GEMFILE" != "" ]]; then
 		if [[ -e "$GEMFILE.lock" ]]; then
 			run cp "$GEMFILE.lock" ./
 		fi
+		echo "run bundle config --local force_ruby_platform true"
 		run bundle config --local force_ruby_platform true
+		echo "run "$TMPBUILDROOT/bin/bundle" config set --local system true"
 		run "$TMPBUILDROOT/bin/bundle" config set --local system true
+		echo "run "$TMPBUILDROOT/bin/bundle" install --retry 3 --jobs $CONCURRENCY"
 		run "$TMPBUILDROOT/bin/bundle" install --retry 3 --jobs $CONCURRENCY
+		echo "run "$TMPBUILDROOT/bin/bundle" package"
 		run "$TMPBUILDROOT/bin/bundle" package
 
 		# Cache gems.
@@ -376,7 +380,7 @@ run rm -f bin/testrb # Only Ruby 2.1 has it
 run rm -rf include
 run rm -rf share
 run rm -rf lib/{libruby-static.a,pkgconfig}
-#run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/ # don't remove the documentation generators
+run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/ # don't remove the documentation generators
 run rm -f lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
 run rm -f lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out,mkmf.log}
 run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
@@ -425,7 +429,7 @@ echo
 
 
 header "Sanity checking build output..."
-bash "$SELFDIR/internal/sanity_check" "$TMPBUILDROOT"
+bash "$SELFDIR/internal/sanity_check.sh" "$TMPBUILDROOT"
 echo
 
 
