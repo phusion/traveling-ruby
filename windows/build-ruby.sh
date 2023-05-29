@@ -18,7 +18,7 @@ RELEASE_NUM=1
 
 function usage()
 {
-	echo "Usage: ./build-ruby [options] <CACHE DIR> <OUTPUT DIR>"
+	echo "Usage: ./build-ruby.sh [options] <CACHE DIR> <OUTPUT DIR>"
 	echo "Build Ruby binaries."
 	echo
 	echo "Options:"
@@ -149,7 +149,13 @@ header "Extracting Ruby..."
 	echo "+ In $OUTPUT_DIR:"
 	cd "$OUTPUT_DIR"
 	echo "+ 7z x $CACHE_DIR/$RUBY_FILE"
-	7z x "$CACHE_DIR/$RUBY_FILE" >/dev/null
+	if command -v 7z >/dev/null 2>&1; then
+		7z x "$CACHE_DIR/$RUBY_FILE" >/dev/null
+	else
+		echo "no 7z found, trying 7zz"
+		echo "tip: on mac brew install 7zip"
+		7zz x "$CACHE_DIR/$RUBY_FILE" >/dev/null
+	fi
 )
 if [[ $? != 0 ]]; then
 	exit 1

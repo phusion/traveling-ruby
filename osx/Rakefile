@@ -82,11 +82,11 @@ RUBY_VERSIONS.each do |ruby_version|
 
 
   file(package => "output/#{ruby_version}/bin") do
-    sh "./package -r #{package} output/#{ruby_version}"
+    sh "./package.sh -r #{package} output/#{ruby_version}"
   end
 
   file("#{gem_dir}/ok" => "output/#{ruby_version}/bin") do
-    sh "./package -E #{gem_dir} output/#{ruby_version}"
+    sh "./package.sh -E #{gem_dir} output/#{ruby_version}"
     touch "#{gem_dir}/ok"
   end
 
@@ -95,13 +95,13 @@ RUBY_VERSIONS.each do |ruby_version|
   file("output/#{ruby_version}/bin" => "runtime/ok") do
     sh "mkdir -p output/#{ruby_version}"
     sh "mkdir -p /tmp/ruby-#{ruby_version}"
-    sh "./build-ruby -r #{ruby_version} -w /tmp/ruby-#{ruby_version} runtime output/#{ruby_version}"
+    sh "./build-ruby.sh -r #{ruby_version} -w /tmp/ruby-#{ruby_version} runtime output/#{ruby_version}"
   end
 
 
   desc "Test Ruby #{ruby_version}"
   task "test:#{ruby_version}" => "output/#{ruby_version}/bin" do
-    sh "./test-gems output/#{ruby_version}"
+    sh "./test-gems.sh output/#{ruby_version}"
   end
 
   desc "Upload Ruby #{ruby_version} packages to the server"
@@ -118,6 +118,6 @@ RUBY_VERSIONS.each do |ruby_version|
 end
 
 file "runtime/ok" => "setup-runtime" do
-  sh "./setup-runtime runtime"
+  sh "./setup-runtime.sh runtime"
   sh "touch runtime/ok"
 end
