@@ -4,6 +4,31 @@
 
 Traveling Ruby is a project which supplies self-contained, "portable" Ruby binaries: Ruby binaries that can run on any Linux distribution and any macOS machine. It also has Windows support [(with some caveats)](#caveats). This allows Ruby app developers to bundle these binaries with their Ruby app, so that they can distribute a single package to end users, without needing end users to first install Ruby or gems.
 
+ We currently support the following platforms and versions
+
+| OS     | Ruby      | Architecture | Supported |
+| -------| ------- | ------------ | --------- |
+| OSX    | 3.2.2     | x86_64       | ✅         |
+| OSX    | 3.2.2     | arm64| ✅         |
+| Linux  | 3.2.2   | x86_64       | ✅         |
+| Linux  | 3.2.2   | arm64 | ✅         |
+| Windows| 3.2.2 | x86_64       | ✅         |
+| Windows| 3.2.2 | x86      | ✅         |
+| Windows| 3.2.2 | arm64 | 🚧         |
+
+🚧 - Works under emulation with x86 or x64 packages on Windows on Arm.
+
+_note:_ 
+
+Windows On Arm can use either x86 or x86_64 with following caveats
+
+- x86_64
+  - User will experience `$EXITCODE` of `-1073741515` without following step.
+  - Requires installing of the [Microsoft Visual C++ Redistributable for Visual Studio 2019 for ARM64](https://aka.ms/vs/16/release/VC_redist.arm64.exe).
+- x86, see [post](https://patriksvensson.se/posts/2020/05/targeting-arm-for-windows-in-rust) - note is for rust, but same for Ruby apps.
+  - User will experience error `unexpected ucrtbase.dll` without following step.
+  - Requires installing of insiders build [25250](https://blogs.windows.com/windows-insider/2022/11/28/announcing-windows-11-insider-preview-build-25252/) or later, see [issue](https://github.com/msys2/MINGW-packages/issues/10896)
+
 [![](https://raw.githubusercontent.com/FooBarWidget/traveling-ruby/main/doc/video.png)](https://vimeo.com/phusionnl/review/113827942/ceca7e70da)
 
 _Introduction in 2 minutes_
@@ -38,7 +63,7 @@ This makes the release process much simpler. Instead of having to create almost 
 
 However, distributing a precompiled Ruby interpreter that works for all end users, is more easily said than done. [Read this section](#why_precompiled_binary_difficult) to learn why it's difficult.
 
-Traveling Ruby aims to solve the problem of supplying precompiled **Ruby 2.4** binaries that work for all end users.
+Traveling Ruby aims to solve the problem of supplying precompiled **Ruby 3.1** binaries that work for all end users.
 
 ## Getting started
 
@@ -81,7 +106,7 @@ Windows support:
  * Traveling Ruby supports creating packages *for* Windows, but it does not yet support creating packages *on* Windows. That is, the Traveling Ruby tutorials and the documentation do not work when you are a Ruby developer on Windows. To create Windows packages, you must use macOS or Linux.
 
    This is because in our documentation we make heavy use of standard Unix tools. Tools which are not available on Windows. In the future we may replace the use of such tools with Ruby tools so that the documentation works on Windows too.
- * Traveling Ruby currently supports Ruby 2.4.10.
+ * Traveling Ruby currently supports Ruby 3.2.2.
  * Native extensions are not yet supported.
 
 ## Building binaries
