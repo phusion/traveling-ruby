@@ -1,8 +1,10 @@
 IMAGE_VERSION = "1.0"
 VERSION       = File.read("../VERSION.txt").strip
 RUBY_VERSIONS = File.read("../RUBY_VERSIONS.txt").strip.split(/\s+/)
-ARCHITECTURES = ["x86_64"]
-CONCURRENCY   = `./internal/cpucount`.to_i + 1
+ARCHITECTURES = ENV['ARCHITECTURES'] ? [].push(ENV['ARCHITECTURES']) : ["x86_64","arm64"]
+CONCURRENCY   = `./internal/cpucount.sh`.to_i
+
+desc "Build all packages"
 
 task :default => :package
 
@@ -42,71 +44,119 @@ ARCHITECTURES.each do |arch|
   desc "Build the #{arch} Docker image"
   task "image:#{arch}" do
     sh "docker build --pull" \
-      " -t phusion/traveling-ruby-builder-#{arch}:#{IMAGE_VERSION}" \
+      " -t you54f/traveling-ruby-builder-#{arch}:#{IMAGE_VERSION}" \
       " -f image/Dockerfile-#{arch} image"
   end
 
   desc "Open a shell for testing building the #{arch} Docker image"
   task "image:buildtest:#{arch}" do
     File.read("image/Dockerfile-#{arch}") =~ /FROM (.+)/
-    base_image = $1
+    base_image = $1.split(" ")[1]
+    platform = $1.split(" ").first
+    puts "base_image: #{base_image}"
+    puts "platform: #{platform}"
     sh "docker", "run", "-ti", "--rm",
       "-v", File.absolute_path("image") + ":/tr_build:ro",
       "-v", File.absolute_path("image") + ":/host:delegated",
+      platform,
       base_image, "bash"
   end
+end
 
+
+ARCHITECTURES.each do |arch|
+
+  task :package => "package:#{arch}"
+
+  task :build   => "build:#{arch}"
+  task :test    => "test:#{arch}"
+  task :testdocker    => "testdocker:#{arch}"
+  task :upload  => "upload:#{arch}"
+  task :clean   => "clean:#{arch}"
 
   RUBY_VERSIONS.each do |ruby_version|
     package = "traveling-ruby-#{VERSION}-#{ruby_version}-linux-#{arch}.tar.gz"
     gem_dir = "traveling-ruby-gems-#{VERSION}-#{ruby_version}-linux-#{arch}"
 
-    task :package => "package:#{ruby_version}:#{arch}"
-    task :build   => "build:#{ruby_version}:#{arch}"
-    task :test    => "test:#{ruby_version}:#{arch}"
-    task :upload  => "upload:#{ruby_version}:#{arch}"
-    task :clean   => "clean:#{ruby_version}:#{arch}"
+    task :package => "package:#{arch}:#{ruby_version}"
+    task :build   => "build:#{arch}:#{ruby_version}"
+    task :test    => "test:#{arch}:#{ruby_version}"
+    task :testdocker    => "testdocker:#{arch}:#{ruby_version}"
+    task :upload  => "upload:#{arch}:#{ruby_version}"
+    task :clean   => "clean:#{arch}:#{ruby_version}"
 
+    desc "Create packages for Platform #{arch}"
+    task "package:#{arch}" do
+    RUBY_VERSIONS.each do |ruby_version|
+      begin
+
+          Rake::Task["package:#{arch}:#{ruby_version}"].invoke
+
+        rescue => e
+          puts "Error occurred: #{e.message}"
+        endt
+        end
+    end
+    desc "Build binaries for Ruby #{ruby_version} #{arch}"
+    task "build:#{arch}" =>  ["build:#{arch}:#{ruby_version}"]
+
+   
     desc "Create packages for Ruby #{ruby_version} #{arch}"
-    task "package:#{ruby_version}:#{arch}" => [package, "#{gem_dir}/ok"]
+    task "package:#{arch}:#{ruby_version}" => [package, "#{gem_dir}/ok"]
+
 
     desc "Build binaries for Ruby #{ruby_version} #{arch}"
-    task "build:#{ruby_version}:#{arch}" => "output/#{ruby_version}-#{arch}/bin"
+    task "build:#{arch}:#{ruby_version}" => "output/#{ruby_version}-#{arch}/bin"
 
 
     file(package => "output/#{ruby_version}-#{arch}/bin") do
-      sh "./package -r #{package} output/#{ruby_version}-#{arch}"
+        sh "./package.sh -r #{package} output/#{ruby_version}-#{arch}"
+
     end
 
     file("#{gem_dir}/ok" => "output/#{ruby_version}-#{arch}/bin") do
-      sh "./package -E #{gem_dir} output/#{ruby_version}-#{arch}"
+      sh "./package.sh -E #{gem_dir} output/#{ruby_version}-#{arch}"
       touch "#{gem_dir}/ok"
+
     end
 
     # We use 'file' instead of 'directory' here so that packages are updated
     # whenever we update binaries.
     file("output/#{ruby_version}-#{arch}/bin" => "cache/#{ruby_version}-#{arch}") do
       sh "mkdir -p output/#{ruby_version}-#{arch}"
-      sh "./build-ruby -j #{CONCURRENCY} -i phusion/traveling-ruby-builder-#{arch}:#{IMAGE_VERSION}" \
+      sh "./build-ruby.sh -j #{CONCURRENCY} -i you54f/traveling-ruby-builder-#{arch}:#{IMAGE_VERSION}" \
         " -r #{ruby_version} -c cache/#{ruby_version}-#{arch}" \
         " output/#{ruby_version}-#{arch}"
+
     end
 
     directory("cache/#{ruby_version}-#{arch}")
 
+    desc "test binaries for Ruby #{ruby_version} #{arch}"
+    task "test:#{arch}" =>  ["test:#{arch}:#{ruby_version}"]
+    desc "test  (via Docker) binaries for Ruby #{ruby_version} #{arch}"
+    task "test:#{arch}" =>  ["test:#{arch}:#{ruby_version}"]
+    desc "Upload binaries for Ruby #{ruby_version} #{arch}"
+    task "upload:#{arch}" =>  ["upload:#{arch}:#{ruby_version}"]
+    desc "clean binaries for Ruby #{ruby_version} #{arch}"
+    task "clean:#{arch}" =>  ["clean:#{arch}:#{ruby_version}"]
 
     desc "Test Ruby #{ruby_version} #{arch}"
-    task "test:#{ruby_version}:#{arch}" => "output/#{ruby_version}-#{arch}/bin" do
-      sh "./test-gems output/#{ruby_version}-#{arch}"
+    task "test:#{arch}:#{ruby_version}" => "output/#{ruby_version}-#{arch}/bin" do
+      sh "./test-gems.sh output/#{ruby_version}-#{arch}"
+    end
+    desc "Test (via Docker) Ruby #{ruby_version} #{arch}"
+    task "testdocker:#{arch}:#{ruby_version}" => "output/#{ruby_version}-#{arch}/bin" do
+      sh "./test-gems-docker.sh output/#{ruby_version}-#{arch}"
     end
 
     desc "Upload Ruby #{ruby_version} #{arch} packages to the server"
-    task "upload:#{ruby_version}:#{arch}" => [package, "#{gem_dir}/ok"] do
-      sh "env IMAGE_VERSION=#{IMAGE_VERSION} ./upload #{package} #{gem_dir}"
+    task "upload:#{arch}:#{ruby_version}" => [package, "#{gem_dir}/ok"] do
+      sh "env IMAGE_VERSION=#{IMAGE_VERSION} ./upload.sh #{package} #{gem_dir}"
     end
 
     desc "Clean Ruby #{ruby_version} packages"
-    task "clean:#{ruby_version}:#{arch}" do
+    task "clean:#{arch}:#{ruby_version}" do
       sh "rm -rf #{package} #{gem_dir} output/#{arch}"
     end
   end

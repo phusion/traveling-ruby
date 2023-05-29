@@ -5,7 +5,7 @@ SELFDIR=`dirname "$0"`
 SELFDIR=`cd "$SELFDIR" && pwd`
 source "$SELFDIR/../shared/library.sh"
 
-CPUCOUNT=`"$SELFDIR/internal/cpucount"`
+cpucount.sh=`"$SELFDIR/internal/cpucount.sh"`
 RUBY_VERSIONS=(`cat "$SELFDIR/../RUBY_VERSIONS.txt"`)
 
 OUTPUT_DIR=
@@ -22,7 +22,7 @@ GEMFILE_MOUNT=()
 
 function usage()
 {
-	echo "Usage: ./build-ruby [options] <OUTPUT_DIR>"
+	echo "Usage: ./build-ruby.sh [options] <OUTPUT_DIR>"
 	echo "Build Traveling Ruby binaries."
 	echo
 	echo "Options:"
@@ -165,4 +165,4 @@ exec docker run \
 	-e "SANITY_CHECK_OUTPUT=$SANITY_CHECK_OUTPUT" \
 	-e "DEBUG_SHELL=$DEBUG_SHELL" \
 	"$IMAGE" \
-	/system/build-ruby
+	/system/build-ruby.sh
