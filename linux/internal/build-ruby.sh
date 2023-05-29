@@ -116,8 +116,6 @@ if $SETUP_SOURCE; then
 	run ./configure \
 		--prefix /tmp/ruby \
 		--disable-install-doc \
-		--disable-install-rdoc \
-		--disable-install-capi \
 		--with-out-ext=tk,sdbm,gdbm,dbm,dl,coverage
 	echo
 else
@@ -131,7 +129,12 @@ if $COMPILE; then
 	header "Compiling"
 	run sed -i 's|dir_config("openssl")|$libs << " -lz "; dir_config("openssl")|' ext/openssl/extconf.rb
 	# Do not link to ncurses. We want it to link to libtermcap instead, which is much smaller.
-	run sed -i '/ncurses/d' ext/readline/extconf.rb
+	if [[ $RUBY_MAJOR -lt 3 || $RUBY_MAJOR -eq 3 && $RUBY_MINOR -lt 3 ]]; then
+		echo overwriting ext/readline/extconf.rb as a workaround for https://bugs.ruby-lang.org/issues/17123
+		echo RUBY_MAJOR=$RUBY_MAJOR
+		echo RUBY_MAJOR=$RUBY_MINOR
+		run sed -i '/ncurses/d' ext/readline/extconf.rb
+	fi
 	run make -j$CONCURRENCY Q= V=1 exts.mk
 	run make -j$CONCURRENCY Q= V=1
 	echo
@@ -152,8 +155,21 @@ if [[ "$NAME" = x86 ]]; then
 else
 	USRLIBDIR=/usr/lib64
 fi
+header "finding libs"
+find -name libyam*  
+find -name psy*
+find -name libffi*
+header "checking usr lib dir"
+run ls $USRLIBDIR
+run ls /usr/lib
+run ls /hbb_shlib/lib
+# run ls /hbb_shlib/lib64
 run cp $USRLIBDIR/libtinfo.so.5 /tmp/ruby/lib/
-run cp $USRLIBDIR/libreadline.so.6 /tmp/ruby/lib/
+if [[ $RUBY_MAJOR -lt 3 || $RUBY_MAJOR -eq 3 && $RUBY_MINOR -lt 3 ]]; then
+	run cp $USRLIBDIR/libreadline.so.6 /tmp/ruby/lib/
+fi
+# run cp $USRLIBDIR/libyaml-0.so.2 /tmp/ruby/lib/
+# run cp $USRLIBDIR/libyaml-0.so.2.0.4 /tmp/ruby/lib/
 run cp /system_shared/ca-bundle.crt /tmp/ruby/lib/
 run cp /system/traveling_ruby_restore_environment.rb /tmp/ruby/lib/ruby/site_ruby/
 export SSL_CERT_FILE=/tmp/ruby/lib/ca-bundle.crt
@@ -174,6 +190,14 @@ echo $GEM_EXTENSION_API_VERSION > /tmp/ruby/info/GEM_EXTENSION_API_VERSION
 run mkdir -p /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/deplibs/$GEM_PLATFORM
 pushd /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/deplibs/$GEM_PLATFORM
 run mkdir curses && run cp $USRLIBDIR/{libncursesw.so.5,libmenuw.so.5,libformw.so.5} curses/
+
+
+
+## If installing libffi from source
+# run cp /hbb_shlib/lib64/{libffi.so.8,libffi.so.8.1.2} /tmp/ruby/lib/
+
+# ## If using libffi included in the holy build box system
+run cp $USRLIBDIR/{libffi.so.6,libffi.so.6.0.1} /tmp/ruby/lib/
 popd
 
 echo "Patching rbconfig.rb"
@@ -187,6 +211,14 @@ run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/{test-unit,rdoc}-*
 
 function install_gems()
 {
+	# curl -LO https://github.com/yaml/libyaml/releases/download/0.2.5/yaml-0.2.5.tar.gz
+	# mkdir -p /tmp/yaml
+	# tar xvf yaml-0.2.5.tar.gz -C /tmp/yaml 
+	# /tmp/ruby/bin/gem install psych -v 5.0.1 -- --with-libyaml-source-dir=/tmp/yaml
+	# rm yaml-0.2.5.tar.gz
+	# rm -rf /tmp/yaml
+	# rm /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/$RUBY_ARCH/psych.so
+	
 	for GEMFILE in /system_shared/gemfiles/*/Gemfile; do
 		run cp "$GEMFILE" /tmp/ruby/
 		if [[ -e "$GEMFILE.lock" ]]; then
@@ -260,7 +292,7 @@ run rm -rf /tmp/ruby/include
 run rm -rf /tmp/ruby/share
 run rm -rf /tmp/ruby/lib/{libruby-static.a,pkgconfig}
 run rm -rf /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
-run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
+run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
 run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out}
 run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
 run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/*.{c,h}
@@ -287,12 +319,15 @@ if [[ -e /system_shared/gemfiles ]]; then
 fi
 echo
 
-if $SANITY_CHECK_OUTPUT; then
-	header "Sanity checking build output"
-	env LIBCHECK_ALLOW='libreadline|libtinfo|libformw|libmenuw|libncursesw' \
-		libcheck /tmp/ruby/bin.real/ruby $(find /tmp/ruby -name '*.so')
-fi
-
+## Skip order of sanity check, so we still perform it but retain our 
+## build output for further testing
 header "Committing build output"
 run chown -R $APP_UID:$APP_GID /tmp/ruby
 run mv /tmp/ruby/* /output/
+
+if $SANITY_CHECK_OUTPUT; then
+	header "Sanity checking build output"
+	env LIBCHECK_ALLOW='libreadline|libtinfo|libformw|libmenuw|libncursesw' \
+	# env LIBCHECK_ALLOW='libreadline|libtinfo|libformw|libmenuw|libncursesw|libffi' \
+		libcheck /output/bin.real/ruby $(find /output -name '*.so')
+fi
