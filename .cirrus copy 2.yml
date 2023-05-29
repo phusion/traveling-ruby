@@ -1,0 +1,172 @@
+env:
+  TRAVELING_RUBY_RB_VERSION: "3.2.2"
+  TRAVELING_RUBY_PKG_DATE: "20230523"
+  # GITHUB_TOKEN: ENCRYPTED[7f3663f35400d0e1f8e0fec456af6b75a07b0fd2d0632fe1697b8fb73af5e78245144216288d88d2daa681ccd159e07d]
+
+linux_arm_docker_builder:
+  env:
+    repo: you54f/traveling-ruby
+    NEXT_TAG: rel-20230527-3.2.2-871f45b6
+    matrix:
+#### Latest + Latest working
+      - script: rake package:3.2.2:arm64 ## LATEST ## Working # Linux ARM64 
+      # - script: rake package:3.1.4:arm64 ## LATEST  Not Working # Linux ARM64 
+      # - script: rake package:3.1.2:arm64 ## Working # Linux ARM64
+      # - script: rake package:3.0.6:arm64 ## LATEST  Not Working # Linux ARM64 
+      # - script: rake package:3.0.4:arm64 ## Working # Linux ARM64
+      # - script: rake package:2.7.8:arm64 ## LATEST Not Working # Linux ARM64 
+      # - script: rake package:2.6.10:arm64 ## LATEST  Working # Linux ARM64
+
+
+#### Not Working
+
+      # - script: rake package:3.3.0-preview1:arm64
+      # - script: rake package:3.1.4:arm64
+      # - script: rake package:3.1.3:arm64
+      # - script: rake package:3.0.6:arm64
+      # - script: rake package:3.0.5:arm64
+      # - script: rake package:2.7.8:arm64
+      # - script: rake package:2.7.7:arm64
+
+### Archives - Working
+
+      # - script: rake package:3.2.1:arm64
+      # - script: rake package:3.2.0:arm64
+      # - script: rake package:3.2.0-rc1:arm64
+      # - script: rake package:3.2.0-preview2:arm64
+      # - script: rake package:3.2.0-preview1:arm64
+
+      # - script: rake package:3.1.1:arm64
+      # - script: rake package:3.1.0:arm64
+      # - script: rake package:3.1.0-preview1:arm64
+
+      # - script: rake package:3.0.3:arm64
+      # - script: rake package:3.0.2:arm64
+      # - script: rake package:3.0.1:arm64
+      # - script: rake package:3.0.0:arm64
+
+      # - script: rake package:2.6.10:arm64
+
+  test_script: cd linux && $script
+  upload_script: gh release upload "${NEXT_TAG}" linux/*.tar.gz --repo "${REPO}" --clobber
+  binary_artifacts:
+    path: "linux/*.tar.gz"
+
+linux_amd_docker_builder:
+  env:
+    repo: you54f/traveling-ruby
+    NEXT_TAG: rel-20230527-3.2.2-871f45b6
+    matrix:
+
+#### Latest + Latest working
+
+      - script: rake package:3.2.2:x86_64 ## LATEST ## Working # Linux ARM64 
+      # # - script: rake package:3.1.4:x86_64 ## LATEST  Not Working # Linux ARM64 
+      # - script: rake package:3.1.2:x86_64 ## Working # Linux ARM64
+      # # - script: rake package:3.0.6:x86_64 ## LATEST  Not Working # Linux ARM64 
+      # - script: rake package:3.0.4:x86_64 ## Working # Linux ARM64
+      # - script: rake package:2.7.8:x86_64 ## LATEST Not Working # Linux ARM64 
+      # - script: rake package:2.6.10:x86_64 ## LATEST  Working # Linux ARM64
+
+
+  test_script: cd linux && $script
+  upload_script: gh release upload "${NEXT_TAG}" linux/*.tar.gz --repo "${REPO}" --clobber
+  binary_artifacts:
+    path: "linux/*.tar.gz"
+
+
+macos_arm_task: 
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-ventura-base:latest
+  env:
+    repo: you54f/traveling-ruby
+    NEXT_TAG: rel-20230527-3.2.2-871f45b6
+    matrix:
+
+#### Latest + Latest working
+
+      - script: rake package:3.2.2 ## LATEST ## Working # Linux ARM64 
+      # - script: rake package:3.1.4 ## LATEST  Not Working # Linux ARM64 
+      # - script: rake package:3.1.2 ## Working # Linux ARM64
+      # - script: rake package:3.0.6 ## LATEST  Not Working # Linux ARM64 
+      # - script: rake package:3.0.4 ## Working # Linux ARM64
+      # - script: rake package:2.7.8 ## LATEST Not Working # Linux ARM64 
+      # - script: rake package:2.6.10 ## LATEST  Working # Linux ARM64
+  setup_script: |
+    rbenv global system
+    ruby --version
+    bundler --version
+    sudo gem install bundler:2.4.10
+    bundler --version
+    rbenv global 3.2.2
+    ruby --version
+    bundler --version
+    find osx/ -type f -exec chmod +x {} \;
+    chmod +x shared/package
+  test_script: cd osx && $script
+  upload_script: gh release upload "${NEXT_TAG}" osx/*.tar.gz --repo "${REPO}" --clobber
+  # upload_script: gh release upload "${NEXT_TAciG}" osx/*.tar.gz --repo "${REPO}" --clobber
+  binary_artifacts:
+    path: "osx/*.tar.gz"
+
+gem_test_task: 
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-ventura-base:latest
+  script: |
+    brew uninstall libyaml
+    find shared  -name '*.sh'
+    find osx  -name '*.sh'
+    find osx/output/**/bin
+    find shared  -name '*.sh' -exec chmod +x {} \;
+    find osx  -name '*.sh' -exec chmod +x {} \;
+    find osx/output/**/bin  -exec chmod +x {} \;
+    find osx/output/**/bin.real  -exec chmod +x {} \;
+    cd osx
+    ls -1 output | xargs -I '{}' ./test-gems.sh output/'{}'
+
+mac_check_task: 
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-ventura-base:latest
+  script: |
+    ruby --version
+    bundler --version
+    brew leaves
+
+
+gem_unarchive_and_test_task: 
+  env: 
+    matrix:
+      # image: debian:bookworm-slim
+      # image: bitnami/minideb:latest
+      # image: busybox:glibc
+      # image: busybox:uclibc
+      # image: busybox:musl
+      # image: centos:centos8
+      # image: centos:centos9
+      image: quay.io/centos/centos:stream
+      # image: quay.io/centos/centos:stream9
+      # image: quay.io/centos/centos:stream9-minimal
+      # image: quay.io/centos/centos:stream8
+      # image: quay.io/centos/centos:8
+      # image: centos:centos7
+      # image: alpine:latest
+      # image: alpine:3.18
+      # image: alpine:3.17
+      # image: alpine:3.16
+      # image: alpine:3.15
+
+  container:
+    image: $image
+  check_dep_script: |
+    ldconfig -v | grep libffi || echo "libffi not found"
+    ldconfig -v | grep libyaml || echo "libyaml not found"
+  super_script:
+    ls -1 *.tar.gz | while read file; do \
+    name=$(echo $file | cut -d'-' -f1-2); \
+    pkg_date=$(echo $file | cut -d'-' -f3); \
+    ruby_version=$(echo $file | cut -d'-' -f4); \
+    os=$(echo $file | cut -d'-' -f5); \
+    arch=$(echo $file | cut -d'-' -f6 | cut -d'.' -f1); \
+    size=$(du -h $file | cut -f1); \
+    echo "$name $pkg_date $ruby_version $os $arch $size" >> /output/output.txt; \
+    tar -czvf /output/$ruby_version-$arch.tar.gz $file;

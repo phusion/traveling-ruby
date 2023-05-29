@@ -89,13 +89,11 @@ ARCHITECTURES.each do |arch|
     task "package:#{arch}" do
     RUBY_VERSIONS.each do |ruby_version|
       begin
-
           Rake::Task["package:#{arch}:#{ruby_version}"].invoke
-
         rescue => e
           puts "Error occurred: #{e.message}"
-        endt
         end
+      end
     end
     desc "Build binaries for Ruby #{ruby_version} #{arch}"
     task "build:#{arch}" =>  ["build:#{arch}:#{ruby_version}"]
@@ -147,7 +145,7 @@ ARCHITECTURES.each do |arch|
     end
     desc "Test (via Docker) Ruby #{ruby_version} #{arch}"
     task "testdocker:#{arch}:#{ruby_version}" => "output/#{ruby_version}-#{arch}/bin" do
-      sh "./test-gems-docker.sh output/#{ruby_version}-#{arch}"
+      sh "./test-gems-docker.sh \"output/#{ruby_version}-#{arch}\""
     end
 
     desc "Upload Ruby #{ruby_version} #{arch} packages to the server"

@@ -1,0 +1,9 @@
+name pkg_date ruby_version os arch size
+--- -------- -------------- -- ---- ----
+traveling-ruby 20230528 3.1.4 osx arm64  14M
+traveling-ruby 20230528 3.2.0 osx arm64  14M
+traveling-ruby 20230528 3.2.0-preview2 osx arm64  14M
+traveling-ruby 20230528 3.2.0-rc1 osx arm64  14M
+traveling-ruby 20230528 3.2.1 osx arm64  14M
+traveling-ruby 20230528 3.2.2 osx arm64  14M
+traveling-ruby 20230528 3.3.0-preview1 osx arm64  15M

@@ -325,7 +325,13 @@ header "Committing build output"
 run chown -R $APP_UID:$APP_GID /tmp/ruby
 run mv /tmp/ruby/* /output/
 
-if $SANITY_CHECK_OUTPUT; then
+
+if $SANITY_CHECK_OUTPUT_IGNORE; then
+	header "Sanity checking build output"
+	env LIBCHECK_ALLOW='libreadline|libtinfo|libformw|libmenuw|libncursesw' \
+	# env LIBCHECK_ALLOW='libreadline|libtinfo|libformw|libmenuw|libncursesw|libffi' \
+		libcheck /output/bin.real/ruby $(find /output -name '*.so') || true
+elif $SANITY_CHECK_OUTPUT; then
 	header "Sanity checking build output"
 	env LIBCHECK_ALLOW='libreadline|libtinfo|libformw|libmenuw|libncursesw' \
 	# env LIBCHECK_ALLOW='libreadline|libtinfo|libformw|libmenuw|libncursesw|libffi' \

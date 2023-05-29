@@ -5,7 +5,7 @@ SELFDIR=`dirname "$0"`
 SELFDIR=`cd "$SELFDIR" && pwd`
 source "$SELFDIR/../shared/library.sh"
 
-cpucount.sh=`"$SELFDIR/internal/cpucount.sh"`
+cpucount=`"$SELFDIR/internal/cpucount.sh"`
 RUBY_VERSIONS=(`cat "$SELFDIR/../RUBY_VERSIONS.txt"`)
 
 OUTPUT_DIR=

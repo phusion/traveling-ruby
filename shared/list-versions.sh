@@ -34,21 +34,19 @@ list_output_builds() {
 
 
 
-if [[ ${1:-} == "" ]]; then
+if [[ ${1:-} == "all" ]]; then
+  cd $SELFDIR/../osx
   list_output_builds
-elif [[ ${1:-} == "all" ]]; then
-  cd ../osx
+  cd $SELFDIR/../windows
   list_output_builds
-  cd ../windows
-  list_output_builds
-  cd ../linux
+  cd $SELFDIR/../linux
   list_output_builds
 elif [[ ${1:-} != "" ]]; then
   if [[ "$1" != "windows" && "$1" != "linux" && "$1" != "osx" ]]; then
     echo "Invalid argument: $1. Please enter 'windows', 'linux', or 'osx'."
     exit 1
   fi
-  cd ../$1
+  cd $SELFDIR/../$1
   list_output_builds
 fi
 
