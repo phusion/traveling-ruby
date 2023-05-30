@@ -117,7 +117,7 @@ RUBY_VERSIONS.each do |ruby_version|
   end
 end
 
-file "runtime/ok" => "setup-runtime" do
+file "runtime/ok" => "setup-runtime.sh" do
   sh "./setup-runtime.sh runtime"
   sh "touch runtime/ok"
 end
