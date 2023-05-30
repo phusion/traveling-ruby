@@ -1,5 +1,6 @@
 VERSION       = File.read("../VERSION.txt").strip
 RUBY_VERSIONS = File.read("../RUBY_VERSIONS.txt").strip.split(/\s+/)
+ARCHITECTURES = ENV['ARCHITECTURES'] ? [].push(ENV['ARCHITECTURES']) : ["x86_64","arm64"]
 
 task :default => :package
 
@@ -62,47 +63,104 @@ task :unstash_conflicting_paths do
   end
 end
 
+ARCHITECTURES.each do |arch|
 
-RUBY_VERSIONS.each do |ruby_version|
-  arch = `uname -m`.chomp.strip
+  task :package => "package:#{arch}"
+  task :build   => "build:#{arch}"
+  task :test    => "test:#{arch}"
+  task :upload  => "upload:#{arch}"
+  task :clean   => "clean:#{arch}"
+
+  desc "Create packages for Platform #{arch}"
+  task "package:#{arch}" do
+    RUBY_VERSIONS.each do |ruby_version|
+      begin
+          Rake::Task["package:#{arch}:#{ruby_version}"].invoke
+        rescue => e
+          puts "Error occurred: #{e.message}"
+        end
+      end
+  end
+  desc "Build binaries for Platform #{arch}"
+  task "build:#{arch}" do
+    RUBY_VERSIONS.each do |ruby_version|
+      begin
+          Rake::Task["build:#{arch}:#{ruby_version}"].invoke
+        rescue => e
+          puts "Error occurred: #{e.message}"
+        end
+      end
+  end
+
+ RUBY_VERSIONS.each do |ruby_version|
   package = "traveling-ruby-#{VERSION}-#{ruby_version}-osx-#{arch}.tar.gz"
   gem_dir = "traveling-ruby-gems-#{VERSION}-#{ruby_version}-osx-#{arch}"
 
-  task :package => "package:#{ruby_version}"
-  task :build   => "build:#{ruby_version}"
-  task :test    => "test:#{ruby_version}"
-  task :upload  => "upload:#{ruby_version}"
-  task :clean   => "clean:#{ruby_version}"
+  task :package => "package:#{arch}:#{ruby_version}"
+  task :build   => "build:#{arch}:#{ruby_version}"
+  task :test    => "test:#{arch}:#{ruby_version}"
+  task :upload  => "upload:#{arch}:#{ruby_version}"
+  task :clean   => "clean:#{arch}:#{ruby_version}"
 
-  desc "Create packages for Ruby #{ruby_version}"
-  task "package:#{ruby_version}" => [package, "#{gem_dir}/ok"]
+  # task :package => "package:#{ruby_version}"
+  # task :build   => "build:#{ruby_version}"
+  # task :test    => "test:#{ruby_version}"
+  # task :upload  => "upload:#{ruby_version}"
+  # task :clean   => "clean:#{ruby_version}"
 
-  desc "Build binaries for Ruby #{ruby_version}"
-  task "build:#{ruby_version}" => "output/#{ruby_version}/bin"
 
 
-  file(package => "output/#{ruby_version}/bin") do
-    sh "./package.sh -r #{package} output/#{ruby_version}"
+    desc "Build binaries for Ruby #{ruby_version} #{arch}"
+    task "build:#{arch}" =>  ["build:#{arch}:#{ruby_version}"]
+
+   
+    desc "Create packages for Ruby #{ruby_version} #{arch}"
+    task "package:#{arch}:#{ruby_version}" => [package, "#{gem_dir}/ok"]
+
+
+    desc "Build binaries for Ruby #{ruby_version} #{arch}"
+    task "build:#{arch}:#{ruby_version}" => "output/#{ruby_version}-#{arch}/bin"
+
+
+  file(package => "output/#{ruby_version}-#{arch}/bin") do
+    sh "./package.sh -r #{package} output/#{ruby_version}-#{arch}"
   end
 
-  file("#{gem_dir}/ok" => "output/#{ruby_version}/bin") do
-    sh "./package.sh -E #{gem_dir} output/#{ruby_version}"
+  file("#{gem_dir}/ok" => "output/#{ruby_version}-#{arch}/bin") do
+    sh "./package.sh -E #{gem_dir} output/#{ruby_version}-#{arch}"
     touch "#{gem_dir}/ok"
   end
 
   # We use 'file' instead of 'directory' here so that packages are updated
   # whenever we update binaries.
-  file("output/#{ruby_version}/bin" => "runtime/ok") do
-    sh "mkdir -p output/#{ruby_version}"
-    sh "mkdir -p /tmp/ruby-#{ruby_version}"
-    sh "./build-ruby.sh -r #{ruby_version} -w /tmp/ruby-#{ruby_version} runtime output/#{ruby_version}"
+  file("output/#{ruby_version}-#{arch}/bin" => "runtime/ok") do
+    sh "mkdir -p output/#{ruby_version}-#{arch}"
+    sh "mkdir -p /tmp/ruby-#{ruby_version}-#{arch}"
+    sh "./build-ruby.sh -r #{ruby_version} -w /tmp/ruby-#{ruby_version}-#{arch} runtime output/#{ruby_version}-#{arch}"
   end
 
+  desc "Test Ruby for Platform #{arch}"
+  task "test:#{arch}" do
+    RUBY_VERSIONS.each do |ruby_version|
+      begin
+          Rake::Task["test:#{arch}:#{ruby_version}"].invoke
+        rescue => e
+          puts "Error occurred: #{e.message}"
+        end
+      end
+    end
 
-  desc "Test Ruby #{ruby_version}"
-  task "test:#{ruby_version}" => "output/#{ruby_version}/bin" do
-    sh "./test-gems.sh output/#{ruby_version}"
-  end
+    desc "test binaries for Ruby #{ruby_version} #{arch}"
+    task "test:#{arch}" =>  ["test:#{arch}:#{ruby_version}"]
+    desc "Upload binaries for Ruby #{ruby_version} #{arch}"
+    task "upload:#{arch}" =>  ["upload:#{arch}:#{ruby_version}"]
+    desc "clean binaries for Ruby #{ruby_version} #{arch}"
+    task "clean:#{arch}" =>  ["clean:#{arch}:#{ruby_version}"]
+
+    desc "Test Ruby #{ruby_version} #{arch}"
+    task "test:#{arch}:#{ruby_version}" => "output/#{ruby_version}-#{arch}/bin" do
+      sh "./test-gems.sh output/#{ruby_version}-#{arch}"
+    end
 
   desc "Upload Ruby #{ruby_version} packages to the server"
   task "upload:#{ruby_version}" => [package, "#{gem_dir}/ok"] do
@@ -112,11 +170,11 @@ RUBY_VERSIONS.each do |ruby_version|
   end
 
   desc "Clean Ruby #{ruby_version} packages, but not the runtime"
-  task "clean:#{ruby_version}" do
-    sh "rm -rf #{package} #{gem_dir} output/#{ruby_version}"
+  task "clean:#{arch}:#{ruby_version}" do
+    sh "rm -rf #{package} #{gem_dir} output/#{ruby_version}-#{arch}"
   end
+ end
 end
-
 file "runtime/ok" => "setup-runtime.sh" do
   sh "./setup-runtime.sh runtime"
   sh "touch runtime/ok"

@@ -431,12 +431,14 @@ elif [[ ! -e "$RUNTIME_DIR/lib/openssl-ok" ]] || $FORCE_OPENSSL; then
 	pushd openssl-$OPENSSL_VERSION >/dev/null
 
 	ARCH=$(uname -m)
-	if [[ "$ARCH" == "x86_64" ]]; then
+	if [[ "$ARCHITECTURE" == "x86_64" ]]; then
 		BUILDTARGET="darwin64-x86_64-cc"
-	elif [[ "$ARCH" == "arm64" ]]; then
+	elif [[ "$ARCHITECTURE" == "arm64" ]]; then
 		BUILDTARGET="darwin64-arm64-cc"
 	else
-		echo "*** ERROR: unknown architecture, don't know how to build"
+		echo "*** ERROR: unknown architecture $ARCHITECTURE, don't know how to build"
+		echo "set ARCHITECTURE to one of: x86_64 arm64"
+		echo "we detected you are running on via uname: $ARCH"
 		exit 1
 	fi
 	run ./Configure "$BUILDTARGET" --prefix="$RUNTIME_DIR" --openssldir="$RUNTIME_DIR/openssl" threads zlib shared
@@ -828,6 +830,9 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libxslt.a" ]] || $FORCE_LIBXSLT; then
 		--without-profiler \
 		CFLAGS="-w -O2 -fPIC -fvisibility=hidden" \
 		CXXFLAGS="-w -O2 -fPIC -fvisibility=hidden"
+		# remove the -w flag here
+		# FIXME: getting a "Certificate can't be trusted" error while using HTTPS protocol
+
 	run make -j$CONCURRENCY
 	run make install-strip -j$CONCURRENCY
 

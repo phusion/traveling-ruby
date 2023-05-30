@@ -381,7 +381,7 @@ run rm -rf include
 run rm -rf share
 run rm -rf lib/{libruby-static.a,pkgconfig}
 run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/ # don't remove the documentation generators
-run rm -f lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
+run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
 run rm -f lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out,mkmf.log}
 run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
 run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/*.{c,h}
