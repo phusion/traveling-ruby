@@ -12,3 +12,4 @@
 *.tar.gz
 .DS_Store
 ok
+output.txt

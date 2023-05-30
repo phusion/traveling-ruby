@@ -176,6 +176,7 @@ ARCHITECTURES.each do |arch|
  end
 end
 file "runtime/ok" => "setup-runtime.sh" do
+  puts "Setting up runtime"
   sh "./setup-runtime.sh runtime"
   sh "touch runtime/ok"
 end

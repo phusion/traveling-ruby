@@ -234,7 +234,9 @@ function parse_options()
 	fi
 }
 
+echo "Setting up Traveling Ruby's runtime..."
 parse_options "$@"
+echo "Runtime directory: $RUNTIME_DIR"
 mkdir -p "$RUNTIME_DIR"
 RUNTIME_DIR="`cd \"$RUNTIME_DIR\" && pwd`"
 "$SELFDIR/internal/check_requirements.sh"

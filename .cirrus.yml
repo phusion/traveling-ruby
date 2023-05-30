@@ -16,27 +16,29 @@ DOWNLOAD_TASK: &DOWNLOAD_TASK
   script: |
     gh release download  "${NEXT_TAG}" --repo you54f/traveling-ruby -p *$PLATFORM-$CIRRUS_ARCH*
 
-
 RUBY_VERSIONS_TASKS: &RUBY_VERSIONS_TASKS
   - script: rake package:$ARCHITECTURES:3.3.0-preview1
     test: rake testdocker:$ARCHITECTURES:3.3.0-preview1
   - script: rake package:$ARCHITECTURES:3.2.2
     test: rake testdocker:$ARCHITECTURES:3.2.2
-  # - script: rake package:$ARCHITECTURES:3.1.4
-  #   test: rake testdocker:$ARCHITECTURES:3.1.4
+  - script: rake package:$ARCHITECTURES:3.1.4
+    test: rake testdocker:$ARCHITECTURES:3.1.4
   - script: rake package:$ARCHITECTURES:3.1.2
     test: rake testdocker:$ARCHITECTURES:3.1.2
-  # - script: rake package:$ARCHITECTURES:3.0.6
-  #   test: rake testdocker:$ARCHITECTURES:3.0.6
+  - script: rake package:$ARCHITECTURES:3.0.6
+    test: rake testdocker:$ARCHITECTURES:3.0.6
   - script: rake package:$ARCHITECTURES:3.0.4
     test: rake testdocker:$ARCHITECTURES:3.0.4
-  # - script: rake package:$ARCHITECTURES:2.7.8
-  #   test: rake testdocker:$ARCHITECTURES:2.7.8
+  - script: rake package:$ARCHITECTURES:2.7.8
+    test: rake testdocker:$ARCHITECTURES:2.7.8
   - script: rake package:$ARCHITECTURES:2.6.10
     test: rake testdocker:$ARCHITECTURES:2.6.10
 
-RUBY_VERSIONS_MULTI_BUILDER: &RUBY_VERSIONS_MULTI_BUILDER
+RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER: &RUBY_VERSIONS_MULTI_BUILDER
   package_script: cd $PLATFORM && rake package:$ARCHITECTURES
+
+RUBY_VERSIONS_MULTI_ARCH_RUBY_VERSION_BUILDER: &RUBY_VERSIONS_MULTI_ARCH_RUBY_VERSION_BUILDER
+  package_script: cd $PLATFORM && rake package
 
 RUBY_VERSIONS_MATRIX_RUNNER: &RUBY_VERSIONS_MATRIX_RUNNER
   build_script: cd $PLATFORM && $script
@@ -63,12 +65,17 @@ BINARY_ATRIFACTS: &BINARY_ATRIFACTS
   binary_artifacts:
     path: "$PLATFORM/*.tar.gz"
 
+
+# ========================================
+# Linux - Matrix Package & Test
+# ========================================
+
 ## The <os>_<arch>_matrix_builder jobs are used to build each 
 ## version of ruby on seperate runners and run a test suite
 ## of docker containers to ensure the binaries are working
 
 linux_arm64_matrix_docker_builder:
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-arm64\).*'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*'
   env:
     CIRRUS_ARCH: arm64
     PLATFORM: linux
@@ -82,7 +89,7 @@ linux_arm64_matrix_docker_builder:
   <<: *BINARY_ATRIFACTS
 
 linux_x64_matrix_docker_builder:
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-x86_64\).*'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-x86_64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*'
   env:
     CIRRUS_ARCH: amd64
     PLATFORM: linux
@@ -94,13 +101,17 @@ linux_x64_matrix_docker_builder:
   <<: *RUBY_VERSIONS_MATRIX_RUNNER
   # <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
-  
+
+# ========================================
+# Linux - Packager
+# ========================================
+
 ## The <os>_<arch>_packager_docker_builder jobs are used to build
 ## each version of ruby on a single runner. The rake task has been
 ## modified to build all versions of ruby in a single run and not fail
 
 linux_arm64_packager_docker_builder:
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux\).*'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager\).*'
   env:
     CIRRUS_ARCH: arm64
     PLATFORM: linux
@@ -112,7 +123,7 @@ linux_arm64_packager_docker_builder:
   <<: *BINARY_ATRIFACTS
 
 linux_x64_packager_docker_builder:
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux-x86_64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux\).*'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux-x86_64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager\).*'
   env:
     CIRRUS_ARCH: amd64
     PLATFORM: linux
@@ -124,6 +135,70 @@ linux_x64_packager_docker_builder:
   <<: *BINARY_ATRIFACTS
 
 
+# ========================================
+# MacOS
+# ========================================
+
+macos_check: &macos_check
+  check_script: |
+    ruby --version
+    bundler --version
+    brew leaves
+    xcode-select -p
+
+# ========================================
+# MacOS - Packager
+# ========================================
+
+cirrus_cli_setup: &cirrus_cli_setup
+  cirrus_cli_script: |
+    find $PLATFORM shared -name '*.sh'
+    find $PLATFORM shared -name '*.sh' -exec chmod +x {} \;
+
+macos_packager_task: 
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager\).*'
+  env:
+    PLATFORM: osx
+    matrix:
+      - script: rake --trace package
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-ventura-base:latest
+  <<: *macos_check
+  <<: *cirrus_cli_setup
+  <<: *RUBY_VERSIONS_MULTI_ARCH_RUBY_VERSION_BUILDER
+  <<: *BINARY_ATRIFACTS
+
+
+# ========================================
+# Windows - Packager
+# ========================================
+
+windows_packager_task: 
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-windows\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager\).*'
+  env:
+    PLATFORM: windows
+    matrix:
+      - script: rake --trace package
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-ventura-base:latest
+  windows_setup_script: |
+    brew install sevenzip
+  <<: *cirrus_cli_setup
+  no_version_remover_script: |
+    sed -ie '/3.3.0-preview1/d' RUBY_VERSIONS.txt
+  <<: *RUBY_VERSIONS_MULTI_ARCH_RUBY_VERSION_BUILDER
+  <<: *BINARY_ATRIFACTS
+
+
+# ========================================
+# Windows - Matrix Package & Test
+# ========================================
+
+
+
+# ========================================
+# Release Tasks
+# ========================================
 
 
 ## General tasks for GitHub Releases
