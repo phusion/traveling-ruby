@@ -96,7 +96,7 @@ linux_x64_matrix_docker_builder:
 ## modified to build all versions of ruby in a single run and not fail
 
 linux_arm64_packager_docker_builder:
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux-arm64\).*'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux\).*'
   env:
     CIRRUS_ARCH: arm64
     PLATFORM: linux
@@ -107,7 +107,7 @@ linux_arm64_packager_docker_builder:
   <<: *BINARY_ATRIFACTS
 
 linux_x64_packager_docker_builder:
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux-x86_64\).*'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux\).*'
   env:
     CIRRUS_ARCH: amd64
     PLATFORM: linux
