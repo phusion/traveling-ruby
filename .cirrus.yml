@@ -20,16 +20,16 @@ DOWNLOAD_TASK: &DOWNLOAD_TASK
 RUBY_VERSIONS_TASKS: &RUBY_VERSIONS_TASKS
   - script: rake package:$ARCHITECTURES:3.3.0-preview1
     test: rake testdocker:$ARCHITECTURES:3.3.0-preview1
-  - script: rake package:$ARCHITECTURES:3.1.4
-    test: rake testdocker:$ARCHITECTURES:3.1.4
+  # - script: rake package:$ARCHITECTURES:3.1.4
+  #   test: rake testdocker:$ARCHITECTURES:3.1.4
   - script: rake package:$ARCHITECTURES:3.1.2
     test: rake testdocker:$ARCHITECTURES:3.1.2
   - script: rake package:$ARCHITECTURES:3.0.6
     test: rake testdocker:$ARCHITECTURES:3.0.6
   - script: rake package:$ARCHITECTURES:3.0.4
     test: rake testdocker:$ARCHITECTURES:3.0.4
-  - script: rake package:$ARCHITECTURES:2.7.8
-    test: rake testdocker:$ARCHITECTURES:2.7.8
+  # - script: rake package:$ARCHITECTURES:2.7.8
+  #   test: rake testdocker:$ARCHITECTURES:2.7.8
   - script: rake package:$ARCHITECTURES:2.6.10
     test: rake testdocker:$ARCHITECTURES:2.6.10
 
@@ -91,14 +91,14 @@ linux_x64_matrix_docker_builder:
 ## each version of ruby on a single runner. The rake task has been
 ## modified to build all versions of ruby in a single run and not fail
 
-linux_arm64_docker_builder:
+linux_arm64_packager_docker_builder:
   only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux-arm64\).*'
   env:
     CIRRUS_ARCH: arm64
     PLATFORM: linux
     <<: *ENV_TEMPLATE
   <<: *ENV_CHECK_SCRIPT
-  <<: *RUBY_VERSIONS_MATRIX_RUNNER
+  <<: *RUBY_VERSIONS_MULTI_BUILDER
   # <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 
@@ -108,9 +108,8 @@ linux_x64_packager_docker_builder:
     CIRRUS_ARCH: amd64
     PLATFORM: linux
     <<: *ENV_TEMPLATE
-    matrix:
-      <<: *RUBY_VERSIONS_TASKS
-  <<: *RUBY_VERSIONS_MATRIX_RUNNER
+  <<: *ENV_CHECK_SCRIPT
+  <<: *RUBY_VERSIONS_MULTI_BUILDER
   # <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 
