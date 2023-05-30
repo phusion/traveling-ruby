@@ -38,11 +38,8 @@ RUBY_VERSIONS_MULTI_BUILDER: &RUBY_VERSIONS_MULTI_BUILDER
   package_script: cd $PLATFORM && rake package:$ARCHITECTURES
 
 RUBY_VERSIONS_MATRIX_RUNNER: &RUBY_VERSIONS_MATRIX_RUNNER
-  package_script: cd $PLATFORM && rake package:$ARCHITECTURES
-  build_script: |
-    cd $PLATFORM && $script
-  test_script: |
-    cd $PLATFORM && $test
+  build_script: cd $PLATFORM && $script
+  test_script: cd $PLATFORM && $test
 
 ENV_TEMPLATE: &ENV_TEMPLATE
   ARCHITECTURES: $CIRRUS_ARCH
