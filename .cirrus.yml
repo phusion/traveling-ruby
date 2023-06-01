@@ -20,6 +20,14 @@ UPLOAD_TASK: &UPLOAD_TASK
   script: |
     gh release upload "${NEXT_TAG}" $PLATFORM/**/*.tar.gz --repo "${REPO}" --clobber
 
+UPLOAD_TASK: &UPLOAD_TASK
+  script: |
+    cd $PLATFORM
+    for file in traveling-ruby-gems-*/**/*.tar.gz; do
+      tar -czvf "${file%.tar.gz}.gz" "$file"
+    done
+    gh release upload "${NEXT_TAG}" *.tar.gz --repo "${REPO}" --clobber
+
 DOWNLOAD_TASK: &DOWNLOAD_TASK
   script: |
     gh release download  "${NEXT_TAG}" --repo "${REPO}" -p *$PLATFORM-$CIRRUS_ARCH*
@@ -29,6 +37,12 @@ RUBY_VERSIONS_LATEST_MATRIX: &RUBY_VERSIONS_LATEST_MATRIX
   RUBY_VERSIONS: 3.2.2
   RUBY_VERSIONS: 3.1.4
   RUBY_VERSIONS: 3.0.6
+  RUBY_VERSIONS: 2.7.8
+  RUBY_VERSIONS: 2.6.10
+
+RUBY_VERSIONS_MATRIX_LINUX: &RUBY_VERSIONS_MATRIX_LINUX
+  RUBY_VERSIONS: 3.3.0-preview1
+  RUBY_VERSIONS: 3.2.2
   RUBY_VERSIONS: 2.7.8
   RUBY_VERSIONS: 2.6.10
   RUBY_VERSIONS: 3.1.2
@@ -134,7 +148,7 @@ linux_arm64_matrix_docker_builder:
     ARCHITECTURES: arm64
     <<: *ENV_TEMPLATE
     matrix:
-      *RUBY_VERSIONS_LATEST_MATRIX
+      *RUBY_VERSIONS_MATRIX_LINUX
   <<: *ENV_CHECK_SCRIPT
   <<: *RUBY_VERSIONS_MATRIX_DOCKER_RUNNER
   <<: *INSTALL_GH_CLI
@@ -151,7 +165,7 @@ linux_x64_matrix_docker_builder:
     ARCHITECTURES: x86_64
     <<: *ENV_TEMPLATE
     matrix:
-      *RUBY_VERSIONS_LATEST_MATRIX
+      *RUBY_VERSIONS_MATRIX_LINUX
   <<: *ENV_CHECK_SCRIPT
   <<: *RUBY_VERSIONS_MATRIX_DOCKER_RUNNER
   <<: *INSTALL_GH_CLI
@@ -230,6 +244,7 @@ macos_packager_task:
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
   <<: *macos_check
   <<: *cirrus_cli_setup
+  <<: *download_macos_runtime
   package_script: cd $PLATFORM && rake package
   <<: *BINARY_ATRIFACTS
 
@@ -255,7 +270,7 @@ macos_arm64_matrix_task:
       *RUBY_VERSIONS_LATEST_MATRIX
   <<: *macos_check
   <<: *cirrus_cli_setup
-  download_macos: *download_macos_runtime
+  <<: *download_macos_runtime
   package_script: cd $PLATFORM && rake package
   test_script: cd $PLATFORM && rake test
   # upload_output_dir_script: cd $PLATFORM && tar -czvf $PLATFORM-runtime.tar.gz runtime
