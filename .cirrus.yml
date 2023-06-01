@@ -12,13 +12,13 @@ INSTALL_GH_CLI: &INSTALL_GH_CLI
     && apt install gh -y
 
 PRE_RELEASE_TASK: &PRE_RELEASE_TASK
-  script: |
+  prerelease_script: |
     RELEASE_NOTES=$(git log --pretty=format:"%s" $(git describe --tags --abbrev=0)..HEAD)
     gh release create "${NEXT_TAG}" --prerelease --draft --repo "${REPO}" --title "${NEXT_TAG}" --notes "${RELEASE_NOTES}"
 
 
 UPLOAD_TASK: &UPLOAD_TASK
-  script: |
+  upload_script: |
     cd $PLATFORM
     for file in $(find traveling-ruby-gems-* -name '*.gz'); do
       gem_name=$(echo "${file%-*}" | tr '/' '-')
@@ -36,7 +36,7 @@ UPLOAD_TASK: &UPLOAD_TASK
     fi
 
 DOWNLOAD_TASK: &DOWNLOAD_TASK
-  script: |
+  download_script: |
     gh release download  "${NEXT_TAG}" --repo "${REPO}" -p *$PLATFORM-$CIRRUS_ARCH*
 
 RUBY_VERSIONS_LATEST_MATRIX: &RUBY_VERSIONS_LATEST_MATRIX
@@ -227,7 +227,7 @@ macos_check: &macos_check
     c++ --version -arch x86_64
 
 set_bundler_version: &set_bundler_version
-  check_script: |
+  set_bundler_version_script: |
     rbenv global system
     sudo gem install bundler -v $(cat BUNDLER_VERSION.txt)
     bundler --version

@@ -32,5 +32,5 @@ gem 'unicorn', :platforms => :ruby
 # gem 'mysql2', :platforms => :ruby
 
 # Fails to build on /MacOS
-gem 'nokogiri'
+# gem 'nokogiri', :platforms => :ruby
 # nokogumbo is now part of nokogiri
