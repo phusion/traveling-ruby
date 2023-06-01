@@ -16,9 +16,6 @@ PRE_RELEASE_TASK: &PRE_RELEASE_TASK
     RELEASE_NOTES=$(git log --pretty=format:"%s" $(git describe --tags --abbrev=0)..HEAD)
     gh release create "${NEXT_TAG}" --prerelease --draft --repo "${REPO}" --title "${NEXT_TAG}" --notes "${RELEASE_NOTES}"
 
-# UPLOAD_TASK: &UPLOAD_TASK
-#   script: |
-#     gh release upload "${NEXT_TAG}" $PLATFORM/**/*.tar.gz --repo "${REPO}" --clobber
 
 UPLOAD_TASK: &UPLOAD_TASK
   script: |
@@ -31,7 +28,12 @@ UPLOAD_TASK: &UPLOAD_TASK
       echo $ruby_version-$gem_version.tar.gz
       cp "$file" $ruby_version-$gem_version.tar.gz
     done
-    gh release upload "${NEXT_TAG}" traveling-ruby-*.tar.gz --repo "${REPO}" --clobber
+    ls -l
+    if [[ $CIRRUS_BRANCH == 'next-test' ]]; then
+      gh release upload "${NEXT_TAG}" traveling-ruby-*.tar.gz --repo "${REPO}" --clobber
+    else
+      echo "Not on main branch, skipping upload"
+    fi
 
 DOWNLOAD_TASK: &DOWNLOAD_TASK
   script: |
@@ -145,7 +147,7 @@ linux_x64_packager_docker_builder:
 linux_arm64_matrix_docker_builder:
   cpu: 4
   memory: 4G
-  # only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*'
   env:
     CIRRUS_ARCH: arm64
     PLATFORM: linux
@@ -223,8 +225,13 @@ macos_check: &macos_check
     c++ --version -arch $CIRRUS_ARCH
     cc --version -arch x86_64
     c++ --version -arch x86_64
+
+set_bundler_version: &set_bundler_version
+  check_script: |
+    rbenv global system
     sudo gem install bundler -v $(cat BUNDLER_VERSION.txt)
     bundler --version
+    rbenv global 3.2.2
 
 macos_check_task: 
   only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(mac-check\).*'
@@ -250,6 +257,7 @@ macos_packager_task:
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
   <<: *macos_check
   <<: *cirrus_cli_setup
+  <<: *set_bundler_version
   <<: *download_macos_runtime
   package_script: cd $PLATFORM && rake package
   <<: *BINARY_ATRIFACTS
@@ -276,6 +284,7 @@ macos_arm64_matrix_task:
       *RUBY_VERSIONS_LATEST_MATRIX
   <<: *macos_check
   <<: *cirrus_cli_setup
+  <<: *set_bundler_version
   <<: *download_macos_runtime
   package_script: cd $PLATFORM && rake package
   test_script: cd $PLATFORM && rake test
