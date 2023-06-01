@@ -223,6 +223,8 @@ macos_check: &macos_check
     c++ --version -arch $CIRRUS_ARCH
     cc --version -arch x86_64
     c++ --version -arch x86_64
+    sudo gem install bundler -v $(cat BUNDLER_VERSION.txt)
+    bundler --version
 
 macos_check_task: 
   only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(mac-check\).*'
