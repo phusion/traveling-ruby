@@ -41,6 +41,10 @@ RUBY_VERSIONS_MATRIX_RUNNER: &RUBY_VERSIONS_MATRIX_RUNNER
   build_script: cd $PLATFORM && $script
   test_script: cd $PLATFORM && $test
 
+RUBY_VERSIONS_MATRIX_DOCKER_RUNNER: &RUBY_VERSIONS_MATRIX_DOCKER_RUNNER
+  package_script: cd $PLATFORM && rake package
+  testdocker_script: cd $PLATFORM && rake testdocker
+
 ENV_TEMPLATE: &ENV_TEMPLATE
   SANITY_CHECK_OUTPUT_IGNORE: "true"
   # ARCHITECTURES: $CIRRUS_ARCH
@@ -71,6 +75,8 @@ BINARY_ATRIFACTS: &BINARY_ATRIFACTS
 ## modified to build all versions of ruby in a single run and not fail
 
 linux_arm64_packager_docker_builder:
+  cpu: 4
+  memory: 4G
   only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager\).*'
   env:
     CIRRUS_ARCH: arm64
@@ -79,10 +85,16 @@ linux_arm64_packager_docker_builder:
     <<: *ENV_TEMPLATE
   <<: *ENV_CHECK_SCRIPT
   <<: *RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER
-  # <<: *UPLOAD_TASK
+  broken_version_remover_script: |
+    sed -ie '/3.1.4/d' RUBY_VERSIONS.txt
+    sed -ie '/3.0.6/d' RUBY_VERSIONS.txt
+    sed -ie '/2.7.8/d' RUBY_VERSIONS.txt
+  <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 
 linux_x64_packager_docker_builder:
+  cpu: 4
+  memory: 4G
   only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux-x86_64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager\).*'
   env:
     CIRRUS_ARCH: amd64
@@ -93,8 +105,9 @@ linux_x64_packager_docker_builder:
   broken_version_remover_script: |
     sed -ie '/3.1.4/d' RUBY_VERSIONS.txt
     sed -ie '/3.0.6/d' RUBY_VERSIONS.txt
+    sed -ie '/2.7.8/d' RUBY_VERSIONS.txt
   <<: *RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER
-  # <<: *UPLOAD_TASK
+  <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 
 
@@ -107,6 +120,8 @@ linux_x64_packager_docker_builder:
 ## of docker containers to ensure the binaries are working
 
 linux_arm64_matrix_docker_builder:
+  cpu: 4
+  memory: 4G
   only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*'
   env:
     CIRRUS_ARCH: arm64
@@ -116,13 +131,13 @@ linux_arm64_matrix_docker_builder:
     matrix:
       <<: *RUBY_VERSIONS_MATRIX
   <<: *ENV_CHECK_SCRIPT
-  package_script: cd $PLATFORM && rake package
-  testdocker_script: cd $PLATFORM && rake testdocker
-  # <<: *RUBY_VERSIONS_MATRIX_RUNNER
-  # <<: *UPLOAD_TASK
+  <<: *RUBY_VERSIONS_MATRIX_DOCKER_RUNNER
+  <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 
 linux_x64_matrix_docker_builder:
+  cpu: 4
+  memory: 4G
   only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-x86_64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*'
   env:
     CIRRUS_ARCH: amd64
@@ -132,9 +147,7 @@ linux_x64_matrix_docker_builder:
     matrix:
       <<: *RUBY_VERSIONS_MATRIX
   <<: *ENV_CHECK_SCRIPT
-  package_script: cd $PLATFORM && rake package
-  testdocker_script: cd $PLATFORM && rake testdocker
-  # <<: *UPLOAD_TASK
+  <<: *RUBY_VERSIONS_MATRIX_DOCKER_RUNNER
   <<: *BINARY_ATRIFACTS
 
 # ========================================
@@ -230,14 +243,14 @@ macos_arm64_matrix_task:
     ARCHITECTURES: arm64
     <<: *ENV_TEMPLATE
     matrix:
-      RUBY_VERSIONS: 3.3.0-preview1
-      # <<: *RUBY_VERSIONS_MATRIX
+      # RUBY_VERSIONS: 3.3.0-preview1
+      <<: *RUBY_VERSIONS_MATRIX
   <<: *macos_check
   <<: *cirrus_cli_setup
+  download_macos: *download_macos_runtime
   package_script: cd $PLATFORM && rake package
-  # download_macos: *download_macos_runtime
-  upload_output_dir_script: cd $PLATFORM && tar -czvf $PLATFORM-runtime.tar.gz runtime
-  test_script: cd $PLATFORM && rake test || echo "tests failed"
+  test_script: cd $PLATFORM && rake test
+  # upload_output_dir_script: cd $PLATFORM && tar -czvf $PLATFORM-runtime.tar.gz runtime
   # <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 

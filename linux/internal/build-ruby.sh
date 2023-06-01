@@ -226,11 +226,8 @@ function install_gems()
 		fi
 		echo "+ Entering /tmp/ruby"
 		pushd /tmp/ruby >/dev/null
-		# We set -j to 1 because of this bug:
-		# https://github.com/bundler/bundler/issues/3660
-		# When it is solved, we can set -j to $CONCURRENCY.
 		run /tmp/ruby/bin/bundle config set --local system true
-		run /tmp/ruby/bin/bundle install --retry 3 --jobs 1
+		run /tmp/ruby/bin/bundle install --retry 3 --jobs $CONCURRENCY
 		run rm Gemfile*
 		echo "+ Leaving /tmp/ruby"
 		popd >/dev/null

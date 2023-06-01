@@ -1,6 +1,6 @@
 IMAGE_VERSION = "next"
 VERSION       = File.read("../VERSION.txt").strip
-RUBY_VERSIONS = ENV['RUBY_VERSIONS'] ? [].push(ENV['RUBY_VERSIONS']) : File.read("../RUBY_VERSIONS_LINUX.txt").strip.split(/\s+/)
+RUBY_VERSIONS = ENV['RUBY_VERSIONS'] ? [].push(ENV['RUBY_VERSIONS']) : File.read("../RUBY_VERSIONS.txt").strip.split(/\s+/)
 ARCHITECTURES = ENV['ARCHITECTURES'] ? [].push(ENV['ARCHITECTURES']) : ["x86_64","arm64"]
 CONCURRENCY   = `./internal/cpucount.sh`.to_i
 
