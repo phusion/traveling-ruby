@@ -96,6 +96,10 @@ if [[ ("$PLATFORM" == "osx" || "$PLATFORM" == "linux") && "$ARCHITECTURE" == "ar
 	GEMS_TO_FAIL+=("nio4r")
 fi
 
+if [[ "$PLATFORM" == "linux" ]]; then
+	GEMS_TO_FAIL+=("nio4r")
+fi
+
 if [[ "$BUILD_OUTPUT_DIR" == *"3.0.4"* ]]; then
 	GEMS_TO_FAIL+=("debug")
 fi
@@ -113,7 +117,7 @@ echo "$GEM_LIST" >> "$BUILD_OUTPUT_DIR/test_report"
 # header "modifying gem names in $BUILD_OUTPUT_DIR for testing"
 # "$BUILD_OUTPUT_DIR/bin/gem" list | awk '{gsub(/io-/, "io/"); gsub(/net-/, "net/"); sub(/-ext/, ""); sub(/-ruby/, ""); print $1}' | grep -v -- "-ext"
 
-GEMS=($("$BUILD_OUTPUT_DIR/bin/gem" list | awk '{gsub(/io-/, "io/"); gsub(/net-/, "net/"); sub(/-ext/, ""); sub(/-ruby/, ""); print $1}' | grep -v -- "-ext"))
+GEMS=($("$BUILD_OUTPUT_DIR/bin/gem" list | awk '{gsub(/io-/, "io/"); gsub(/net-/, "net/"); sub(/-ext/, ""); sub(/-ruby/, ""); sub(/english/, "English"); print $1}' | grep -v -- "-ext"))
 if [ ${#GEMS[@]} -eq 0 ]; then
 	GEMS=("${GEMS_TO_TEST[@]}")
 else

@@ -24,15 +24,18 @@ DOWNLOAD_TASK: &DOWNLOAD_TASK
   script: |
     gh release download  "${NEXT_TAG}" --repo "${REPO}" -p *$PLATFORM-$CIRRUS_ARCH*
 
-RUBY_VERSIONS_MATRIX: &RUBY_VERSIONS_MATRIX
+RUBY_VERSIONS_LATEST_MATRIX: &RUBY_VERSIONS_LATEST_MATRIX
   RUBY_VERSIONS: 3.3.0-preview1
   RUBY_VERSIONS: 3.2.2
   RUBY_VERSIONS: 3.1.4
-  RUBY_VERSIONS: 3.1.2
   RUBY_VERSIONS: 3.0.6
-  RUBY_VERSIONS: 3.0.4
   RUBY_VERSIONS: 2.7.8
   RUBY_VERSIONS: 2.6.10
+  
+RUBY_VERSIONS_ALT_MATRIX: &RUBY_VERSIONS_ALT_MATRIX
+  RUBY_VERSIONS: 3.1.2
+  RUBY_VERSIONS: 3.0.4
+
 
 RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER: &RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER
   package_script: cd $PLATFORM && rake package
@@ -89,6 +92,7 @@ linux_arm64_packager_docker_builder:
     sed -ie '/3.1.4/d' RUBY_VERSIONS.txt
     sed -ie '/3.0.6/d' RUBY_VERSIONS.txt
     sed -ie '/2.7.8/d' RUBY_VERSIONS.txt
+  <<: *INSTALL_GH_CLI
   <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 
@@ -107,6 +111,7 @@ linux_x64_packager_docker_builder:
     sed -ie '/3.0.6/d' RUBY_VERSIONS.txt
     sed -ie '/2.7.8/d' RUBY_VERSIONS.txt
   <<: *RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER
+  <<: *INSTALL_GH_CLI
   <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 
@@ -129,9 +134,11 @@ linux_arm64_matrix_docker_builder:
     ARCHITECTURES: arm64
     <<: *ENV_TEMPLATE
     matrix:
-      *RUBY_VERSIONS_MATRIX
+      *RUBY_VERSIONS_LATEST_MATRIX
+      *RUBY_VERSIONS_ALT_MATRIX
   <<: *ENV_CHECK_SCRIPT
   <<: *RUBY_VERSIONS_MATRIX_DOCKER_RUNNER
+  <<: *INSTALL_GH_CLI
   <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 
@@ -145,9 +152,12 @@ linux_x64_matrix_docker_builder:
     ARCHITECTURES: x86_64
     <<: *ENV_TEMPLATE
     matrix:
-      *RUBY_VERSIONS_MATRIX
+      *RUBY_VERSIONS_LATEST_MATRIX
+      *RUBY_VERSIONS_ALT_MATRIX
   <<: *ENV_CHECK_SCRIPT
   <<: *RUBY_VERSIONS_MATRIX_DOCKER_RUNNER
+  <<: *INSTALL_GH_CLI
+  <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 
 # ========================================
@@ -241,9 +251,10 @@ macos_arm64_matrix_task:
   env:
     PLATFORM: osx
     ARCHITECTURES: arm64
+    ARCHITECTURE: arm64 # temp measure, will be set by rakefile when running targeted x86_64 / arm64 builds
     <<: *ENV_TEMPLATE
     matrix:
-      *RUBY_VERSIONS_MATRIX
+      *RUBY_VERSIONS_LATEST_MATRIX
   <<: *macos_check
   <<: *cirrus_cli_setup
   download_macos: *download_macos_runtime
