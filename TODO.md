@@ -1,82 +1,82 @@
-RUBY_VERSIONS_TASKS: &RUBY_VERSIONS_TASKS
-  - script: rake package:$ARCHITECTURES:3.3.0-preview1
-    test: rake testdocker:$ARCHITECTURES:3.3.0-preview1
+# TODO
 
-  # - script: rake package:$ARCHITECTURES:3.2.2
-  #   test: rake testdocker:$ARCHITECTURES:3.2.2
-# 3.2.2
-# | PLATFORM | ARCH   | Working |
-# | OSX     | x86_64 |  |
-# | OSX     | arm64  |  |
-# | Linux   | x86_64 |  |
-# | Linux   | arm64  | ✅ |
-# | Windows | x86_64 |  |
-# | Windows | x86    |  |
+Just some WIP notes to keep some track of testing progress
 
-  # - script: rake package:$ARCHITECTURES:3.1.4
-  #   test: rake testdocker:$ARCHITECTURES:3.1.4
+### Latest Ruby Versions
+ 
+- `3.3.0-preview1`
+- `3.2.2`
+- `3.1.4`
+- `3.1.2`
+- `3.0.6`
+- `3.0.4`
+- `2.6.10`
 
-# 3.1.4
-# | PLATFORM | ARCH   | Working |
-# | OSX     | x86_64 |  |
-# | OSX     | arm64  |  |
-# | Linux   | x86_64 |  |
-# | Linux   | arm64  | X |
-# | Windows | x86_64 |  |
-# | Windows | x86    |  |
+#### Ruby Build Caveats
+
+- Windows 3.3.0-preview1 builds not provdided
+  - https://github.com/oneclick/rubyinstaller2/releases
+- Linux
+  - Cannot build latest `3.1.4` / `3.0.6`
+- MacOS
+  - Cannot build latest `3.1.4` / `3.0.6` on x86_64
+  - Cannot build latest `2.7.8` on arm64
+  - Cannot build `2.6.10` on either
+  - `-dead_strip` linker command unused when running configure
+
+### Ruby Versions failing to build
+
+- Ruby `3.3.0-preview1`
+  - Windows
+    - Not Available
+
+- Ruby  `3.1.3` / `3.1.4`
+  - Linux 
+    - OpenSSL not found error
+  - MacOS (`x86_64`)
+
+- Ruby  `3.0.5` / `3.0.6`
+  - Linux
+    - OpenSSL not found error
 
 
-  # - script: rake package:$ARCHITECTURES:3.1.2
-  #   test: rake testdocker:$ARCHITECTURES:3.1.2
-# 3.1.2
-# | PLATFORM | ARCH   | Working |
-# | OSX     | x86_64 |  |
-# | OSX     | arm64  |  |
-# | Linux   | x86_64 |  |
-# | Linux   | arm64  | ✅ |
-# | Windows | x86_64 |  |
-# | Windows | x86    |  |
+- Ruby  `2.7.8` / `3.0.6`
+  - Linux
+    - OpenSSL not found error
 
 
-  # - script: rake package:$ARCHITECTURES:3.0.6
-  #   test: rake testdocker:$ARCHITECTURES:3.0.6
-# + /tmp/ruby/bin/gem install bundler -v 2.4.10 --no-document
-# ERROR:  While executing gem ... (Gem::Exception)
-#     OpenSSL is not available. Install OpenSSL and rebuild Ruby (preferred) or use non-HTTPS sources
-# rake aborted!
+### Gems failing to install
 
-# 3.0.6
-# | PLATFORM | ARCH   | Working |
-# | OSX     | x86_64 |  |
-# | OSX     | arm64  |  |
-# | Linux   | x86_64 |  |
-# | Linux   | arm64  | X |
-# | Windows | x86_64 |  |
-# | Windows | x86    |  |
+- mysql2 `gem 'mysql2', :platforms => :ruby`
+  - MacOS
+  - Linux
 
-  # - script: rake package:$ARCHITECTURES:3.0.4
-  #   test: rake testdocker:$ARCHITECTURES:3.0.4
+- nokogiri `gem 'nokogiri'`
+  - MacOS
 
-# 3.0.4
-# | PLATFORM | ARCH   | Working |
-# | OSX     | x86_64 |  |
-# | OSX     | arm64  |  |
-# | Linux   | x86_64 |  |
-# | Linux   | arm64  | ✅ |
-# | Windows | x86_64 |  |
-# | Windows | x86    |  |
 
-  # - script: rake package:$ARCHITECTURES:2.7.8
-  #   test: rake testdocker:$ARCHITECTURES:2.7.8
-# /tmp/ruby-2.7.8/lib/rubygems/core_ext/kernel_require.rb:83:in `require': cannot load such file -- openssl (LoadError)
-#         from /tmp/ruby-2.7.8/lib/rubygems/core_ext/kernel_require.rb:83:in `require'
-#   - script: rake package:$ARCHITECTURES:2.6.10
-#     test: rake testdocker:$ARCHITECTURES:2.6.10
-# # 2.6.10
-# # | PLATFORM | ARCH   | Working |
-# # | OSX     | x86_64 |  |
-# # | OSX     | arm64  |  |
-# # | Linux   | x86_64 |  |
-# # | Linux   | arm64  | ✅ |
-# # | Windows | x86_64 |  |
-# # | Windows | x86    |  |
+
+### Gems failing testing
+
+- `rinda`
+  - MacOS
+  - Linux
+
+- `test-unit`
+  - MacOS
+  - Linux
+
+- `win32ole`
+  - MacOS
+  - Linux
+
+- `rinda`
+  - MacOS
+  - Linux
+
+- `nio4r`
+  - MacOS (arm64)
+  - Linux (arm64)
+
+- `debug`
+  - Ruby `3.0.4`

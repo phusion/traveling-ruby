@@ -1,6 +1,6 @@
 IMAGE_VERSION = "next"
 VERSION       = File.read("../VERSION.txt").strip
-RUBY_VERSIONS = ENV['RUBY_VERSIONS'] ? [].push(ENV['RUBY_VERSIONS']) : File.read("../RUBY_VERSIONS.txt").strip.split(/\s+/)
+RUBY_VERSIONS = ENV['RUBY_VERSIONS'] ? [].push(ENV['RUBY_VERSIONS']) : File.read("../RUBY_VERSIONS_LINUX.txt").strip.split(/\s+/)
 ARCHITECTURES = ENV['ARCHITECTURES'] ? [].push(ENV['ARCHITECTURES']) : ["x86_64","arm64"]
 CONCURRENCY   = `./internal/cpucount.sh`.to_i
 
@@ -8,7 +8,7 @@ desc "Build all packages"
 
 task :default => :package
 
-desc "Create packages for all Ruby versions (#{RUBY_VERSIONS.join(' ')}) and all architectures (#{ARCHITECTURES.join(' ')}"
+desc "Create packages for all Ruby versions (#{RUBY_VERSIONS.join(' ')}) and all architectures (#{ARCHITECTURES.join(' ')})"
 task :package do
   # Do nothing
 end
@@ -18,7 +18,7 @@ task :image do
   # Do nothing
 end
 
-desc "Build binaries for all Ruby versions (#{RUBY_VERSIONS.join(' ')}) and all architectures (#{ARCHITECTURES.join(' ')}"
+desc "Build binaries for all Ruby versions (#{RUBY_VERSIONS.join(' ')}) and all architectures (#{ARCHITECTURES.join(' ')})"
 task :build do
   # Do nothing
 end
@@ -123,7 +123,7 @@ ARCHITECTURES.each do |arch|
 
     desc "Clean Ruby #{ruby_version} packages"
     task "clean:#{ruby_version}:#{arch}" do
-      sh "rm -rf #{package} #{gem_dir} output/#{arch}"
+      sh "rm -rf #{package} #{gem_dir} output/#{ruby_version}-#{arch}"
     end
   end
 end

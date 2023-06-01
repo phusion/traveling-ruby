@@ -12,13 +12,8 @@ gem 'charlock_holmes', :platforms => :ruby
 gem 'curses', :platforms => :ruby
 gem 'escape_utils'
 gem 'fast-stemmer'
-# gem 'ffi'
 gem 'hitimes'
-# gem 'json'
 gem 'kgio', :platforms => :ruby
-
-gem 'nokogiri'
-# nokogumbo is now part of nokogiri
 gem 'pg'
 gem 'posix-spawn', :platforms => :ruby
 gem 'puma', :platforms => :ruby
@@ -26,13 +21,16 @@ gem 'raindrops', :platforms => :ruby
 gem 'redcarpet'
 gem 'RedCloth'
 gem 'rugged', :platforms => :ruby
-# requies 
-
 gem 'sqlite3'
 gem 'thin'
 gem 'unf_ext'
 gem 'unicorn', :platforms => :ruby
-# gem 'yajl-ruby'
 
-# gem 'mysql2', :platforms => :ruby
+
+# Fails to build on Linux/MacOS
 # Fails to build on linux needs to link to zlib
+# gem 'mysql2', :platforms => :ruby
+
+# Fails to build on /MacOS
+gem 'nokogiri'
+# nokogumbo is now part of nokogiri

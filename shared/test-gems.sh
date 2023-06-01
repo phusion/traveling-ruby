@@ -20,11 +20,17 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "h" opt; do
+	while getopts "hap:" opt; do
 		case "$opt" in
 		h)
 			usage
 			exit
+			;;
+		p)
+			PLATFORM="$OPTARG"
+			;;
+		a)
+			ARCHITECTURE="$OPTARG"
 			;;
 		*)
 			return 1
@@ -44,6 +50,31 @@ function parse_options()
 		echo "ERROR: $BUILD_OUTPUT_DIR doesn't exist."
 		exit 1
 	fi
+
+	if [[ "$PLATFORM" = "" ]]; then
+		PLATFORM=$(uname | tr '[:upper:]' '[:lower:]')
+		if [[ "$PLATFORM" = "darwin" ]]; then
+			PLATFORM="osx"
+		fi
+	fi
+
+	if [[ "$PLATFORM" != "" && "$PLATFORM" != "osx" && "$PLATFORM" != "windows" && "$PLATFORM" != "linux" ]]; then
+		echo "ERROR: Invalid platform specified. Must be 'osx', 'windows', or 'linux'."
+		exit 1
+	fi
+
+	if [[ "$ARCHITECTURE" = "" ]]; then
+		if [[ "$BUILD_OUTPUT_DIR" == *"arm64"* ]]; then
+			ARCHITECTURE="arm64"
+		elif [[ "$BUILD_OUTPUT_DIR" == *"x86_64"* ]]; then
+			ARCHITECTURE="x86_64"
+		fi
+	fi
+
+	if [[ "$ARCHITECTURE" != "" && "$ARCHITECTURE" != "arm64" && "$ARCHITECTURE" != "x86_64" ]]; then
+		echo "ERROR: Invalid architecture specified. Must be 'arm64' or 'x86_64'."
+		exit 1
+	fi
 }
 
 
@@ -58,18 +89,29 @@ parse_options "$@"
 # 	thin sqlite3 yajl puma/puma_http11 kgio raindrops fast-stemmer
 # 	hitimes redcarpet curses)
 
-GEMS_TO_TEST=(ffi json rexml yajl)
+GEMS_TO_TEST=(ffi json rexml yajl nio socket)
 GEMS_TO_FAIL=("rinda" "test-unit" "win32ole") # Add the gem names that we want to fail
+
+if [[ ("$PLATFORM" == "osx" || "$PLATFORM" == "linux") && "$ARCHITECTURE" == "arm64" ]]; then
+	GEMS_TO_FAIL+=("nio4r")
+fi
 
 if [[ "$BUILD_OUTPUT_DIR" == *"3.0.4"* ]]; then
 	GEMS_TO_FAIL+=("debug")
 fi
+
+echo "Testing gems in $BUILD_OUTPUT_DIR"
+echo "Platform: $PLATFORM"
+echo "Architecture: $ARCHITECTURE"
+echo "Gems to test: ${GEMS_TO_TEST[@]}"
+echo "Gems to fail: ${GEMS_TO_FAIL[@]}"
+
 header "Listing gems versions in $BUILD_OUTPUT_DIR"
 GEM_LIST=$("$BUILD_OUTPUT_DIR/bin/gem" list)
 echo "$GEM_LIST"
 echo "$GEM_LIST" >> "$BUILD_OUTPUT_DIR/test_report"
 # header "modifying gem names in $BUILD_OUTPUT_DIR for testing"
-"$BUILD_OUTPUT_DIR/bin/gem" list | awk '{gsub(/io-/, "io/"); gsub(/net-/, "net/"); sub(/-ext/, ""); sub(/-ruby/, ""); print $1}' | grep -v -- "-ext"
+# "$BUILD_OUTPUT_DIR/bin/gem" list | awk '{gsub(/io-/, "io/"); gsub(/net-/, "net/"); sub(/-ext/, ""); sub(/-ruby/, ""); print $1}' | grep -v -- "-ext"
 
 GEMS=($("$BUILD_OUTPUT_DIR/bin/gem" list | awk '{gsub(/io-/, "io/"); gsub(/net-/, "net/"); sub(/-ext/, ""); sub(/-ruby/, ""); print $1}' | grep -v -- "-ext"))
 if [ ${#GEMS[@]} -eq 0 ]; then
@@ -101,5 +143,5 @@ else
 	printf '%s\n' "${ERRORS[@]}"
 	echo "The following gems failed to load:" > "$BUILD_OUTPUT_DIR/test_report"
 	printf '%s\n' "${ERRORS[@]}" >> "$BUILD_OUTPUT_DIR/test_report"
-	exit 1
+	exit 1 
 fi

@@ -1,7 +1,15 @@
 env:
-  repo: you54f/traveling-ruby
-  NEXT_TAG: rel-20230529-next
+  REPO: you54f/traveling-ruby
+  NEXT_TAG: rel-20230601-next
   GITHUB_TOKEN: ENCRYPTED[7f3663f35400d0e1f8e0fec456af6b75a07b0fd2d0632fe1697b8fb73af5e78245144216288d88d2daa681ccd159e07d]
+
+INSTALL_GH_CLI: &INSTALL_GH_CLI
+  install_gh_cli_script: |
+    curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+    && apt update \
+    && apt install gh -y
 
 PRE_RELEASE_TASK: &PRE_RELEASE_TASK
   script: |
@@ -10,34 +18,23 @@ PRE_RELEASE_TASK: &PRE_RELEASE_TASK
 
 UPLOAD_TASK: &UPLOAD_TASK
   script: |
-    gh release upload "${NEXT_TAG}" $PLATFORM/*.tar.gz --repo "${REPO}" --clobber
+    gh release upload "${NEXT_TAG}" $PLATFORM/**/*.tar.gz --repo "${REPO}" --clobber
 
 DOWNLOAD_TASK: &DOWNLOAD_TASK
   script: |
-    gh release download  "${NEXT_TAG}" --repo you54f/traveling-ruby -p *$PLATFORM-$CIRRUS_ARCH*
+    gh release download  "${NEXT_TAG}" --repo "${REPO}" -p *$PLATFORM-$CIRRUS_ARCH*
 
-RUBY_VERSIONS_TASKS: &RUBY_VERSIONS_TASKS
-  - script: rake package:$ARCHITECTURES:3.3.0-preview1
-    test: rake testdocker:$ARCHITECTURES:3.3.0-preview1
-  - script: rake package:$ARCHITECTURES:3.2.2
-    test: rake testdocker:$ARCHITECTURES:3.2.2
-  - script: rake package:$ARCHITECTURES:3.1.4
-    test: rake testdocker:$ARCHITECTURES:3.1.4
-  - script: rake package:$ARCHITECTURES:3.1.2
-    test: rake testdocker:$ARCHITECTURES:3.1.2
-  - script: rake package:$ARCHITECTURES:3.0.6
-    test: rake testdocker:$ARCHITECTURES:3.0.6
-  - script: rake package:$ARCHITECTURES:3.0.4
-    test: rake testdocker:$ARCHITECTURES:3.0.4
-  - script: rake package:$ARCHITECTURES:2.7.8
-    test: rake testdocker:$ARCHITECTURES:2.7.8
-  - script: rake package:$ARCHITECTURES:2.6.10
-    test: rake testdocker:$ARCHITECTURES:2.6.10
+RUBY_VERSIONS_MATRIX: &RUBY_VERSIONS_MATRIX
+  RUBY_VERSIONS: 3.3.0-preview1
+  RUBY_VERSIONS: 3.2.2
+  RUBY_VERSIONS: 3.1.4
+  RUBY_VERSIONS: 3.1.2
+  RUBY_VERSIONS: 3.0.6
+  RUBY_VERSIONS: 3.0.4
+  RUBY_VERSIONS: 2.7.8
+  RUBY_VERSIONS: 2.6.10
 
-RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER: &RUBY_VERSIONS_MULTI_BUILDER
-  package_script: cd $PLATFORM && rake package:$ARCHITECTURES
-
-RUBY_VERSIONS_MULTI_ARCH_RUBY_VERSION_BUILDER: &RUBY_VERSIONS_MULTI_ARCH_RUBY_VERSION_BUILDER
+RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER: &RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER
   package_script: cd $PLATFORM && rake package
 
 RUBY_VERSIONS_MATRIX_RUNNER: &RUBY_VERSIONS_MATRIX_RUNNER
@@ -58,12 +55,47 @@ ENV_CHECK_SCRIPT: &ENV_CHECK_SCRIPT
     echo "script: $script"
     echo "NEXT_TAG: $NEXT_TAG"
     echo "ARCHITECTURES: $ARCHITECTURES"
-    echo "repo: $repo"
+    echo "repo: $REPO"
     echo "script: $script"
 
 BINARY_ATRIFACTS: &BINARY_ATRIFACTS
   binary_artifacts:
-    path: "$PLATFORM/*.tar.gz"
+    path: "$PLATFORM/**/*.tar.gz"
+
+# ========================================
+# Linux - Packager
+# ========================================
+
+## The <os>_<arch>_packager_docker_builder jobs are used to build
+## each version of ruby on a single runner. The rake task has been
+## modified to build all versions of ruby in a single run and not fail
+
+linux_arm64_packager_docker_builder:
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager\).*'
+  env:
+    CIRRUS_ARCH: arm64
+    PLATFORM: linux
+    ARCHITECTURES: arm64
+    <<: *ENV_TEMPLATE
+  <<: *ENV_CHECK_SCRIPT
+  <<: *RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER
+  # <<: *UPLOAD_TASK
+  <<: *BINARY_ATRIFACTS
+
+linux_x64_packager_docker_builder:
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux-x86_64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager\).*'
+  env:
+    CIRRUS_ARCH: amd64
+    PLATFORM: linux
+    ARCHITECTURES: x86_64
+    <<: *ENV_TEMPLATE
+  <<: *ENV_CHECK_SCRIPT
+  broken_version_remover_script: |
+    sed -ie '/3.1.4/d' RUBY_VERSIONS.txt
+    sed -ie '/3.0.6/d' RUBY_VERSIONS.txt
+  <<: *RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER
+  # <<: *UPLOAD_TASK
+  <<: *BINARY_ATRIFACTS
 
 
 # ========================================
@@ -82,9 +114,11 @@ linux_arm64_matrix_docker_builder:
     ARCHITECTURES: arm64
     <<: *ENV_TEMPLATE
     matrix:
-      <<: *RUBY_VERSIONS_TASKS
+      <<: *RUBY_VERSIONS_MATRIX
   <<: *ENV_CHECK_SCRIPT
-  <<: *RUBY_VERSIONS_MATRIX_RUNNER
+  package_script: cd $PLATFORM && rake package
+  testdocker_script: cd $PLATFORM && rake testdocker
+  # <<: *RUBY_VERSIONS_MATRIX_RUNNER
   # <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 
@@ -96,48 +130,47 @@ linux_x64_matrix_docker_builder:
     ARCHITECTURES: x86_64
     <<: *ENV_TEMPLATE
     matrix:
-      <<: *RUBY_VERSIONS_TASKS
+      <<: *RUBY_VERSIONS_MATRIX
   <<: *ENV_CHECK_SCRIPT
-  <<: *RUBY_VERSIONS_MATRIX_RUNNER
+  package_script: cd $PLATFORM && rake package
+  testdocker_script: cd $PLATFORM && rake testdocker
   # <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
-
-# ========================================
-# Linux - Packager
-# ========================================
-
-## The <os>_<arch>_packager_docker_builder jobs are used to build
-## each version of ruby on a single runner. The rake task has been
-## modified to build all versions of ruby in a single run and not fail
-
-linux_arm64_packager_docker_builder:
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager\).*'
-  env:
-    CIRRUS_ARCH: arm64
-    PLATFORM: linux
-    ARCHITECTURES: arm64
-    <<: *ENV_TEMPLATE
-  <<: *ENV_CHECK_SCRIPT
-  <<: *RUBY_VERSIONS_MULTI_BUILDER
-  # <<: *UPLOAD_TASK
-  <<: *BINARY_ATRIFACTS
-
-linux_x64_packager_docker_builder:
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux-x86_64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-linux\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager\).*'
-  env:
-    CIRRUS_ARCH: amd64
-    PLATFORM: linux
-    ARCHITECTURES: x86_64
-    <<: *ENV_TEMPLATE
-  <<: *ENV_CHECK_SCRIPT
-  <<: *RUBY_VERSIONS_MULTI_BUILDER
-  # <<: *UPLOAD_TASK
-  <<: *BINARY_ATRIFACTS
-
 
 # ========================================
 # MacOS
 # ========================================
+
+cirrus_cli_setup: &cirrus_cli_setup
+  cirrus_cli_script: |
+    ls $PLATFORM
+    
+    echo "removing runtime and output folder"
+    find "$PLATFORM" -type d -name "output" -exec rm -rf {} +
+    find "$PLATFORM" -type d -name "runtime" -exec rm -rf {} +
+    echo "removing traveling-ruby packaged gems"
+    find "$PLATFORM" -type d -name "traveling-ruby-gems" -exec rm -rf {} +
+    echo "removing traveling-ruby packaged runtimes"
+    find "$PLATFORM" -type f -name "traveling-ruby-*.tar.gz" -exec rm -f {} +
+    echo "removing existing runtime if it exists"
+    find "$PLATFORM" -type f -name "$PLATFORM-runtime.tar.gz" -exec rm -f {} +
+    
+    ls $PLATFORM
+
+    echo "chmoddiing script files due to lack of file perms in cirrus-cli"
+    find $PLATFORM shared -name '*.sh'
+    find $PLATFORM shared -name '*.sh' -exec chmod +x {} \;
+    chmod +x osx/internal/bin/c++
+    chmod +x osx/internal/bin/cc
+    ls $PLATFORM
+
+download_macos_runtime: &download_macos_runtime
+  download_script: |
+    echo "downloading pre-packaged runtime"
+    curl -L -o $PLATFORM/$PLATFORM-runtime.tar.gz https://github.com/YOU54F/traveling-ruby/releases/download/rel-20230529-next/osx-runtime.tar.gz
+    echo "unpacking pre-packaged runtime"
+    [[ -f "$PLATFORM/$PLATFORM-runtime.tar.gz" ]] && tar -xzf $PLATFORM/$PLATFORM-runtime.tar.gz -C $PLATFORM && rm -rf $PLATFORM/$PLATFORM-runtime.tar.gz && echo "unpacked $PLATFORM-runtime.tar.gz" && ls -al $PLATFORM/runtime
+    ls $PLATFORM
 
 macos_check: &macos_check
   check_script: |
@@ -145,15 +178,26 @@ macos_check: &macos_check
     bundler --version
     brew leaves
     xcode-select -p
+    which cc
+    which c++
+    cc --version -arch $CIRRUS_ARCH
+    c++ --version -arch $CIRRUS_ARCH
+    cc --version -arch x86_64
+    c++ --version -arch x86_64
+
+macos_check_task: 
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(mac-check\).*'
+  env:
+    PLATFORM: osx
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-ventura-base:latest
+  <<: *macos_check
+  <<: *cirrus_cli_setup
+  
 
 # ========================================
 # MacOS - Packager
 # ========================================
-
-cirrus_cli_setup: &cirrus_cli_setup
-  cirrus_cli_script: |
-    find $PLATFORM shared -name '*.sh'
-    find $PLATFORM shared -name '*.sh' -exec chmod +x {} \;
 
 macos_packager_task: 
   only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager\).*'
@@ -165,9 +209,37 @@ macos_packager_task:
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
   <<: *macos_check
   <<: *cirrus_cli_setup
-  <<: *RUBY_VERSIONS_MULTI_ARCH_RUBY_VERSION_BUILDER
+  package_script: cd $PLATFORM && rake package
   <<: *BINARY_ATRIFACTS
 
+# ========================================
+# MacOS - Matrix Package & Test
+# ========================================
+
+## The <os>_<arch>_matrix_builder jobs are used to build each 
+## version of ruby on seperate runners and run a test suite
+## of docker containers to ensure the binaries are working
+
+
+macos_arm64_matrix_task:
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*'
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-ventura-base:latest
+  env:
+    PLATFORM: osx
+    ARCHITECTURES: arm64
+    <<: *ENV_TEMPLATE
+    matrix:
+      RUBY_VERSIONS: 3.3.0-preview1
+      # <<: *RUBY_VERSIONS_MATRIX
+  <<: *macos_check
+  <<: *cirrus_cli_setup
+  package_script: cd $PLATFORM && rake package
+  # download_macos: *download_macos_runtime
+  upload_output_dir_script: cd $PLATFORM && tar -czvf $PLATFORM-runtime.tar.gz runtime
+  test_script: cd $PLATFORM && rake test || echo "tests failed"
+  # <<: *UPLOAD_TASK
+  <<: *BINARY_ATRIFACTS
 
 # ========================================
 # Windows - Packager
@@ -186,7 +258,7 @@ windows_packager_task:
   <<: *cirrus_cli_setup
   no_version_remover_script: |
     sed -ie '/3.3.0-preview1/d' RUBY_VERSIONS.txt
-  <<: *RUBY_VERSIONS_MULTI_ARCH_RUBY_VERSION_BUILDER
+  <<: *RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER
   <<: *BINARY_ATRIFACTS
 
 
@@ -242,3 +314,87 @@ download_task:
     GH_TOKEN: $GITHUB_TOKEN
   <<: *DOWNLOAD_TASK
   script: ls
+
+
+
+# ========================================
+# Standalone Testing Tasks
+# ========================================
+
+
+linux_gem_test_task: 
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(test-linux-gems\).*'
+  env: 
+    matrix:
+      image: debian:latest
+      image: node:20-slim
+      # image: debian:bookworm-slim
+      # image: bitnami/minideb:latest
+      # image: busybox:glibc
+      # image: busybox:uclibc
+      # image: busybox:musl
+      # image: centos:centos8
+      # image: centos:centos9
+      # image: quay.io/centos/centos:stream
+      # image: quay.io/centos/centos:stream9
+      # image: quay.io/centos/centos:stream9-minimal
+      # image: quay.io/centos/centos:stream8
+      # image: quay.io/centos/centos:8
+      # image: centos:centos7
+      # image: alpine:latest
+      # image: alpine:3.18
+      # image: alpine:3.17
+      # image: alpine:3.16
+      # image: alpine:3.15
+      # image: ubuntu:latest
+      # image: ubuntu:20.04
+      # image: ubuntu:18.04
+      # image: ubuntu:16.04
+      # image: fedora:latest
+      # image: fedora:34
+      # image: fedora:33
+      # image: fedora:32
+      # image: opensuse/leap:latest
+      # image: opensuse/leap:15.3
+      # image: opensuse/leap:15.2
+      # image: opensuse/leap:15.1
+      # image: opensuse/leap:15.0
+      # image: gentoo/stage3-amd64
+      # image: raspbian/stretch
+      # image: raspbian/buster
+      # image: raspbian/bullseye
+
+  arm_container:
+    image: $image
+  check_dep_script: |
+    ldconfig -v | grep libffi || echo "libffi not found"
+    ldconfig -v | grep libyaml || echo "libyaml not found"
+  dependencies_script: |
+      if [ -f /etc/debian_version ]; then
+        apt-get update
+        apt-get install -y curl
+      elif [ -f /etc/alpine-release ]; then
+        apk add --no-cache curl
+      elif [ -f /etc/redhat-release ]; then
+        yum install -y curl
+      elif [ -f /etc/busybox-release ]; then
+        apk add --no-cache curl
+      else
+        echo "Unsupported Linux distribution"
+        exit 1
+      fi
+  <<: *INSTALL_GH_CLI
+  check_gh_cli_script: |
+    gh --version
+    echo "gh cli installed"
+    echo "repo: ${REPO}"
+    echo "tag: ${NEXT_TAG}"
+  unpack_script: |
+    gh release view --repo "${REPO}" "${NEXT_TAG}" --json assets -q '.[]|.[].name' | grep -e 'linux-arm'
+    ls -la
+    cd linux
+    gh release download --repo "${REPO}" "${NEXT_TAG}" -p '*linux-arm*'
+    ls -la
+    ../shared/list-versions.sh linux
+    ../shared/unpack-versions.sh linux
+    ../shared/test-all-gems.sh linux

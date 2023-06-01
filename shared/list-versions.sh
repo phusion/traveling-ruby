@@ -1,6 +1,14 @@
 #!/usr/bin/env bash
 set -e
 
+# This script lists the available versions of Traveling Ruby builds for different operating systems.
+# Usage: ./list-versions.sh [all|windows|linux|osx] [unpack]
+# - all: lists all available builds for all operating systems.
+# - windows: lists all available builds for Windows.
+# - linux: lists all available builds for Linux.
+# - osx: lists all available builds for macOS.
+# - unpack: if specified as the second argument, unpacks the selected build(s) to the output directory.
+
 SELFDIR=`dirname "$0"`
 SELFDIR=`cd "$SELFDIR" && pwd`
 source "$SELFDIR/library.sh"
@@ -21,35 +29,33 @@ list_output_builds() {
     [[ "$ruby_version" == *"-"* ]] && arch=$(echo $file | cut -d'-' -f7 | cut -d'.' -f1) || arch=$(echo $file | cut -d'-' -f6 | cut -d'.' -f1)
     size=$(du -h $file | cut -f1)
     echo "$name $pkg_date $ruby_version $os $arch $size" >> output.txt;
-    # rm output.txt
-    # echo "unpacking to output/$version-$arch"
-    # mkdir -p "output/$version-$arch"
-    # tar -xzf "$file" -C "output/$version-$arch"
+    if [[ ${2:-} == "unpack" ]]; then
+      echo "unpacking to output/$ruby_version-$arch"
+      mkdir -p "output/$ruby_version-$arch"
+      tar -xzf "$file" -C "output/$ruby_version-$arch"
+    fi
   done
-  cat output.txt | column -t
+  cat output.txt
 
 }
 
-
-
-
-
+# Check the first argument to determine which operating system to list builds for.
+# If no argument is provided, exit with an error message.
 if [[ ${1:-} == "all" ]]; then
   cd $SELFDIR/../osx
-  list_output_builds
+  list_output_builds "" $2
   cd $SELFDIR/../windows
-  list_output_builds
+  list_output_builds "" $2
   cd $SELFDIR/../linux
-  list_output_builds
+  list_output_builds "" $2
 elif [[ ${1:-} != "" ]]; then
   if [[ "$1" != "windows" && "$1" != "linux" && "$1" != "osx" ]]; then
     echo "Invalid argument: $1. Please enter 'windows', 'linux', or 'osx'."
     exit 1
   fi
   cd $SELFDIR/../$1
-  list_output_builds
+  list_output_builds "" $2
+else
+  echo "Usage: ./list-versions.sh [all|windows|linux|osx] [unpack]"
+  exit 1
 fi
-
-
-
-
