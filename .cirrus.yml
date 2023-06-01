@@ -122,14 +122,14 @@ linux_x64_packager_docker_builder:
 linux_arm64_matrix_docker_builder:
   cpu: 4
   memory: 4G
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*'
+  # only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*'
   env:
     CIRRUS_ARCH: arm64
     PLATFORM: linux
     ARCHITECTURES: arm64
     <<: *ENV_TEMPLATE
     matrix:
-      <<: *RUBY_VERSIONS_MATRIX
+      *RUBY_VERSIONS_MATRIX
   <<: *ENV_CHECK_SCRIPT
   <<: *RUBY_VERSIONS_MATRIX_DOCKER_RUNNER
   <<: *UPLOAD_TASK
@@ -145,7 +145,7 @@ linux_x64_matrix_docker_builder:
     ARCHITECTURES: x86_64
     <<: *ENV_TEMPLATE
     matrix:
-      <<: *RUBY_VERSIONS_MATRIX
+      *RUBY_VERSIONS_MATRIX
   <<: *ENV_CHECK_SCRIPT
   <<: *RUBY_VERSIONS_MATRIX_DOCKER_RUNNER
   <<: *BINARY_ATRIFACTS
@@ -243,8 +243,7 @@ macos_arm64_matrix_task:
     ARCHITECTURES: arm64
     <<: *ENV_TEMPLATE
     matrix:
-      # RUBY_VERSIONS: 3.3.0-preview1
-      <<: *RUBY_VERSIONS_MATRIX
+      *RUBY_VERSIONS_MATRIX
   <<: *macos_check
   <<: *cirrus_cli_setup
   download_macos: *download_macos_runtime
