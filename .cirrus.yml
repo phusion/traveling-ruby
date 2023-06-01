@@ -16,17 +16,22 @@ PRE_RELEASE_TASK: &PRE_RELEASE_TASK
     RELEASE_NOTES=$(git log --pretty=format:"%s" $(git describe --tags --abbrev=0)..HEAD)
     gh release create "${NEXT_TAG}" --prerelease --draft --repo "${REPO}" --title "${NEXT_TAG}" --notes "${RELEASE_NOTES}"
 
-UPLOAD_TASK: &UPLOAD_TASK
-  script: |
-    gh release upload "${NEXT_TAG}" $PLATFORM/**/*.tar.gz --repo "${REPO}" --clobber
+# UPLOAD_TASK: &UPLOAD_TASK
+#   script: |
+#     gh release upload "${NEXT_TAG}" $PLATFORM/**/*.tar.gz --repo "${REPO}" --clobber
 
 UPLOAD_TASK: &UPLOAD_TASK
   script: |
     cd $PLATFORM
-    for file in traveling-ruby-gems-*/**/*.tar.gz; do
-      tar -czvf "${file%.tar.gz}.gz" "$file"
+    for file in $(find traveling-ruby-gems-* -name '*.gz'); do
+      gem_name=$(echo "${file%-*}" | tr '/' '-')
+      gem_version=$(echo "${file%.tar.gz}" | awk -F- '{print $NF}')
+      pkg_date=$(echo "${file%-*}" | cut -d'-' -f4)
+      ruby_version=$(echo "${file%-*}" | tr '/' '-' | sed -E 's/.*-([0-9]+\.[0-9]+\.[0-9]+(-[a-z0-9]+)?)-([a-z]+)-([a-z0-9_]+)\.tar\.gz/\1/')
+      echo $ruby_version-$gem_version.tar.gz
+      cp "$file" $ruby_version-$gem_version.tar.gz
     done
-    gh release upload "${NEXT_TAG}" *.tar.gz --repo "${REPO}" --clobber
+    gh release upload "${NEXT_TAG}" traveling-ruby-*.tar.gz --repo "${REPO}" --clobber
 
 DOWNLOAD_TASK: &DOWNLOAD_TASK
   script: |
@@ -43,13 +48,12 @@ RUBY_VERSIONS_LATEST_MATRIX: &RUBY_VERSIONS_LATEST_MATRIX
 RUBY_VERSIONS_MATRIX_LINUX: &RUBY_VERSIONS_MATRIX_LINUX
   RUBY_VERSIONS: 3.3.0-preview1
   RUBY_VERSIONS: 3.2.2
-  RUBY_VERSIONS: 2.7.8
+  # RUBY_VERSIONS: 2.7.8
   RUBY_VERSIONS: 2.6.10
   RUBY_VERSIONS: 3.1.2
   RUBY_VERSIONS: 3.0.4
   # 3.1.2 and 3.0.4 are not the latest, but the latest that will build
   # for those branch on linux
-
 
 RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER: &RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER
   package_script: cd $PLATFORM && rake package
