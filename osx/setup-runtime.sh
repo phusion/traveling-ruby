@@ -102,6 +102,14 @@ function usage()
 	echo "  -M      Skip installing MySQL"
 	echo "  -p      Force installing PostgreSQL"
 	echo "  -P      Skip installing PostgreSQL"
+	echo "  -k      Force installing PKG_CONFIG"
+	echo "  -K      Skip installing PKG_CONFIG"
+	echo "  -a      Force installing AUTOCONF"
+	echo "  -A      Skip installing AUTOCONF"
+	echo "  -u      Force installing AUTOMAKE"
+	echo "  -U      Skip installing AUTOMAKE"
+	echo "  -l      Force installing LIBTOOL"
+	echo "  -L      Skip installing LIBTOOL"
 	echo "  -i      Force installing ICU"
 	echo "  -I      Skip installing ICU"
 	echo "  -b      Force installing libssh2"
@@ -119,7 +127,7 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "cCoOnNeEgGfFyYsSzZmMpPiIbBxXtTj:h" opt; do
+	while getopts "lLuUaAkKcCoOnNeEgGfFyYsSzZmMpPiIbBxXtTj:h" opt; do
 		case "$opt" in
 		c)
 			FORCE_CMAKE=true
@@ -144,6 +152,30 @@ function parse_options()
 			;;
 		E)
 			SKIP_LIBEDIT=true
+			;;
+		k)
+			FORCE_PKG_CONFIG=true
+			;;
+		K)
+			SKIP_PKG_CONFIG=true
+			;;
+		a)
+			FORCE_AUTOCONF=true
+			;;
+		A)
+			SKIP_AUTOCONF=true
+			;;
+		u)
+			FORCE_AUTOMAKE=true
+			;;
+		U)
+			SKIP_AUTOMAKE=true
+			;;
+		l)
+			FORCE_LIBTOOL=true
+			;;
+		L)
+			SKIP_LIBTOOL=true
 			;;
 		g)
 			FORCE_GMP=true
@@ -339,7 +371,7 @@ elif [[ ! -e "$RUNTIME_DIR/bin/ccache" ]] || $FORCE_CCACHE; then
 
 	mkdir build
 	cd build
-	run cmake -DCMAKE_BUILD_TYPE=Release -DZSTD_FROM_INTERNET=ON -DHIREDIS_FROM_INTERNET=ON -DCMAKE_INSTALL_PREFIX="$RUNTIME_DIR" ..
+	run cmake -DCMAKE_OSX_ARCHITECTURES=$ARCHITECTURE -DCMAKE_MACOSX_DEPLOYMENT_TARGET=12.2 -DCMAKE_BUILD_TYPE=Release -DZSTD_FROM_INTERNET=ON -DHIREDIS_FROM_INTERNET=ON -DCMAKE_INSTALL_PREFIX="$RUNTIME_DIR" ..
 	run make -j$CONCURRENCY
 	run make install
 
@@ -360,7 +392,7 @@ elif [[ ! -e "$RUNTIME_DIR/bin/pkg-config" ]] || $FORCE_PKG_CONFIG; then
 	echo "Entering $RUNTIME_DIR/pkg-config-$PKG_CONFIG_VERSION"
 	pushd pkg-config-$PKG_CONFIG_VERSION >/dev/null
 
-	run ./configure --prefix="$RUNTIME_DIR" --with-internal-glib
+	run ./configure --prefix="$RUNTIME_DIR" --with-internal-glib --build=$DEPLOY_TARGET
 	run make -j$CONCURRENCY
 	run make install
 	echo "Entering $RUNTIME_DIR"
@@ -380,7 +412,7 @@ elif [[ ! -e "$RUNTIME_DIR/bin/autoconf" ]] || $FORCE_AUTOCONF; then
 	echo "Entering $RUNTIME_DIR/autoconf-$AUTOCONF_VERSION"
 	pushd autoconf-$AUTOCONF_VERSION >/dev/null
 
-	run ./configure --prefix="$RUNTIME_DIR"
+	run ./configure --build=$DEPLOY_TARGET --prefix="$RUNTIME_DIR"
 	run make -j$CONCURRENCY
 	run make install-strip
 	echo "Entering $RUNTIME_DIR"
@@ -400,7 +432,7 @@ elif [[ ! -e "$RUNTIME_DIR/bin/automake" ]] || $FORCE_AUTOMAKE; then
 	echo "Entering $RUNTIME_DIR/automake-$AUTOMAKE_VERSION"
 	pushd automake-$AUTOMAKE_VERSION >/dev/null
 
-	run ./configure --prefix="$RUNTIME_DIR"
+	run ./configure --build=$DEPLOY_TARGET --prefix="$RUNTIME_DIR"
 	run make -j$CONCURRENCY
 	run make install-strip
 	echo "Entering $RUNTIME_DIR"
@@ -420,7 +452,7 @@ elif [[ ! -e "$RUNTIME_DIR/bin/libtoolize" ]] || $FORCE_LIBTOOL; then
 	echo "Entering $RUNTIME_DIR/libtool-$LIBTOOL_VERSION"
 	pushd libtool-$LIBTOOL_VERSION >/dev/null
 
-	run ./configure --prefix="$RUNTIME_DIR" \
+	run ./configure --build=$DEPLOY_TARGET --prefix="$RUNTIME_DIR" \
 		--disable-shared --enable-static \
 		CFLAGS='-O2 -fPIC -fvisibility=hidden'
 	run make -j$CONCURRENCY
@@ -489,7 +521,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libncurses.6.dylib" ]] || $FORCE_NCURSES; then
 
 	run ./configure --prefix="$RUNTIME_DIR" --with-shared --without-normal --without-cxx --without-cxx-binding \
 		--without-ada --without-manpages --without-progs --without-tests --enable-pc-files \
-		--without-develop
+		--without-develop --build=$DEPLOY_TARGET
 	run make -j$CONCURRENCY
 	run make install
 
@@ -513,6 +545,10 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libncurses.6.dylib" ]] || $FORCE_NCURSES; then
 		"$RUNTIME_DIR/lib/libform.6.dylib"
 	pushd "$RUNTIME_DIR/lib" >/dev/null
 	run ln -sf libncurses.6.dylib libtermcap.dylib
+
+	run file "$RUNTIME_DIR/lib/libncurses.6.dylib"
+	run file "$RUNTIME_DIR/lib/libform.6.dylib"
+
 	popd >/dev/null
 else
 	echo "Already installed."
@@ -530,7 +566,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libedit.0.dylib" ]] || $FORCE_LIBEDIT; then
 	echo "Entering $RUNTIME_DIR/libedit-$LIBEDIT_VERSION"
 	pushd libedit-$LIBEDIT_DIR_VERSION >/dev/null
 
-	run ./configure --prefix="$RUNTIME_DIR" --disable-static --enable-widec
+	run ./configure --build=$DEPLOY_TARGET --prefix="$RUNTIME_DIR" --disable-static --enable-widec
 	run make -j$CONCURRENCY
 	run make install-strip
 
@@ -543,6 +579,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libedit.0.dylib" ]] || $FORCE_LIBEDIT; then
 	popd >/dev/null
 	run install_name_tool -id "@rpath/libedit.0.dylib" \
 		"$RUNTIME_DIR/lib/libedit.0.dylib"
+	run file "$RUNTIME_DIR/lib/libedit.0.dylib"
 else
 	echo "Already installed."
 fi
@@ -559,9 +596,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libgmp.10.dylib" ]] || $FORCE_GMP; then
 	echo "Entering $RUNTIME_DIR/gmp-$GMP_VERSION"
 	pushd gmp-$GMP_DIR_VERSION >/dev/null
 
-	# NOTE - Added deploy target here to support multi-arch
 	run ./configure --build=$DEPLOY_TARGET --prefix="$RUNTIME_DIR" --enable-static --without-readline --with-pic
-	# run ./configure --prefix="$RUNTIME_DIR" --enable-static --without-readline --with-pic
 	run make -j$CONCURRENCY
 	run make install-strip
 
@@ -571,6 +606,8 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libgmp.10.dylib" ]] || $FORCE_GMP; then
 
 	run install_name_tool -id "@rpath/libgmp.10.dylib" \
 		"$RUNTIME_DIR/lib/libgmp.10.dylib"
+	run file "$RUNTIME_DIR/lib/libgmp.10.dylib"
+
 else
 	echo "Already installed."
 fi
@@ -588,13 +625,14 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libffi.8.dylib" ]] || $FORCE_LIBFFI; then
 	pushd libffi-$LIBFFI_VERSION >/dev/null
 
 	run env CFLAGS="-O3 -fomit-frame-pointer -fstrict-aliasing -ffast-math -Wall -fexceptions -fPIC" \
-		./configure --prefix="$RUNTIME_DIR" --disable-static --enable-portable-binary
+		./configure --build=$DEPLOY_TARGET --prefix="$RUNTIME_DIR" --disable-static --enable-portable-binary
 	run make -j$CONCURRENCY
 	run make install-strip
 
 	echo "Leaving source directory"
 	popd >/dev/null
 	run rm -rf libffi-$LIBFFI_VERSION
+	run file "$RUNTIME_DIR/lib/libffi.8.dylib"
 
 	run install_name_tool -id "@rpath/libffi.8.dylib" \
 	  "$RUNTIME_DIR/lib/libffi.8.dylib"
@@ -612,13 +650,14 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libyaml-0.2.dylib" ]] || $FORCE_LIBYAML; then
 	echo "Entering $RUNTIME_DIR/libyaml-$LIBYAML_VERSION"
 	pushd yaml-$LIBYAML_VERSION >/dev/null
 
-	run ./configure --prefix="$RUNTIME_DIR" --disable-static
+	run ./configure --prefix="$RUNTIME_DIR" --disable-static --build=$DEPLOY_TARGET
 	run make -j$CONCURRENCY
 	run make install-strip
 
 	echo "Leaving source directory"
 	popd >/dev/null
 	run rm -rf yaml-$LIBYAML_VERSION
+	run file "$RUNTIME_DIR/lib/libyaml-0.2.dylib"
 
 	run install_name_tool -id "@rpath/libyaml-0.2.dylib" \
 		"$RUNTIME_DIR/lib/libyaml-0.2.dylib"
@@ -637,12 +676,13 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libsqlite3.a" ]] || $FORCE_SQLITE3; then
 	pushd sqlite-autoconf-$SQLITE3_VERSION >/dev/null
 
 	run ./configure --prefix="$RUNTIME_DIR" --disable-shared \
-		--disable-dynamic-extensions CFLAGS='-O2 -fPIC -fvisibility=hidden'
+		--disable-dynamic-extensions CFLAGS='-O2 -fPIC -fvisibility=hidden' --build=$DEPLOY_TARGET
 	run make -j$CONCURRENCY
 	run make install-strip
 	echo "Entering $RUNTIME_DIR"
 	popd >/dev/null
 	run rm -rf sqlite-autoconf-$SQLITE3_VERSION
+	run lipo -info "$RUNTIME_DIR/lib/libsqlite3.a"
 else
 	echo "Already installed."
 fi
@@ -659,7 +699,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/liblzma.5.dylib" ]] || $FORCE_LIBLZMA; then
 
 	run ./configure --prefix="$RUNTIME_DIR" --disable-static --disable-xz \
 		--disable-xzdec --disable-lzmadec --disable-lzmainfo --disable-lzma-links \
-		--disable-scripts --disable-doc
+		--disable-scripts --disable-doc --build=$DEPLOY_TARGET
 	run make -j$CONCURRENCY
 	run make install-strip
 
@@ -669,6 +709,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/liblzma.5.dylib" ]] || $FORCE_LIBLZMA; then
 
 	run install_name_tool -id "@rpath/liblzma.5.dylib" \
 		"$RUNTIME_DIR/lib/liblzma.5.dylib"
+	run file "$RUNTIME_DIR/lib/liblzma.5.dylib"
 else
 	echo "Already installed."
 fi
@@ -701,6 +742,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libmysqlclient.a" ]] || $FORCE_MYSQL; then
 	echo "Leaving source directory"
 	popd >/dev/null
 	run rm -rf mysql-connector-c-$MYSQL_LIB_VERSION-src
+	run lipo -info "$RUNTIME_DIR/lib/libmysqlclient.a"
 else
 	echo "Already installed."
 fi
@@ -717,7 +759,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libpq.a" ]] || $FORCE_POSTGRESQL; then
 
 	run ./configure --prefix="$RUNTIME_DIR" \
 		PG_SYSROOT="$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs/MacOSX${MACOSX_DEPLOYMENT_TARGET}.sdk" \
-		CFLAGS="-O2 -fPIC -fvisibility=hidden"
+		CFLAGS="-O2 -fPIC -fvisibility=hidden" --build=$DEPLOY_TARGET
 	# PostgreSQL's build system sometimes fails when building with
 	# concurrency, so we don't do it.
 	run make -C src/common
@@ -742,6 +784,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libpq.a" ]] || $FORCE_POSTGRESQL; then
 	echo "Leaving source directory"
 	popd >/dev/null
 	run rm -rf postgresql-$POSTGRESQL_VERSION
+	run lipo -info "$RUNTIME_DIR/lib/libpq.a"
 else
 	echo "Already installed."
 fi
@@ -757,7 +800,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libicudata.a" ]] || $FORCE_ICU; then
 	pushd icu/source >/dev/null
 
 	run ./configure --prefix="$RUNTIME_DIR" --disable-samples --disable-tests \
-		--enable-static --disable-shared --with-library-bits=64 \
+		--enable-static --disable-shared --with-library-bits=64 --build=$DEPLOY_TARGET \
 		CFLAGS="-w -O2 -fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0" \
 		CXXFLAGS="-w -O2 -fPIC -fvisibility=hidden -DU_CHARSET_IS_UTF8=1 -DU_USING_ICU_NAMESPACE=0"
 	run make -j$CONCURRENCY VERBOSE=1
@@ -766,6 +809,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libicudata.a" ]] || $FORCE_ICU; then
 	echo "Leaving source directory"
 	popd >/dev/null
 	run rm -rf icu
+	run lipo -info "$RUNTIME_DIR/lib/libicudata.a"
 else
 	echo "Already installed."
 fi
@@ -780,7 +824,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libssh2.a" ]] || $FORCE_LIBSSH2; then
 	echo "Entering $RUNTIME_DIR/libssh2-$LIBSSH2_VERSION"
 	pushd libssh2-$LIBSSH2_VERSION >/dev/null
 
-	run ./configure --prefix="$RUNTIME_DIR" --enable-static --disable-shared \
+	run ./configure --prefix="$RUNTIME_DIR" --enable-static --disable-shared --build=$DEPLOY_TARGET \
 		--with-crypto-openssl --with-libz --disable-examples-build --disable-debug \
 		CFLAGS="-w -O2 -fPIC -fvisibility=hidden" \
 		CXXFLAGS="-w -O2 -fPIC -fvisibility=hidden"
@@ -807,7 +851,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libxml2.a" ]] || $FORCE_LIBXML2; then
 
 	run ./configure --prefix="$RUNTIME_DIR" --disable-shared --enable-static \
 		--without-python --without-readline --without-debug \
-		--with-c14n --with-threads \
+		--with-c14n --with-threads --build=$DEPLOY_TARGET \
 		CFLAGS="-w -O2 -fPIC -fvisibility=hidden" \
 		CXXFLAGS="-w -O2 -fPIC -fvisibility=hidden"
 	run make -j$CONCURRENCY
@@ -815,7 +859,8 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libxml2.a" ]] || $FORCE_LIBXML2; then
 
 	echo "Leaving source directory"
 	popd >/dev/null
-	run rm -rf libxml2-$LIBSSH2_VERSION
+	run rm -rf libxml2-$LIBXML2_VERSION
+	run lipo -info "$RUNTIME_DIR/lib/libxml2.a"
 else
 	echo "Already installed."
 fi
@@ -833,7 +878,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libxslt.a" ]] || $FORCE_LIBXSLT; then
 
 	run ./configure --prefix="$RUNTIME_DIR" --disable-shared --enable-static \
 		--without-python --without-debug --without-debugger \
-		--without-profiler \
+		--without-profiler --build=$DEPLOY_TARGET \
 		CFLAGS="-w -O2 -fPIC -fvisibility=hidden" \
 		CXXFLAGS="-w -O2 -fPIC -fvisibility=hidden"
 		# remove the -w flag here
@@ -844,10 +889,14 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libxslt.a" ]] || $FORCE_LIBXSLT; then
 
 	echo "Leaving source directory"
 	popd >/dev/null
-	run rm -rf libxslt-$LIBSSH2_VERSION
+	run rm -rf libxslt-$LIBXSLT_VERSION
+	run lipo -info "$RUNTIME_DIR/lib/libxslt.a"
 else
 	echo "Already installed."
 fi
 echo
 
+header "Checking the architecture of the compiled libraries..."
+find $RUNTIME_DIR -type f -path '*.dylib' | xargs file;
+find $RUNTIME_DIR -type f -path '*.a' | xargs -I {} lipo -info '{}'
 header "All done!"
