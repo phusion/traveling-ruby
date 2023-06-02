@@ -83,22 +83,28 @@ parse_options "$@"
 
 ##########
 
-
-# GEMS=(openssl readline rugged charlock_holmes unf_ext bcrypt RedCloth
-# 	eventmachine escape_utils json nokogiri mysql2 ffi pg posix-spawn
-# 	thin sqlite3 yajl puma/puma_http11 kgio raindrops fast-stemmer
-# 	hitimes redcarpet curses)
-
-GEMS_TO_TEST=(ffi json rexml yajl nio socket)
-GEMS_TO_FAIL=("rinda" "test-unit" "win32ole") # Add the gem names that we want to fail
-GEMS_TO_SKIP=("sinatra") # Add the gem names that we want to skip
-if [[ ("$PLATFORM" == "osx" || "$PLATFORM" == "linux") && "$ARCHITECTURE" == "arm64" ]]; then
-	GEMS_TO_FAIL+=("nio4r")
-fi
-
-if [[ "$PLATFORM" == "linux" ]]; then
-	GEMS_TO_FAIL+=("nio4r")
-fi
+GEMS_TO_TEST=(
+	rexml 
+	nio 
+	socket 
+	rinda/ring 
+	rinda/tuplespace
+	openssl readline rugged charlock_holmes unf_ext bcrypt RedCloth
+	eventmachine escape_utils json nokogiri ffi pg posix-spawn
+	thin sqlite3 yajl puma/puma_http11 kgio raindrops fast-stemmer
+	hitimes redcarpet curses
+	mysql2
+	)
+GEMS_TO_FAIL=(
+	"win32ole"
+	) 
+GEMS_TO_SKIP=(
+	mysql2
+	"sinatra"
+	"nio4r" 
+	test-unit 
+	"rinda"
+)
 
 if [[ "$BUILD_OUTPUT_DIR" == *"3.0.4"* ]]; then
 	GEMS_TO_FAIL+=("debug")

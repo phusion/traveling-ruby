@@ -211,14 +211,7 @@ run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/{test-unit,rdoc}-*
 
 function install_gems()
 {
-	# curl -LO https://github.com/yaml/libyaml/releases/download/0.2.5/yaml-0.2.5.tar.gz
-	# mkdir -p /tmp/yaml
-	# tar xvf yaml-0.2.5.tar.gz -C /tmp/yaml 
-	# /tmp/ruby/bin/gem install psych -v 5.0.1 -- --with-libyaml-source-dir=/tmp/yaml
-	# rm yaml-0.2.5.tar.gz
-	# rm -rf /tmp/yaml
-	# rm /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/$RUBY_ARCH/psych.so
-	
+
 	for GEMFILE in /system_shared/gemfiles/*/Gemfile; do
 		run cp "$GEMFILE" /tmp/ruby/
 		if [[ -e "$GEMFILE.lock" ]]; then

@@ -23,7 +23,7 @@ trap cleanup EXIT
 DIR="$1"
 TAB=`perl -e 'print "\t"'`
 ERROR=false
-STANDARD_LIBS="(@executable_path/|@rpath/|/usr/lib/libobjc|/usr/lib/libSystem|/usr/lib/libutil|/usr/lib/libz"
+STANDARD_LIBS="(@executable_path/|@rpath/|/usr/lib/libobjc|/usr/lib/libSystem|/usr/lib/libutil|/usr/lib/libz|/usr/lib/liblzma"
 STANDARD_LIBS="$STANDARD_LIBS|/usr/lib/libiconv|/usr/lib/libstdc\+\+|/usr/lib/libc\+\+\."
 STANDARD_LIBS="$STANDARD_LIBS|CoreFoundation|CoreServices|/Foundation\.framework/|/Security\.framework/)"
 
@@ -37,6 +37,7 @@ for F in $DIR/bin.real/ruby `find $DIR -name '*.bundle'` `find $DIR -name '*.dyl
 	fi
 done
 if $ERROR; then
+	echo "Uh Oh."
 	exit 1
 else
 	echo "All OK."

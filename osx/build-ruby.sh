@@ -342,9 +342,10 @@ if [[ "$GEMFILE" != "" ]]; then
 		run "$TMPBUILDROOT/bin/gem" install "$RUNTIME_DIR/vendor/cache/bundler-$BUNDLER_VERSION.gem" --no-document
 	fi
 
-	export BUNDLE_BUILD__NOKOGIRI="--use-system-libraries"
+	# export BUNDLE_BUILD__NOKOGIRI="--use-system-libraries \
+    #    --with-opt-dir=$RUNTIME_DIR"
 	export BUNDLE_BUILD__MYSQL2="--with-mysql_config"
-	export BUNDLE_BUILD__CHARLOCK_HOLMES="--with-icu-dir=$RUNTIME_DIR"
+	# export BUNDLE_BUILD__CHARLOCK_HOLMES="--with-icu-dir=$RUNTIME_DIR"
 
 	# Run bundle install.
 	for GEMFILE in "${GEMFILES[@]}"; do
@@ -352,8 +353,8 @@ if [[ "$GEMFILE" != "" ]]; then
 		if [[ -e "$GEMFILE.lock" ]]; then
 			run cp "$GEMFILE.lock" ./
 		fi
-		echo "run bundle config --local force_ruby_platform true"
-		run bundle config --local force_ruby_platform true
+		# echo "run bundle config --local force_ruby_platform true"
+		# run bundle config --local force_ruby_platform true
 		echo "run "$TMPBUILDROOT/bin/bundle" config set --local system true"
 		run "$TMPBUILDROOT/bin/bundle" config set --local system true
 		echo "run "$TMPBUILDROOT/bin/bundle" install --retry 3 --jobs $CONCURRENCY"
@@ -383,10 +384,13 @@ run rm -f bin/testrb # Only Ruby 2.1 has it
 run rm -rf include
 run rm -rf share
 run rm -rf lib/{libruby*static.a,pkgconfig}
-# NOTE:- Updated the above to consinder the below library, otherwise
+# NOTE:- Updated the above to consider the below library, otherwise
 # the size of our bundle doubles
 # 	find output -type f -exec du -ah {} + | sort -rh | head -n 10
 #  21M    output/3.2.2-arm64/lib/libruby.3.2-static.a
+# Remove any .git folders
+# find . -name ".git" -type d -exec rm -rf {} +
+
 run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
 run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
 run rm -f lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out,mkmf.log}
@@ -411,7 +415,7 @@ echo "Removing absolute rpaths to the runtime..."
 if [[ "$GEMFILE" != "" ]]; then
 	echo "Entering Bundler gem directory"
 	pushd lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/bundler-$BUNDLER_VERSION >/dev/null
-	rm -rf .gitignore .rspec .travis.yml man Rakefile lib/bundler/man/*.txt lib/bundler/templates
+	rm -rf .gitignore .rspec .travis.yml man Rakefile lib/bundler/man/*.txt lib/bundler/templates .github .git
 	popd >/dev/null
 	echo "Leaving Bundler gem directory"
 fi
