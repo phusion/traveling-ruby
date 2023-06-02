@@ -310,7 +310,10 @@ echo $RUBY_COMPAT_VERSION > info/RUBY_COMPAT_VERSION
 echo $RUBYARCH > info/RUBY_ARCH
 echo $GEM_PLATFORM > info/GEM_PLATFORM
 echo $GEM_EXTENSION_API_VERSION > info/GEM_EXTENSION_API_VERSION
-
+echo "RUBY_COMPAT_VERSION is $RUBY_COMPAT_VERSION"
+echo "RUBY_ARCH is $RUBY_ARCH"
+echo "GEM_PLATFORM is $GEM_PLATFORM"
+echo "GEM_EXTENSION_API_VERSION is $GEM_EXTENSION_API_VERSION"
 echo "Patching rbconfig.rb"
 echo >> "$TMPBUILDROOT/lib/ruby/$RUBY_COMPAT_VERSION/$RUBY_ARCH/rbconfig.rb"
 cat "$SELFDIR/internal/rbconfig_patch.rb" >> "$TMPBUILDROOT/lib/ruby/$RUBY_COMPAT_VERSION/$RUBY_ARCH/rbconfig.rb"
@@ -379,8 +382,12 @@ run rm bin/{erb,rdoc,ri}
 run rm -f bin/testrb # Only Ruby 2.1 has it
 run rm -rf include
 run rm -rf share
-run rm -rf lib/{libruby-static.a,pkgconfig}
-run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/ # don't remove the documentation generators
+run rm -rf lib/{libruby*static.a,pkgconfig}
+# NOTE:- Updated the above to consinder the below library, otherwise
+# the size of our bundle doubles
+# 	find output -type f -exec du -ah {} + | sort -rh | head -n 10
+#  21M    output/3.2.2-arm64/lib/libruby.3.2-static.a
+run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
 run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
 run rm -f lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out,mkmf.log}
 run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
