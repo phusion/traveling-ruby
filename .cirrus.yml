@@ -208,7 +208,7 @@ cirrus_cli_setup: &cirrus_cli_setup
 download_macos_runtime: &download_macos_runtime
   download_script: |
     echo "downloading pre-packaged runtime"
-    curl -L -o $PLATFORM/$PLATFORM-runtime.tar.gz https://github.com/YOU54F/traveling-ruby/releases/download/rel-20230529-next/osx-runtime.tar.gz
+    curl -L -o $PLATFORM/$PLATFORM-runtime.tar.gz https://github.com/YOU54F/traveling-ruby/releases/download/rel-20230529-next/osx-runtime-$ARCHITECTURE.tar.gz
     echo "unpacking pre-packaged runtime"
     [[ -f "$PLATFORM/$PLATFORM-runtime.tar.gz" ]] && tar -xzf $PLATFORM/$PLATFORM-runtime.tar.gz -C $PLATFORM && rm -rf $PLATFORM/$PLATFORM-runtime.tar.gz && echo "unpacked $PLATFORM-runtime.tar.gz" && ls -al $PLATFORM/runtime
     ls $PLATFORM
@@ -228,10 +228,10 @@ macos_check: &macos_check
 
 set_bundler_version: &set_bundler_version
   set_bundler_version_script: |
-    rbenv global system
-    sudo gem install bundler -v $(cat BUNDLER_VERSION.txt)
-    bundler --version
-    rbenv global 3.2.2
+    $USE_ROSETTA rbenv global system
+    $USE_ROSETTA sudo gem install bundler -v $(cat BUNDLER_VERSION.txt)
+    $USE_ROSETTA bundler --version
+    $USE_ROSETTA rbenv global 3.2.2
 
 macos_check_task: 
   only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(mac-check\).*'
@@ -286,8 +286,33 @@ macos_arm64_matrix_task:
   <<: *cirrus_cli_setup
   <<: *set_bundler_version
   <<: *download_macos_runtime
-  package_script: cd $PLATFORM && rake package
+  # package_script: cd $PLATFORM && rake package
+  package_script: cd $PLATFORM && rake
   test_script: cd $PLATFORM && rake test
+  # upload_output_dir_script: cd $PLATFORM && tar -czvf $PLATFORM-runtime.tar.gz runtime
+  # <<: *UPLOAD_TASK
+  <<: *BINARY_ATRIFACTS
+
+macos_x86_64_matrix_task:
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*'
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-ventura-base:latest
+  env:
+    PLATFORM: osx
+    ARCHITECTURES: x86_64
+    ARCHITECTURE: x86_64 # temp measure, will be set by rakefile when running targeted x86_64 / arm64 builds
+    # $USE_ROSETTA: arch -m x86_64
+    <<: *ENV_TEMPLATE
+    matrix:
+      *RUBY_VERSIONS_LATEST_MATRIX
+  <<: *macos_check
+  <<: *cirrus_cli_setup
+  <<: *set_bundler_version
+  <<: *download_macos_runtime
+  # install_rosetta_script: softwareupdate --install-rosetta --agree-to-license
+  package_script: cd $PLATFORM && $USE_ROSETTA rake
+  # package_script: cd $PLATFORM && $USE_ROSETTA rake package
+  test_script: cd $PLATFORM && $USE_ROSETTA rake test
   # upload_output_dir_script: cd $PLATFORM && tar -czvf $PLATFORM-runtime.tar.gz runtime
   # <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
