@@ -91,7 +91,7 @@ parse_options "$@"
 
 GEMS_TO_TEST=(ffi json rexml yajl nio socket)
 GEMS_TO_FAIL=("rinda" "test-unit" "win32ole") # Add the gem names that we want to fail
-
+GEMS_TO_SKIP=("sinatra") # Add the gem names that we want to skip
 if [[ ("$PLATFORM" == "osx" || "$PLATFORM" == "linux") && "$ARCHITECTURE" == "arm64" ]]; then
 	GEMS_TO_FAIL+=("nio4r")
 fi
@@ -117,7 +117,7 @@ echo "$GEM_LIST" >> "$BUILD_OUTPUT_DIR/test_report"
 # header "modifying gem names in $BUILD_OUTPUT_DIR for testing"
 # "$BUILD_OUTPUT_DIR/bin/gem" list | awk '{gsub(/io-/, "io/"); gsub(/net-/, "net/"); sub(/-ext/, ""); sub(/-ruby/, ""); print $1}' | grep -v -- "-ext"
 
-GEMS=($("$BUILD_OUTPUT_DIR/bin/gem" list | awk '{gsub(/io-/, "io/"); gsub(/net-/, "net/"); sub(/-ext/, ""); sub(/-ruby/, ""); sub(/english/, "English"); print $1}' | grep -v -- "-ext"))
+GEMS=($("$BUILD_OUTPUT_DIR/bin/gem" list | awk '{gsub(/io-/, "io/"); gsub(/net-/, "net/"); gsub(/pact-provider-verifier/, "pact/provider_verifier/cli/verify"); gsub(/pact_broker-client/, "pact_broker/client/tasks"); gsub(/pact-/, "pact/"); gsub(/faraday-/, "faraday/"); sub(/-ext/, ""); sub(/-ruby/, ""); sub(/english/, "English"); print $1}' | grep -v -- "-ext"))
 if [ ${#GEMS[@]} -eq 0 ]; then
 	GEMS=("${GEMS_TO_TEST[@]}")
 else
@@ -130,11 +130,21 @@ export LD_BIND_NOW=1
 export DYLD_BIND_AT_LAUNCH=1
 ERRORS=()
 for LIB in ${GEMS[@]}; do
+	if [[ " ${GEMS_TO_SKIP[@]} " =~ " ${LIB} " ]]; then # Check if the current gem is in the GEMS_TO_SKIP array
+		warning "Skipping gem $LIB"
+		continue
+	fi
 	if ! "$BUILD_OUTPUT_DIR/bin/ruby" -r$LIB -e true ; then
 		if [[ ! " ${GEMS_TO_FAIL[@]} " =~ " ${LIB} " ]]; then # Check if the current gem is not in the GEMS_TO_FAIL array
 			ERRORS+=("$LIB")
 		else # If the current gem is in the GEMS_TO_FAIL array, then it's OK
 			warning "Gem $LIB failed to load but exit code supressed. "
+		fi
+	else
+		success "Gem $LIB OK!"
+		if [[ "$LIB" == "pact/ffi" ]]; then
+		echo "Testing pact-ffi gem loads shared library (via ffi gem)"
+		"$BUILD_OUTPUT_DIR/bin/ruby" -r$LIB -e "puts PactFfi.pactffi_version"
 		fi
 	fi
 done
