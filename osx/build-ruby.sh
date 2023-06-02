@@ -211,6 +211,19 @@ if [[ -e ~/.bundle/config ]]; then
 fi
 "$SELFDIR/internal/check_requirements.sh"
 
+	ARCH=$(uname -m)
+	if [[ "$ARCHITECTURE" == "x86_64" ]]; then
+		BUILDTARGET="darwin64-x86_64-cc"
+		DEPLOY_TARGET="x86_64-apple-darwin22"
+	elif [[ "$ARCHITECTURE" == "arm64" ]]; then
+		BUILDTARGET="darwin64-arm64-cc"
+		DEPLOY_TARGET="aarch64-apple-darwin22"
+	else
+		echo "*** ERROR: unknown architecture $ARCHITECTURE, don't know how to build"
+		echo "set ARCHITECTURE to one of: x86_64 arm64"
+		echo "we detected you are running on via uname: $ARCH"
+		exit 1
+	fi
 
 #######################################
 
@@ -264,7 +277,8 @@ if $SETUP_SOURCE; then
 		--prefix "$TMPBUILDROOT" \
 		--with-out-ext=tk,sdbm,gdbm,dbm,dl,coverage \
 		--disable-install-doc \
-		--with-openssl-dir="$RUNTIME_DIR"
+		--with-openssl-dir="$RUNTIME_DIR" \
+		--build=$DEPLOY_TARGET
 	echo
 fi
 
