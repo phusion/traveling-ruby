@@ -290,7 +290,19 @@ echo
 # export CPPFLAGS="-w"
 # export CXXFLAGS="-w"
 # export CFLAGS="-w"
-
+	ARCH=$(uname -m)
+	if [[ "$ARCHITECTURE" == "x86_64" ]]; then
+		BUILDTARGET="darwin64-x86_64-cc"
+		DEPLOY_TARGET="x86_64-apple-darwin22"
+	elif [[ "$ARCHITECTURE" == "arm64" ]]; then
+		BUILDTARGET="darwin64-arm64-cc"
+		DEPLOY_TARGET="aarch64-apple-darwin22"
+	else
+		echo "*** ERROR: unknown architecture $ARCHITECTURE, don't know how to build"
+		echo "set ARCHITECTURE to one of: x86_64 arm64"
+		echo "we detected you are running on via uname: $ARCH"
+		exit 1
+	fi
 header "Installing tool 1/$TOTAL_TOOLS: CMake..."
 if $SKIP_CMAKE; then
 	echo "Skipped."
@@ -432,17 +444,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/openssl-ok" ]] || $FORCE_OPENSSL; then
 	echo "Entering $RUNTIME_DIR/openssl-$OPENSSL_VERSION"
 	pushd openssl-$OPENSSL_VERSION >/dev/null
 
-	ARCH=$(uname -m)
-	if [[ "$ARCHITECTURE" == "x86_64" ]]; then
-		BUILDTARGET="darwin64-x86_64-cc"
-	elif [[ "$ARCHITECTURE" == "arm64" ]]; then
-		BUILDTARGET="darwin64-arm64-cc"
-	else
-		echo "*** ERROR: unknown architecture $ARCHITECTURE, don't know how to build"
-		echo "set ARCHITECTURE to one of: x86_64 arm64"
-		echo "we detected you are running on via uname: $ARCH"
-		exit 1
-	fi
+
 	run ./Configure "$BUILDTARGET" --prefix="$RUNTIME_DIR" --openssldir="$RUNTIME_DIR/openssl" threads zlib shared
 	run make -j$CONCURRENCY
 	run make install_sw
@@ -557,7 +559,9 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libgmp.10.dylib" ]] || $FORCE_GMP; then
 	echo "Entering $RUNTIME_DIR/gmp-$GMP_VERSION"
 	pushd gmp-$GMP_DIR_VERSION >/dev/null
 
-	run ./configure --prefix="$RUNTIME_DIR" --disable-static --without-readline
+	# NOTE - Added deploy target here to support multi-arch
+	run ./configure --build=$DEPLOY_TARGET --prefix="$RUNTIME_DIR" --enable-static --without-readline --with-pic
+	# run ./configure --prefix="$RUNTIME_DIR" --enable-static --without-readline --with-pic
 	run make -j$CONCURRENCY
 	run make install-strip
 
