@@ -96,3 +96,125 @@ Very few applications need support for transcoding strings from one encoding to 
 Most likely your application does not need RDoc during runtime. You can remove that as follows:
 
     rm -rf lib/ruby/lib/ruby/*/rdoc*
+
+
+
+
+# Reducing the size of your Traveling Ruby packages
+
+Before
+
+```console
+du -sh * | sort -nr                
+384M    runtime
+224M    output
+ 36K    internal
+ 28K    setup-runtime.sh
+ 16K    build-ruby.sh
+8.0K    Rakefile
+4.0K    test-gems.sh
+4.0K    package.sh
+4.0K    README.md
+```
+
+After
+
+```console
+du -sh * | sort -nr
+384M    runtime
+ 67M    output
+ 36K    internal
+ 28K    setup-runtime.sh
+ 16K    build-ruby.sh
+ 15M    traveling-ruby-gems-20230601-3.0.6-osx-x86_64
+8.0K    Rakefile
+6.8M    traveling-ruby-20230601-3.0.6-osx-x86_64.tar.gz
+4.0K    test-gems.sh
+4.0K    package.sh
+4.0K    README.md
+```
+
+export BUILD_OUTPUT_DIR=output/3.0.6-x86_64/
+
+# Remove tests
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/test| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/tests| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/spec| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/features| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/benchmark| xargs rm -rf
+
+# Remove documentation
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/README*| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/CHANGE*| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/Change*| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/COPYING*| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/LICENSE*| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/MIT-LICENSE*| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/TODO| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/*.txt| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/*.md| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/*.rdoc| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/doc| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/docs| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/example| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/examples| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/sample| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/doc-api| xargs rm -rf
+
+find ${BUILD_OUTPUT_DIR}**/.md| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}**/.gitignore| xargs rm -rf
+find ${BUILD_OUTPUT_DIR}**/.github| xargs rm -rf
+find ${BUILD_OUTPUT_DIR} -name '.travis.yml'| xargs rm -rf
+
+# Remove leftover native extension sources and compilation objects
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/ext/Makefile| xargs rm -f
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/ext/*/Makefile| xargs rm -f
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/ext/*/tmp| xargs rm -f
+find ${BUILD_OUTPUT_DIR}lib/ -name '*.c' | xargs rm -f
+find ${BUILD_OUTPUT_DIR}lib/ -name '*.cpp' | xargs rm -f
+find ${BUILD_OUTPUT_DIR}lib/ -name '*.h' | xargs rm -f
+find ${BUILD_OUTPUT_DIR}lib/ -name '*.rl' | xargs rm -f
+find ${BUILD_OUTPUT_DIR}lib/ -name 'extconf.rb' | xargs rm -f
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems -name '*.o' | xargs rm -f
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems -name '*.so'| xargs rm -f
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/lib/*/3.*/ -not -path '3.0' -name '*.bundle' | xargs rm -f
+ls ${BUILD_OUTPUT_DIR}lib/ruby/*/rdoc*| xargs rm -f ## Removing RDoc
+ls ${BUILD_OUTPUT_DIR}lib/ruby/*/*/enc/trans/*| xargs rm -f
+ls ${BUILD_OUTPUT_DIR}lib/ruby/*/*/enc/cp949*| xargs rm -f
+ls ${BUILD_OUTPUT_DIR}lib/ruby/*/*/enc/euc_*| xargs rm -f
+ls ${BUILD_OUTPUT_DIR}lib/ruby/*/*/enc/shift_jis*| xargs rm -f
+ls ${BUILD_OUTPUT_DIR}lib/ruby/*/*/enc/koi8_*| xargs rm -f
+ls ${BUILD_OUTPUT_DIR}lib/ruby/*/*/enc/emacs*| xargs rm -f
+ls ${BUILD_OUTPUT_DIR}lib/ruby/*/*/enc/gb*| xargs rm -f
+ls ${BUILD_OUTPUT_DIR}lib/ruby/*/*/enc/big5*| xargs rm -f
+ls ${BUILD_OUTPUT_DIR}lib/ruby/*/*/enc/windows*| xargs rm -f
+ls ${BUILD_OUTPUT_DIR}lib/ruby/*/*/enc/utf_16*| xargs rm -f
+ls ${BUILD_OUTPUT_DIR}lib/ruby/*/*/enc/utf_32*| xargs rm -f
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/vendor -type f | grep -v '.rb$' | xargs rm -f
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/curses*/vendor -type f | grep -v '.rb$' | xargs rm -f
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/rugged*/vendor -type f | grep -v '.rb$' | xargs rm -f
+find ${BUILD_OUTPUT_DIR}lib/ruby/gems/3.0.0/gems/*/contrib -type f | grep -v '.rb$' | xargs rm -f
+find ${BUILD_OUTPUT_DIR}lib -type f -name '*.java' | xargs rm -f
+find ${BUILD_OUTPUT_DIR}lib -type f -name '*.class'| xargs rm -f
+
+
+# safe
+
+ 33M    output/3.0.6-x86_64/lib/ruby/gems/3.0.0/gems/charlock_holmes-0.7.7/lib/charlock_holmes/charlock_holmes.bundle
+ 33M    output/3.0.6-x86_64/lib/ruby/gems/3.0.0/gems/charlock_holmes-0.7.7/ext/charlock_holmes/charlock_holmes.bundle
+
+
+# unsafe
+
+ 33M    output/3.0.6-x86_64/lib/ruby/gems/3.0.0/extensions/x86_64-darwin-22/3.0.0-static/charlock_holmes-0.7.7/charlock_holmes/charlock_holmes.bundle
+
+# safe to delete the version of ruby that isn't for the packed version
+
+ie for 3.0.6, deleting everything bar /3.0/nokogiri.bundle is ok
+
+2.9M    output/3.0.6-x86_64/lib/ruby/gems/3.0.0/gems/nokogiri-1.15.2-x86_64-darwin/lib/nokogiri/3.2/nokogiri.bundle
+2.9M    output/3.0.6-x86_64/lib/ruby/gems/3.0.0/gems/nokogiri-1.15.2-x86_64-darwin/lib/nokogiri/3.1/nokogiri.bundle
+2.9M    output/3.0.6-x86_64/lib/ruby/gems/3.0.0/gems/nokogiri-1.15.2-x86_64-darwin/lib/nokogiri/3.0/nokogiri.bundle
+2.9M    output/3.0.6-x86_64/lib/ruby/gems/3.0.0/gems/nokogiri-1.15.2-x86_64-darwin/lib/nokogiri/2.7/nokogiri.bundle
+2.5M    output/3.0.6-x86_64/lib/libcrypto.1.1.dylib
+1.7M    output/3.0.6-x86_64/lib/ruby/gems/3.0.0/gems/sqlite3-1.6.3-x86_64-darwin/lib/sqlite3/3.2/sqlite3_native.bundle

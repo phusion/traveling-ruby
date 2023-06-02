@@ -44,23 +44,13 @@ Just some WIP notes to keep some track of testing progress
   - Linux
     - OpenSSL not found error
 
-
 ### Gems failing to install
 
 - mysql2 `gem 'mysql2', :platforms => :ruby`
   - MacOS
   - Linux
 
-- nokogiri `gem 'nokogiri'`
-  - MacOS
-
-
-
 ### Gems failing testing
-
-- `rinda`
-  - MacOS
-  - Linux
 
 - `test-unit`
   - MacOS
@@ -70,13 +60,5 @@ Just some WIP notes to keep some track of testing progress
   - MacOS
   - Linux
 
-- `rinda`
-  - MacOS
-  - Linux
-
-- `nio4r`
-  - MacOS (arm64)
-  - Linux (arm64)
-
 - `debug`
-  - Ruby `3.0.4`
+  - Ruby `3.0.x`

@@ -1,23 +1,50 @@
 # Traveling Ruby OS X build system
 
-The build system requires the Developer Commandline Tools to be installed, as well as a number of other things. See the "System requirements" section.
+The build system requires the Developer Commandline Tools to be installed, as well as a number of other things. 
 
-To build binary packages, run:
+See the "System requirements" section.
+
+To build binary packages for `arm64`, run:
 
     cd osx
-    rake
+    ARCHITECTURE=arm64 rake
+
+To build binary packages for `x86_64`, run:
+
+    cd osx
+    ARCHITECTURE=x86_64 rake
 
 You can view all tasks by running `rake -T`.
 
 ## System requirements
 
-### MacOS 10.14 SDK
+- `x86_64` or `arm64`
+- MacOS minimum deployment target `12.2`
 
-You are required to install the macOS 10.14 SDK so that we can build binaries that run on older macOS versions.
+### Install Xcode Command Line Tools 
+- Copy and paste the following text into your terminal _(and press **"return"**)_: 
+```
+xcode-select --install
+```
+- Follow the prompts.
 
+****
+
+### Cross-Compiling
+
+In order to cross-compile for `x86_64` from `arm64` hosts, you _must_ install Rosetta.
+
+- `sudo softwareupdate --install-rosetta --agree-to-license`
+
+_Note:_ You don't need to run in a Rosetta enabled shell or prefix your command with `-arch x86_64`, setting the `ARCHITECTURE` value to `x86_64` is sufficient.
+
+ <!-- 
+ 
+ TODO:- Are these still needed?
+ 
  1. Download the SDK at [phracker/MacOSX-SDKs](https://github.com/phracker/MacOSX-SDKs).
- 2. Extract with: `sudo tar -xf MacOSX10.14.sdk.tar.xz -C "$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs"`
- 3. Modify the XCode MacOSX.Platform/Info.plist file.
+ 1. Extract with: `sudo tar -xf MacOSX10.14.sdk.tar.xz -C "$(xcode-select -p)/Platforms/MacOSX.platform/Developer/SDKs"`
+ 2. Modify the XCode MacOSX.Platform/Info.plist file.
 
      1. Make the file and its containing directory writable by non-root:
 
@@ -39,7 +66,7 @@ You are required to install the macOS 10.14 SDK so that we can build binaries th
         ~~~bash
         sudo chown root "$(xcode-select -p)/Platforms/MacOSX.platform/Info.plist"
         sudo chown root "$(xcode-select -p)/Platforms/MacOSX.platform"
-        ~~~
+        ~~~ -->
 
 ### Clearing certain paths
 

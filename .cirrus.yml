@@ -208,9 +208,10 @@ cirrus_cli_setup: &cirrus_cli_setup
 download_macos_runtime: &download_macos_runtime
   download_script: |
     echo "downloading pre-packaged runtime"
-    curl -L -o $PLATFORM/$PLATFORM-runtime.tar.gz https://github.com/YOU54F/traveling-ruby/releases/download/rel-20230529-next/osx-runtime-$ARCHITECTURE.tar.gz
+    curl -L -o $PLATFORM/runtime.tar.gz https://github.com/YOU54F/traveling-ruby/releases/download/rel-20230529-next/osx-runtime-$ARCHITECTURE.tar.gz
     echo "unpacking pre-packaged runtime"
-    [[ -f "$PLATFORM/$PLATFORM-runtime.tar.gz" ]] && tar -xzf $PLATFORM/$PLATFORM-runtime.tar.gz -C $PLATFORM && rm -rf $PLATFORM/$PLATFORM-runtime.tar.gz && echo "unpacked $PLATFORM-runtime.tar.gz" && ls -al $PLATFORM/runtime
+    mkdir -p $PLATFORM/runtime
+    [[ -f "$PLATFORM/runtime.tar.gz" ]] && tar -xzf $PLATFORM/runtime.tar.gz && rm -rf $PLATFORM/runtime.tar.gz && echo "unpacked osx-runtime-$ARCHITECTURE.tar.gz" && ls -al $PLATFORM/runtime
     ls $PLATFORM
 
 macos_check: &macos_check
@@ -241,6 +242,8 @@ macos_check_task:
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
   <<: *macos_check
   <<: *cirrus_cli_setup
+  foo_script: |
+    ls /usr/local/lib/
   
 
 # ========================================
@@ -309,7 +312,7 @@ macos_x86_64_matrix_task:
   <<: *cirrus_cli_setup
   <<: *set_bundler_version
   <<: *download_macos_runtime
-  # install_rosetta_script: softwareupdate --install-rosetta --agree-to-license
+  install_rosetta_script: softwareupdate --install-rosetta --agree-to-license
   package_script: cd $PLATFORM && $USE_ROSETTA rake
   # package_script: cd $PLATFORM && $USE_ROSETTA rake package
   test_script: cd $PLATFORM && $USE_ROSETTA rake test

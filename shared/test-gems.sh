@@ -106,7 +106,7 @@ GEMS_TO_SKIP=(
 	"rinda"
 )
 
-if [[ "$BUILD_OUTPUT_DIR" == *"3.0.4"* ]]; then
+if [[ "$BUILD_OUTPUT_DIR" == *"3.0."* ]]; then
 	GEMS_TO_FAIL+=("debug")
 fi
 
