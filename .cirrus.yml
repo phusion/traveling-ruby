@@ -65,7 +65,7 @@ RUBY_VERSIONS_MATRIX_LINUX: &RUBY_VERSIONS_MATRIX_LINUX
   # for those branch on linux
 
 RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER: &RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER
-  package_script: cd $PLATFORM && rake package
+  package_script: cd $PLATFORM && rake
 
 RUBY_VERSIONS_MATRIX_RUNNER: &RUBY_VERSIONS_MATRIX_RUNNER
   build_script: cd $PLATFORM && $script
@@ -290,7 +290,7 @@ macos_packager_task:
 
 
 macos_arm64_matrix_task:
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos-x86_64\).*'
   macos_instance:
     # image: traveling-ruby-builder
     # image: ghcr.io/cirruslabs/macos-ventura-vanilla:latest
@@ -321,7 +321,7 @@ macos_arm64_matrix_task:
   <<: *BINARY_ATRIFACTS
 
 macos_x86_64_matrix_task:
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos-arm64\).*'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos-x86_64\).*'
   macos_instance:
     # image: traveling-ruby-builder
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
@@ -362,7 +362,7 @@ windows_packager_task:
   no_version_remover_script: |
     sed -ie '/3.3.0-preview1/d' RUBY_VERSIONS.txt
   <<: *RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER
-  <<: *UPLOAD_TASK
+  # <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 
 
