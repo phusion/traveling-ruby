@@ -1,6 +1,7 @@
 env:
   REPO: you54f/traveling-ruby
-  NEXT_TAG: rel-20230601-next
+  PKG_DATE: 20230601
+  NEXT_TAG: rel-$PKG_DATE-next
   GITHUB_TOKEN: ENCRYPTED[7f3663f35400d0e1f8e0fec456af6b75a07b0fd2d0632fe1697b8fb73af5e78245144216288d88d2daa681ccd159e07d]
 
 INSTALL_GH_CLI: &INSTALL_GH_CLI
@@ -316,11 +317,11 @@ macos_arm64_matrix_task:
   package_script: cd $PLATFORM && rake
   test_script: cd $PLATFORM && rake test
   # upload_output_dir_script: cd $PLATFORM && tar -czvf $PLATFORM-runtime.tar.gz runtime
-  # <<: *UPLOAD_TASK
+  <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 
 macos_x86_64_matrix_task:
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos-arm64\).*'
   macos_instance:
     # image: traveling-ruby-builder
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
@@ -428,6 +429,7 @@ download_task:
 linux_gem_test_task: 
   only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(test-linux-gems\).*'
   env: 
+    GH_TOKEN: $GITHUB_TOKEN
     matrix:
       image: debian:latest
       image: node:20-slim
@@ -496,7 +498,7 @@ linux_gem_test_task:
     gh release view --repo "${REPO}" "${NEXT_TAG}" --json assets -q '.[]|.[].name' | grep -e 'linux-arm'
     ls -la
     cd linux
-    gh release download --repo "${REPO}" "${NEXT_TAG}" -p '*linux-arm*'
+    gh release download --repo "${REPO}" "${NEXT_TAG}" -p "traveling-ruby-${PKG_DATE}*linux-arm*"
     ls -la
     ../shared/list-versions.sh linux
     ../shared/unpack-versions.sh linux
