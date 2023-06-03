@@ -47,6 +47,12 @@ RUBY_VERSIONS_LATEST_MATRIX: &RUBY_VERSIONS_LATEST_MATRIX
   RUBY_VERSIONS: 2.7.8
   RUBY_VERSIONS: 2.6.10
 
+RUBY_VERSIONS_MATRIX_MACOS: &RUBY_VERSIONS_MATRIX_MACOS
+  RUBY_VERSIONS: 3.3.0-preview1
+  RUBY_VERSIONS: 3.2.2
+  RUBY_VERSIONS: 3.1.4
+  RUBY_VERSIONS: 3.0.6
+
 RUBY_VERSIONS_MATRIX_LINUX: &RUBY_VERSIONS_MATRIX_LINUX
   RUBY_VERSIONS: 3.3.0-preview1
   RUBY_VERSIONS: 3.2.2
@@ -242,9 +248,17 @@ macos_check_task:
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
   <<: *macos_check
   <<: *cirrus_cli_setup
-  foo_script: |
-    ls /usr/local/lib/
-  
+
+mac_ruby_setup: &mac_ruby_setup
+  mac_ruby_script: |
+    RUBY_MAJOR_MINOR=$(echo $RUBY_VERSIONS | cut -d' ' -f2 | cut -d'.' -f1-2)
+    if [ "$RUBY_MAJOR_MINOR" = "3.3" ]; then
+      # brew install ruby --HEAD
+      echo "ruby HEAD installed"
+    else
+      brew install ruby@$RUBY_MAJOR_MINOR
+    fi
+
 
 # ========================================
 # MacOS - Packager
@@ -254,15 +268,15 @@ macos_packager_task:
   only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager\).*'
   env:
     PLATFORM: osx
-    matrix:
-      - script: rake --trace package
+    USE_HOMEBREW_RUBY: 1
   macos_instance:
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
+  # <<: *mac_ruby_setup
   <<: *macos_check
   <<: *cirrus_cli_setup
-  <<: *set_bundler_version
-  <<: *download_macos_runtime
-  package_script: cd $PLATFORM && rake package
+  # <<: *set_bundler_version
+  # <<: *download_macos_runtime
+  package_script: cd $PLATFORM && rake
   <<: *BINARY_ATRIFACTS
 
 # ========================================
@@ -277,6 +291,8 @@ macos_packager_task:
 macos_arm64_matrix_task:
   only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*'
   macos_instance:
+    # image: traveling-ruby-builder
+    # image: ghcr.io/cirruslabs/macos-ventura-vanilla:latest
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
   env:
     PLATFORM: osx
@@ -284,12 +300,19 @@ macos_arm64_matrix_task:
     ARCHITECTURE: arm64 # temp measure, will be set by rakefile when running targeted x86_64 / arm64 builds
     <<: *ENV_TEMPLATE
     matrix:
-      *RUBY_VERSIONS_LATEST_MATRIX
+      *RUBY_VERSIONS_MATRIX_MACOS
   <<: *macos_check
   <<: *cirrus_cli_setup
-  <<: *set_bundler_version
   <<: *download_macos_runtime
-  # package_script: cd $PLATFORM && rake package
+  stash_ruby_script: |
+    which ruby
+    rm -rf $HOME/.rbenv/
+    brew uninstall rbenv
+    brew uninstall gcc
+    brew uninstall cmake
+    ruby --version
+    ln -s /usr/bin/ruby $HOME/foo
+    ruby --version
   package_script: cd $PLATFORM && rake
   test_script: cd $PLATFORM && rake test
   # upload_output_dir_script: cd $PLATFORM && tar -czvf $PLATFORM-runtime.tar.gz runtime
@@ -299,6 +322,7 @@ macos_arm64_matrix_task:
 macos_x86_64_matrix_task:
   only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*'
   macos_instance:
+    # image: traveling-ruby-builder
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
   env:
     PLATFORM: osx
@@ -307,17 +331,16 @@ macos_x86_64_matrix_task:
     # $USE_ROSETTA: arch -m x86_64
     <<: *ENV_TEMPLATE
     matrix:
-      *RUBY_VERSIONS_LATEST_MATRIX
+      *RUBY_VERSIONS_MATRIX_MACOS
   <<: *macos_check
   <<: *cirrus_cli_setup
-  <<: *set_bundler_version
   <<: *download_macos_runtime
   install_rosetta_script: softwareupdate --install-rosetta --agree-to-license
   package_script: cd $PLATFORM && $USE_ROSETTA rake
   # package_script: cd $PLATFORM && $USE_ROSETTA rake package
   test_script: cd $PLATFORM && $USE_ROSETTA rake test
   # upload_output_dir_script: cd $PLATFORM && tar -czvf $PLATFORM-runtime.tar.gz runtime
-  # <<: *UPLOAD_TASK
+  <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 
 # ========================================
@@ -329,7 +352,7 @@ windows_packager_task:
   env:
     PLATFORM: windows
     matrix:
-      - script: rake --trace package
+      - script: rake --trace
   macos_instance:
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
   windows_setup_script: |
@@ -338,6 +361,7 @@ windows_packager_task:
   no_version_remover_script: |
     sed -ie '/3.3.0-preview1/d' RUBY_VERSIONS.txt
   <<: *RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER
+  <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 
 

@@ -344,15 +344,12 @@ if [[ "$GEMFILE" != "" ]]; then
 
 	# Install Bundler, either from cache or directly.
 	if [[ -e "$RUNTIME_DIR/vendor/cache/bundler-$BUNDLER_VERSION.gem" ]]; then
-		echo "install Bundler from cache"
 		run "$TMPBUILDROOT/bin/gem" install "$RUNTIME_DIR/vendor/cache/bundler-$BUNDLER_VERSION.gem" --no-document
 	else
-		echo "install Bundler directly"
 		run "$TMPBUILDROOT/bin/gem" install bundler -v $BUNDLER_VERSION --no-document
 		run mkdir -p "$RUNTIME_DIR/vendor/cache"
 		run cp "$TMPBUILDROOT"/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/bundler-$BUNDLER_VERSION.gem \
 			"$RUNTIME_DIR/vendor/cache/"
-		run "$TMPBUILDROOT/bin/gem" install "$RUNTIME_DIR/vendor/cache/bundler-$BUNDLER_VERSION.gem" --no-document
 	fi
 
 	export BUNDLE_BUILD__NOKOGIRI="--use-system-libraries"
@@ -366,13 +363,9 @@ if [[ "$GEMFILE" != "" ]]; then
 		if [[ -e "$GEMFILE.lock" ]]; then
 			run cp "$GEMFILE.lock" ./
 		fi
-		# echo "run bundle config --local force_ruby_platform true"
 		# run bundle config --local force_ruby_platform true
-		echo "run "$TMPBUILDROOT/bin/bundle" config set --local system true"
 		run "$TMPBUILDROOT/bin/bundle" config set --local system true
-		echo "run "$TMPBUILDROOT/bin/bundle" install --retry 3 --jobs $CONCURRENCY"
 		run "$TMPBUILDROOT/bin/bundle" install --retry 3 --jobs $CONCURRENCY
-		echo "run "$TMPBUILDROOT/bin/bundle" package"
 		run "$TMPBUILDROOT/bin/bundle" package
 
 		# Cache gems.
@@ -441,7 +434,6 @@ echo "Removing absolute rpaths to the runtime..."
 (
 	set -o pipefail
 	BINARIES=$(find . -name '*.bundle' && find . -name '*.dylib')
-	echo $BINARIES
 	BINARIES="bin/ruby $BINARIES"
 	for BINARY in $BINARIES; do
 		RPATHS=$(otool -l "$BINARY" | (grep LC_RPATH -A2 || true) | (grep ' path ' || true) | awk '{ print $2 }')
