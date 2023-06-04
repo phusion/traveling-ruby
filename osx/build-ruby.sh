@@ -365,6 +365,8 @@ if [[ "$GEMFILE" != "" ]]; then
 		fi
 		# run bundle config --local force_ruby_platform true
 		run "$TMPBUILDROOT/bin/bundle" config set --local system true
+		run /tmp/ruby/bin/gem update --system  --no-document
+		run /tmp/ruby/bin/gem uninstall -x rubygems-update
 		run "$TMPBUILDROOT/bin/bundle" install --retry 3 --jobs $CONCURRENCY
 		run "$TMPBUILDROOT/bin/bundle" package
 

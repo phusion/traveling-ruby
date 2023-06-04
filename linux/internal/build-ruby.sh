@@ -220,6 +220,8 @@ function install_gems()
 		echo "+ Entering /tmp/ruby"
 		pushd /tmp/ruby >/dev/null
 		run /tmp/ruby/bin/bundle config set --local system true
+		run /tmp/ruby/bin/gem update --system  --no-document
+		run /tmp/ruby/bin/gem uninstall -x rubygems-update
 		run /tmp/ruby/bin/bundle install --retry 3 --jobs $CONCURRENCY
 		run rm Gemfile*
 		echo "+ Leaving /tmp/ruby"
