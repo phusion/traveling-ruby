@@ -1,0 +1,53 @@
+name: Test you54f/traveling-ruby@next-test
+
+on: 
+  workflow_dispatch:
+  push:
+    branches: [ next-test ]
+  
+jobs:
+  test_cli_action:
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest,windows-latest,macos-latest]
+      fail-fast: false
+
+    runs-on: ${{ matrix.os }}
+
+    name: test traveling-ruby action
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - id: traveling-ruby-action
+        uses: you54f/traveling-ruby@next-test
+
+
+      - name: bash
+        run: ruby --version
+        shell: bash
+
+
+      - name: sh
+        run: ruby --version
+        if: runner.os != 'windows'
+        shell: sh
+
+
+      - name: cmd
+        run: ruby --version
+        if: runner.os == 'windows'
+        shell: cmd
+
+
+      - name: powershell
+        run: ruby --version
+        if: runner.os == 'windows'
+        shell: powershell
+
+
+      - name: pwsh
+        run: ruby --version
+        if: runner.os == 'windows'
+        shell: pwsh

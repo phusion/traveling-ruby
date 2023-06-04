@@ -33,7 +33,7 @@ usage() {
   echo "  --set-path            Add the traveling ruby bin path to the PATH environment variable (default: false)"
   echo "  --clean-install       Remove any existing traveling ruby installation before installing (default: false)"
   echo "  --ci                  Set --set-path to true and --clean-install to true (default: false)"
-  exit 1
+  exit 0
 }
 
 while getopts "hv:d:-:" opt; do
@@ -44,6 +44,9 @@ while getopts "hv:d:-:" opt; do
   d)
     TRAVELING_RUBY_PKG_DATE=$OPTARG
     ;;
+  h)
+  usage
+  ;;
   -)
     case "${OPTARG}" in
     set-path)
@@ -56,19 +59,16 @@ while getopts "hv:d:-:" opt; do
       TRAVELING_RUBY_SET_PATH=true
       TRAVELING_RUBY_CLEAN_INSTALL=true
       ;;
-    *)
+    * | h)
       usage
       ;;
     esac
-    ;;
-  * | h)
-    usage
     ;;
   esac
 done
 
 if [ -z "$TRAVELING_RUBY_VERSION" ]; then
-  TRAVELING_RUBY_VERSION=2.7.4
+  TRAVELING_RUBY_VERSION=3.2.2
 fi
 
 if [ -z "$TRAVELING_RUBY_PKG_DATE" ]; then
@@ -135,7 +135,7 @@ echo "TRAVELING_RUBY_GH_SOURCE: $TRAVELING_RUBY_GH_SOURCE"
 echo "TRAVELING_RUBY_INSTALL_PATH: $TRAVELING_RUBY_INSTALL_PATH"
 echo "TRAVELING_RUBY_FILENAME: $TRAVELING_RUBY_FILENAME"
 
-if [ "$TRAVELING_RUBY_CLEAN_INSTALL" == "true" ]; then
+if [ "$TRAVELING_RUBY_CLEAN_INSTALL" = "true" ]; then
   echo "-------------"
   echo "Cleaning up ${PROJECT_NAME} @ $TRAVELING_RUBY_INSTALL_PATH"
   rm -rf $TRAVELING_RUBY_INSTALL_PATH
@@ -178,15 +178,17 @@ if [ $TRAVELING_RUBY_SET_PATH ]; then
   if [ $GITHUB_ENV ]; then
     echo "Added the following to your path to make ${PROJECT_NAME} available:"
     echo ""
-    echo "  PATH=\${PATH}:$TRAVELING_RUBY_BIN_PATH" >>$GITHUB_ENV
+    echo "PATH=$TRAVELING_RUBY_BIN_PATH:\${PATH}"
+    echo "PATH=${PATH}:$TRAVELING_RUBY_BIN_PATH" >>$GITHUB_ENV
   elif [ $CIRRUS_CI ]; then
     echo "Added the following to your path to make ${PROJECT_NAME} available:"
     echo ""
-    echo "  PATH=\${PATH}:$TRAVELING_RUBY_BIN_PATH" >>$CIRRUS_ENV
+    echo "PATH=$TRAVELING_RUBY_BIN_PATH:\${PATH}"
+    echo "PATH=$TRAVELING_RUBY_BIN_PATH:${PATH}" >>$CIRRUS_ENV
   else
     echo "Add the following to your path to make ${PROJECT_NAME} available:"
     echo "--- Linux/MacOS/Windows Bash Users --------"
     echo ""
-    echo "  PATH=\${PATH}:$TRAVELING_RUBY_BIN_PATH"
+    echo "  PATH=:$TRAVELING_RUBY_BIN_PATH:\${PATH}"
   fi
 fi

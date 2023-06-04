@@ -1,0 +1,52 @@
+name: Test cli.sh
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  local_install_script:
+    name: local install script - ${{matrix.os}} - ${{matrix.shell}} - ${{matrix.ruby-version}}
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        os: [macos-latest,ubuntu-latest]
+        shell: [bash, sh]
+        ## Linux
+        ruby-version: [2.6.10,3.0.4,3.1.2,3.2.2,3.3.0-preview1]
+        # # macOS
+        # ruby-version: [2.6.10,3.0.4,3.0.6,3.1.2,3.1.4,3.2.2,3.3.0-preview1]
+      fail-fast: false
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v3
+      - run: ./cli.sh --ci -v ${{ matrix.ruby-version }}
+        name: install via cli.sh
+      - run: ruby --version
+        name: ruby --version via ${{ matrix.shell }}
+      # - run: gem install pact_broker-client
+
+  windows_local_install_script:
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        shell: [cmd, powershell, pwsh, bash, sh]
+      fail-fast: false
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    steps:
+      - uses: actions/checkout@v3
+      - run: |
+          "$HOME\.traveling-ruby\bin\" >> $env:GITHUB_PATH
+        shell: powershell
+        if: matrix.shell == 'powershell' || matrix.shell == 'pwsh' || matrix.shell == 'cmd'
+      - run: ./cli.sh
+        name: install via cli.sh
+        shell: sh
+      - run: ruby --version
+        name: ruby --version via ${{ matrix.shell }}

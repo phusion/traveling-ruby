@@ -1,0 +1,11 @@
+name: traveling-ruby
+description: Traveling Ruby at your fingertips
+runs:
+  using: "composite"
+  steps:
+    - run: ./cli.sh
+      shell: bash
+    - run: |
+        "$HOME\.traveling-ruby\bin\" >> $env:GITHUB_PATH
+      if: runner.os == 'windows'
+      shell: powershell
