@@ -40,6 +40,53 @@ DOWNLOAD_TASK: &DOWNLOAD_TASK
   download_script: |
     gh release download  "${NEXT_TAG}" --repo "${REPO}" -p *$PLATFORM-$CIRRUS_ARCH*
 
+# ========================================
+# Release Tasks
+# ========================================
+
+
+## General tasks for GitHub Releases
+## These tasks are used to create a release, upload the binaries
+## and download the binaries for testing
+
+## The available tasks are:
+## prerelease_task: Creates a prerelease
+## release_task: Creates a release
+## upload_task: Uploads the binaries to the release
+## download_task: Downloads the binaries from the release
+
+prerelease_task:
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(prerelease\).*'
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-ventura-base:latest
+  env:
+    GH_TOKEN: $GITHUB_TOKEN
+  <<: *PRE_RELEASE_TASK
+
+upload_task:
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(upload\).*'
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-ventura-base:latest
+  env:
+    GH_TOKEN: $GITHUB_TOKEN
+  <<: *UPLOAD_TASK
+
+# release_task: 
+#   macos_instance:
+#     image: ghcr.io/cirruslabs/macos-ventura-base:latest
+#   env:
+#     GH_TOKEN: $GITHUB_TOKEN
+#   <<: *RELEASE_TASK
+
+download_task:
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(download\).*'
+  macos_instance:
+    image: ghcr.io/cirruslabs/macos-ventura-base:latest
+  env:
+    GH_TOKEN: $GITHUB_TOKEN
+  <<: *DOWNLOAD_TASK
+  script: ls
+
 RUBY_VERSIONS_LATEST_MATRIX: &RUBY_VERSIONS_LATEST_MATRIX
   RUBY_VERSIONS: 3.3.0-preview1
   RUBY_VERSIONS: 3.2.2
@@ -372,52 +419,7 @@ windows_packager_task:
 
 
 
-# ========================================
-# Release Tasks
-# ========================================
 
-
-## General tasks for GitHub Releases
-## These tasks are used to create a release, upload the binaries
-## and download the binaries for testing
-
-## The available tasks are:
-## prerelease_task: Creates a prerelease
-## release_task: Creates a release
-## upload_task: Uploads the binaries to the release
-## download_task: Downloads the binaries from the release
-
-prerelease_task:
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(prerelease\).*'
-  macos_instance:
-    image: ghcr.io/cirruslabs/macos-ventura-base:latest
-  env:
-    GH_TOKEN: $GITHUB_TOKEN
-  <<: *PRE_RELEASE_TASK
-
-upload_task:
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(upload\).*'
-  macos_instance:
-    image: ghcr.io/cirruslabs/macos-ventura-base:latest
-  env:
-    GH_TOKEN: $GITHUB_TOKEN
-  <<: *UPLOAD_TASK
-
-# release_task: 
-#   macos_instance:
-#     image: ghcr.io/cirruslabs/macos-ventura-base:latest
-#   env:
-#     GH_TOKEN: $GITHUB_TOKEN
-#   <<: *RELEASE_TASK
-
-download_task:
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(download\).*'
-  macos_instance:
-    image: ghcr.io/cirruslabs/macos-ventura-base:latest
-  env:
-    GH_TOKEN: $GITHUB_TOKEN
-  <<: *DOWNLOAD_TASK
-  script: ls
 
 
 
@@ -512,7 +514,7 @@ linux_gem_test_task:
 install_homebrew_script: &install_homebrew_script |
   # curl required for downloader, build-essential/git required for linuxbrew
   apt update && apt install --yes curl build-essential git 
-  curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/next-test/cli.sh | sh -s -- --ci -v 2.6.10
+  curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/main/cli.sh | sh -s -- --ci -v 2.6.10
   echo 'export PATH=/root/.travelling-ruby/bin:${PATH}' >> /root/.profile
   source /root/.profile
   ruby --version

@@ -13,3 +13,4 @@
 .DS_Store
 ok
 output.txt
+*.tmp

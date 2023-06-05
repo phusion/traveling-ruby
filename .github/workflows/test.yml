@@ -1,9 +1,9 @@
-name: Test you54f/traveling-ruby@next-test
+name: Test you54f/traveling-ruby@main
 
 on: 
   workflow_dispatch:
   push:
-    branches: [ next-test ]
+    branches: [ main ]
   
 jobs:
   test_cli_action:
@@ -44,7 +44,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - id: traveling-ruby-action
-        uses: you54f/traveling-ruby@next-test
+        uses: you54f/traveling-ruby@main
 
 
       - name: bash

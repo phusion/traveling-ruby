@@ -7,7 +7,7 @@
 ## Standalone Installer
 
 
-  curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/next-test/cli.sh | sh -s -- --help
+  curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/main/cli.sh | sh -s -- --help
 
 
 ```console
@@ -37,7 +37,7 @@ jobs:
     name: test pact cli action
     steps:
       - uses: actions/checkout@v3
-      - run: curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/next-test/cli.sh | sh -s -- --ci -v 2.6.10
+      - run: curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/main/cli.sh | sh -s -- --ci -v 2.6.10
       - run: ruby --version
 ```
 
@@ -58,7 +58,7 @@ jobs:
     name: test pact cli action
     steps:
       - uses: actions/checkout@v3
-      - uses: you54f/traveling-ruby@next-test
+      - uses: you54f/traveling-ruby@main
       - run: ruby --version
 ```
 
