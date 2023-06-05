@@ -1,7 +1,7 @@
 env:
   REPO: you54f/traveling-ruby
-  PKG_DATE: 20230601
-  NEXT_TAG: rel-$PKG_DATE-next
+  PKG_DATE: 20230605
+  NEXT_TAG: rel-$PKG_DATE
   GITHUB_TOKEN: ENCRYPTED[7f3663f35400d0e1f8e0fec456af6b75a07b0fd2d0632fe1697b8fb73af5e78245144216288d88d2daa681ccd159e07d]
 
 INSTALL_GH_CLI: &INSTALL_GH_CLI
@@ -30,8 +30,8 @@ UPLOAD_TASK: &UPLOAD_TASK
       cp "$file" $ruby_version-$gem_version.tar.gz
     done
     ls -l
-    if [[ $CIRRUS_BRANCH == 'next-test' ]]; then
-      gh release upload "${NEXT_TAG}" traveling-ruby-*.tar.gz --repo "${REPO}" --clobber
+    if [[ $CIRRUS_BRANCH == 'main' ]]; then
+      gh release upload "${NEXT_TAG}" traveling-ruby-*.tar.gz --repo "${REPO}"
     else
       echo "Not on main branch, skipping upload"
     fi
@@ -154,7 +154,7 @@ linux_x64_packager_docker_builder:
 linux_arm64_matrix_docker_builder:
   cpu: 4
   memory: 4G
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_BRANCH =~ 'master'
   env:
     CIRRUS_ARCH: arm64
     PLATFORM: linux
@@ -171,7 +171,7 @@ linux_arm64_matrix_docker_builder:
 linux_x64_matrix_docker_builder:
   cpu: 4
   memory: 4G
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-x86_64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-x86_64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_BRANCH =~ 'master'
   env:
     CIRRUS_ARCH: amd64
     PLATFORM: linux
@@ -290,7 +290,7 @@ macos_packager_task:
 
 
 macos_arm64_matrix_task:
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos-arm64\).*'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos-arm64\).*' || $CIRRUS_BRANCH =~ 'master'
   macos_instance:
     # image: traveling-ruby-builder
     # image: ghcr.io/cirruslabs/macos-ventura-vanilla:latest
@@ -304,7 +304,7 @@ macos_arm64_matrix_task:
       *RUBY_VERSIONS_MATRIX_MACOS
   <<: *macos_check
   <<: *cirrus_cli_setup
-  <<: *download_macos_runtime
+  # <<: *download_macos_runtime
   stash_ruby_script: |
     which ruby
     rm -rf $HOME/.rbenv/
@@ -321,7 +321,7 @@ macos_arm64_matrix_task:
   <<: *BINARY_ATRIFACTS
 
 macos_x86_64_matrix_task:
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos-x86_64\).*'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos-x86_64\).*' || $CIRRUS_BRANCH =~ 'master'
   macos_instance:
     # image: traveling-ruby-builder
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
@@ -335,7 +335,7 @@ macos_x86_64_matrix_task:
       *RUBY_VERSIONS_MATRIX_MACOS
   <<: *macos_check
   <<: *cirrus_cli_setup
-  <<: *download_macos_runtime
+  # <<: *download_macos_runtime
   install_rosetta_script: softwareupdate --install-rosetta --agree-to-license
   package_script: cd $PLATFORM && $USE_ROSETTA rake
   # package_script: cd $PLATFORM && $USE_ROSETTA rake package
@@ -349,7 +349,7 @@ macos_x86_64_matrix_task:
 # ========================================
 
 windows_packager_task: 
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-windows\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager\).*'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-windows\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager\).*' || $CIRRUS_BRANCH =~ 'master'
   env:
     PLATFORM: windows
     matrix:
@@ -422,7 +422,7 @@ download_task:
 
 
 # ========================================
-# Standalone Testing Tasks
+# Standalone Testing Tasks against GH releases
 # ========================================
 
 
@@ -503,3 +503,46 @@ linux_gem_test_task:
     ../shared/list-versions.sh linux
     ../shared/unpack-versions.sh linux
     ../shared/test-all-gems.sh linux
+
+# ========================================
+# Test Standalone Cli.sh script
+# ========================================
+
+
+install_homebrew_script: &install_homebrew_script |
+  # curl required for downloader, build-essential/git required for linuxbrew
+  apt update && apt install --yes curl build-essential git 
+  curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/next-test/cli.sh | sh -s -- --ci -v 2.6.10
+  echo 'export PATH=/root/.travelling-ruby/bin:${PATH}' >> /root/.profile
+  source /root/.profile
+  ruby --version
+  which ruby
+  HOMEBREW_BREW_GIT_REMOTE="https://github.com/you54f/brew" NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/you54f/install/HEAD/install.sh)" 
+  git -C "/home/linuxbrew/.linuxbrew/Homebrew" remote set-url origin https://github.com/Homebrew/brew
+  echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> /root/.profile
+  source /root/.profile
+  brew --version
+  brew config
+  brew doctor || echo "brew doctor failed with warning about unsupported architecture"
+  brew upgrade
+  export PATH=/root/.travelling-ruby/bin:${PATH}:/home/linuxbrew/.linuxbrew/bin
+  echo "PATH=${PATH}" >>$CIRRUS_ENV
+
+test_homebrew_script: &test_homebrew_script |
+  brew install you54f/pact/pact-plugin-cli
+  brew info you54f/pact/pact-plugin-cli
+  pact-plugin-cli --help
+
+run_commands: &run_commands
+  install_homebrew_script: *install_homebrew_script
+  test_homebrew_script: *test_homebrew_script
+
+cli_arm_task:
+  arm_container:
+    image: ubuntu:22.04
+  <<: *run_commands
+
+cli_amd_task:
+  container:
+    image: ubuntu:22.04
+  <<: *run_commands

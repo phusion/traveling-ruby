@@ -126,9 +126,9 @@ du -sh * | sort -nr
  36K    internal
  28K    setup-runtime.sh
  16K    build-ruby.sh
- 15M    traveling-ruby-gems-20230601-3.0.6-osx-x86_64
+ 15M    traveling-ruby-gems-20230605-3.0.6-osx-x86_64
 8.0K    Rakefile
-6.8M    traveling-ruby-20230601-3.0.6-osx-x86_64.tar.gz
+6.8M    traveling-ruby-20230605-3.0.6-osx-x86_64.tar.gz
 4.0K    test-gems.sh
 4.0K    package.sh
 4.0K    README.md

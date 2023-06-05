@@ -7,14 +7,14 @@
 
 # Options
 # TRAVELING_RUBY_VERSION - set ruby version eg TRAVELING_RUBY_VERSION=2.7.3
-# TRAVELING_RUBY_RELEASE_TAG - set release tag eg TRAVELING_RUBY_RELEASE_TAG=rel20230601
+# TRAVELING_RUBY_RELEASE_TAG - set release tag eg TRAVELING_RUBY_RELEASE_TAG=rel20230605
 # TRAVELING_RUBY_INSTALL_PATH - set install path eg TRAVELING_RUBY_INSTALL_PATH=$HOME/.travelling-ruby
 # TRAVELING_RUBY_CLEAN_INSTALL - set to true to remove existing install eg TRAVELING_RUBY_CLEAN_INSTALL=true
 
 # Usage: (install fixed version of a release) -
-#   $ curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/master/install.sh | TRAVELING_RUBY_RELEASE_TAG=rel-20230601 sh
+#   $ curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/master/install.sh | TRAVELING_RUBY_RELEASE_TAG=rel-20230605 sh
 # or
-#   $ wget -q https://raw.githubusercontent.com/you54f/traveling-ruby/master/install.sh -O- | TRAVELING_RUBY_RELEASE_TAG=rel-20230601 sh
+#   $ wget -q https://raw.githubusercontent.com/you54f/traveling-ruby/master/install.sh -O- | TRAVELING_RUBY_RELEASE_TAG=rel-20230605 sh
 
 # Usage: (install fixed version of ruby) -
 #   $ curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/master/install.sh | TRAVELING_RUBY_VERSION=2.6.10 sh

@@ -7,11 +7,11 @@
 ## Standalone Installer
 
 
-  /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/next-test/cli.sh)" 
+  curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/next-test/cli.sh | sh -s -- --help
 
 
 ```console
-/bin/sh -c 'curl -fsSL https://gist.githubusercontent.com/YOU54F/2e47eb0b653b6810dd6a0be9fc6820ea/raw/install.sh' | sh -s -- --help
+curl -fsSL https://gist.githubusercontent.com/YOU54F/2e47eb0b653b6810dd6a0be9fc6820ea/raw/install.sh | sh -s -- --help
 Usage: sh [-v <version>] [-d <release-date>] [--set-path] [--clean-install] [--ci]
 
   -v <version>          Ruby version to install (default: 3.2.2)
@@ -37,7 +37,7 @@ jobs:
     name: test pact cli action
     steps:
       - uses: actions/checkout@v3
-      - run: /bin/sh -c 'curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/next-test/cli.sh' | sh -s -- --ci -v 2.6.10
+      - run: curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/next-test/cli.sh | sh -s -- --ci -v 2.6.10
       - run: ruby --version
 ```
 
