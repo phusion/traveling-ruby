@@ -92,8 +92,8 @@ fi
 
 if [ "${UPLOAD_PRE_RELEASE}" = true ]; then
   printf "Uploading pre-release %s\n" "${NEXT_TAG}"
-  if [ "${CIRRUS_CI:-}" = 'true' ] && [ "${CIRRUS_BRANCH:-}" = 'master' ]; then
-    printf "Not on master in CIRRUS_CI, skipping pre-release upload\n"
+  if [ "${CIRRUS_CI:-}" = 'true' ] && [ "${CIRRUS_BRANCH:-}" = 'main' ]; then
+    printf "Not on main in CIRRUS_CI, skipping pre-release upload\n"
     exit 0
   fi
   if [ "${CIRRUS_CI:-}" = 'true' ]; then

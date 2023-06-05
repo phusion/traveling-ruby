@@ -1,9 +1,9 @@
 #!/bin/sh -e
 ## Tested with https://www.shellcheck.net/
 # Usage: (install latest release & latest ruby version)
-#   $ curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/master/install.sh | sh
+#   $ curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/main/install.sh | sh
 # or
-#   $ wget -q https://raw.githubusercontent.com/you54f/traveling-ruby/master/install.sh -O- | sh
+#   $ wget -q https://raw.githubusercontent.com/you54f/traveling-ruby/main/install.sh -O- | sh
 
 # Options
 # TRAVELING_RUBY_VERSION - set ruby version eg TRAVELING_RUBY_VERSION=2.7.3
@@ -12,14 +12,14 @@
 # TRAVELING_RUBY_CLEAN_INSTALL - set to true to remove existing install eg TRAVELING_RUBY_CLEAN_INSTALL=true
 
 # Usage: (install fixed version of a release) -
-#   $ curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/master/install.sh | TRAVELING_RUBY_RELEASE_TAG=rel-20230605 sh
+#   $ curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/main/install.sh | TRAVELING_RUBY_RELEASE_TAG=rel-20230605 sh
 # or
-#   $ wget -q https://raw.githubusercontent.com/you54f/traveling-ruby/master/install.sh -O- | TRAVELING_RUBY_RELEASE_TAG=rel-20230605 sh
+#   $ wget -q https://raw.githubusercontent.com/you54f/traveling-ruby/main/install.sh -O- | TRAVELING_RUBY_RELEASE_TAG=rel-20230605 sh
 
 # Usage: (install fixed version of ruby) -
-#   $ curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/master/install.sh | TRAVELING_RUBY_VERSION=2.6.10 sh
+#   $ curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/main/install.sh | TRAVELING_RUBY_VERSION=2.6.10 sh
 # or
-#   $ wget -q https://raw.githubusercontent.com/you54f/traveling-ruby/master/install.sh -O- | TRAVELING_RUBY_VERSION=2.6.10 sh
+#   $ wget -q https://raw.githubusercontent.com/you54f/traveling-ruby/main/install.sh -O- | TRAVELING_RUBY_VERSION=2.6.10 sh
 
 PROJECT_NAME='traveling-ruby'
 TRAVELING_RUBY_GH_SOURCE=YOU54F/${PROJECT_NAME}
@@ -80,7 +80,7 @@ if [ -z "$TRAVELING_RUBY_PKG_DATE" ]; then
   echo "-------------"
   echo "You can download a fixed version by setting the TRAVELING_RUBY_RELEASE_TAG environment variable eg TRAVELING_RUBY_RELEASE_TAG=$TRAVELING_RUBY_RELEASE_TAG"
   echo "example:"
-  echo "  curl -fsSL https://raw.githubusercontent.com/${TRAVELING_RUBY_GH_SOURCE}/master/install.sh | TRAVELING_RUBY_RELEASE_TAG=$TRAVELING_RUBY_RELEASE_TAG sh"
+  echo "  curl -fsSL https://raw.githubusercontent.com/${TRAVELING_RUBY_GH_SOURCE}/main/install.sh | TRAVELING_RUBY_RELEASE_TAG=$TRAVELING_RUBY_RELEASE_TAG sh"
 else
   echo "Thanks for downloading ${PROJECT_NAME} version $PACT_CLI_VERSION."
 fi
@@ -88,7 +88,7 @@ fi
 echo "-------------"
 echo "You can download a fixed ruby version by setting the TRAVELING_RUBY_VERSION environment variable eg TRAVELING_RUBY_VERSION=$TRAVELING_RUBY_VERSION"
 echo "example:"
-echo "  curl -fsSL https://raw.githubusercontent.com/${TRAVELING_RUBY_GH_SOURCE}/master/install.sh | TRAVELING_RUBY_VERSION=$TRAVELING_RUBY_VERSION sh"
+echo "  curl -fsSL https://raw.githubusercontent.com/${TRAVELING_RUBY_GH_SOURCE}/main/install.sh | TRAVELING_RUBY_VERSION=$TRAVELING_RUBY_VERSION sh"
 echo "-------------"
 
 echo "detecting platform & architecture"

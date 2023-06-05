@@ -154,7 +154,7 @@ linux_x64_packager_docker_builder:
 linux_arm64_matrix_docker_builder:
   cpu: 4
   memory: 4G
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_BRANCH =~ 'master'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_BRANCH =~ 'main'
   env:
     CIRRUS_ARCH: arm64
     PLATFORM: linux
@@ -171,7 +171,7 @@ linux_arm64_matrix_docker_builder:
 linux_x64_matrix_docker_builder:
   cpu: 4
   memory: 4G
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-x86_64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_BRANCH =~ 'master'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-x86_64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_BRANCH =~ 'main'
   env:
     CIRRUS_ARCH: amd64
     PLATFORM: linux
@@ -290,7 +290,7 @@ macos_packager_task:
 
 
 macos_arm64_matrix_task:
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos-arm64\).*' || $CIRRUS_BRANCH =~ 'master'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos-arm64\).*' || $CIRRUS_BRANCH =~ 'main'
   macos_instance:
     # image: traveling-ruby-builder
     # image: ghcr.io/cirruslabs/macos-ventura-vanilla:latest
@@ -321,7 +321,7 @@ macos_arm64_matrix_task:
   <<: *BINARY_ATRIFACTS
 
 macos_x86_64_matrix_task:
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos-x86_64\).*' || $CIRRUS_BRANCH =~ 'master'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos-x86_64\).*' || $CIRRUS_BRANCH =~ 'main'
   macos_instance:
     # image: traveling-ruby-builder
     image: ghcr.io/cirruslabs/macos-ventura-base:latest
@@ -349,7 +349,7 @@ macos_x86_64_matrix_task:
 # ========================================
 
 windows_packager_task: 
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-windows\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager\).*' || $CIRRUS_BRANCH =~ 'master'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(packager-windows\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(packager\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_BRANCH =~ 'main'
   env:
     PLATFORM: windows
     matrix:
