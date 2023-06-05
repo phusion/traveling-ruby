@@ -182,18 +182,21 @@ echo $GEM_PLATFORM > "$OUTPUT_DIR/info/GEM_PLATFORM"
 echo $GEM_EXTENSION_API_VERSION > "$OUTPUT_DIR/info/GEM_EXTENSION_API_VERSION"
 echo
 
-
 header "Updating RubyGems..."
 
-run "$CACHE_DIR/bin/gem" update --system $RUBYGEMS_VERSION --no-document
-run "$CACHE_DIR/bin/gem" uninstall -x rubygems-update
+if $OUTPUT_DIR/bin/gem --version | grep -q $RUBYGEMS_VERSION; then
+	echo "RubyGems is up to date."
+else
+	echo "RubyGems is out of date, updating..."
+	run $OUTPUT_DIR/bin/gem update --system $RUBYGEMS_VERSION --no-document
+fi
 
 header "Installing Bundler..."
 if [[ -e "$CACHE_DIR/bundler-$BUNDLER_VERSION.gem" ]]; then
-	run gem install "$CACHE_DIR/bundler-$BUNDLER_VERSION.gem" --no-document \
+	run $OUTPUT_DIR/bin/gem install "$CACHE_DIR/bundler-$BUNDLER_VERSION.gem" --no-document \
 		--install-dir "$OUTPUT_DIR/lib/ruby/gems/$RUBY_COMPAT_VERSION"
 else
-	run gem install bundler -v $BUNDLER_VERSION --no-document \
+	run $OUTPUT_DIR/bin/gem install bundler -v $BUNDLER_VERSION --no-document \
 		--install-dir "$OUTPUT_DIR/lib/ruby/gems/$RUBY_COMPAT_VERSION"
 fi
 run cp "$OUTPUT_DIR/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache"/*.gem "$CACHE_DIR/" || true

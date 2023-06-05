@@ -13,6 +13,7 @@ GEMFILES=()
 
 RUNTIME_DIR=
 OUTPUT_DIR=
+ARCHITECTURE=$(uname -m)
 RUBY_VERSION=${RUBY_VERSIONS[0]}
 WORKDIR=
 OWNS_WORKDIR=true
@@ -116,6 +117,7 @@ function usage()
 	echo "Build Traveling Ruby binaries."
 	echo
 	echo "Options:"
+	echo "  -a NAME        Architecture to setup (e.g. x86_64 or arm64)"
 	echo "  -E          Do not setup source"
 	echo "  -C          Do not compile Ruby"
 	echo "  -G          Do not install gems"
@@ -131,8 +133,11 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "ECGr:w:j:g:h" opt; do
+	while getopts "a:ECGr:w:j:g:h" opt; do
 		case "$opt" in
+		a)
+			ARCHITECTURE=$OPTARG
+			;;
 		E)
 			SETUP_SOURCE=false
 			;;
@@ -211,20 +216,18 @@ if [[ -e ~/.bundle/config ]]; then
 	exit 1
 fi
 "$SELFDIR/internal/check_requirements.sh"
-
-	ARCH=$(uname -m)
-	if [[ "$ARCHITECTURE" == "x86_64" ]]; then
-		BUILDTARGET="darwin64-x86_64-cc"
-		DEPLOY_TARGET="x86_64-apple-darwin22"
-	elif [[ "$ARCHITECTURE" == "arm64" ]]; then
-		BUILDTARGET="darwin64-arm64-cc"
-		DEPLOY_TARGET="aarch64-apple-darwin22"
-	else
-		echo "*** ERROR: unknown architecture $ARCHITECTURE, don't know how to build"
-		echo "set ARCHITECTURE to one of: x86_64 arm64"
-		echo "we detected you are running on via uname: $ARCH"
-		exit 1
-	fi
+if [[ "$ARCHITECTURE" == "x86_64" ]]; then
+	BUILD_TARGET="darwin64-x86_64-cc"
+	DEPLOY_TARGET="x86_64-apple-darwin22"
+elif [[ "$ARCHITECTURE" == "arm64" ]]; then
+	BUILD_TARGET="darwin64-arm64-cc"
+	DEPLOY_TARGET="aarch64-apple-darwin22"
+else
+	echo "*** ERROR: unknown architecture $ARCHITECTURE, don't know how to build"
+	echo "set ARCHITECTURE to one of: x86_64 arm64"
+	echo "we detected you are running on via uname: $(uname -m)"
+	exit 1
+fi
 
 #######################################
 RUBY_MAJOR=`echo $RUBY_VERSION | cut -d . -f 1`
@@ -344,8 +347,18 @@ if [[ "$GEMFILE" != "" ]]; then
 	fi
 
 	# Update RubyGems to the specified version.
-	run "$TMPBUILDROOT/bin/gem" update --system $RUBYGEMS_VERSION --no-document
-	run "$TMPBUILDROOT/bin/gem" uninstall -x rubygems-update
+	
+	
+
+	header "Updating RubyGems..."
+
+	if "$TMPBUILDROOT/bin/gem" --version | grep -q $RUBYGEMS_VERSION; then
+		echo "RubyGems is up to date."
+	else
+		echo "RubyGems is out of date, updating..."
+		run "$TMPBUILDROOT/bin/gem" update --system $RUBYGEMS_VERSION --no-document
+		run "$TMPBUILDROOT/bin/gem" uninstall -x rubygems-update
+	fi
 
 	# Install Bundler, either from cache or directly.
 	if [[ -e "$RUNTIME_DIR/vendor/cache/bundler-$BUNDLER_VERSION.gem" ]]; then

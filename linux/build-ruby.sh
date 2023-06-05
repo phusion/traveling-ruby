@@ -11,6 +11,7 @@ RUBY_VERSIONS=(`cat "$SELFDIR/../RUBY_VERSIONS.txt"`)
 OUTPUT_DIR=
 IMAGE=
 RUBY_VERSION=${RUBY_VERSIONS[0]}
+ARCHITECTURE=$(uname -m)
 CACHE_DIR=
 CONCURRENCY=$CPUCOUNT
 GEMFILE="$SELFDIR/../shared/gemfiles"
@@ -45,8 +46,11 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "i:r:c:ECGj:g:dDh" opt; do
+	while getopts "a:i:r:c:ECGj:g:dDh" opt; do
 		case "$opt" in
+		a)
+			ARCHITECTURE=$OPTARG
+			;;
 		i)
 			IMAGE=$OPTARG
 			;;
@@ -149,6 +153,7 @@ exec docker run \
 	"${TTY_ARGS[@]}" \
 	--rm \
 	--init \
+	--platform linux/"$ARCHITECTURE" \
 	-v "$SELFDIR/internal:/system:ro" \
 	-v "$SELFDIR/../shared:/system_shared:ro" \
 	-v "$OUTPUT_DIR:/output" \

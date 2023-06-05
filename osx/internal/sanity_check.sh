@@ -41,7 +41,7 @@ for F in $DIR/bin.real/ruby `find $DIR -name '*.bundle'` `find $DIR -name '*.dyl
 done
 if $ERROR; then
 	echo "Uh Oh."
-	# exit 1
+	exit 1
 else
 	echo "All OK."
 fi

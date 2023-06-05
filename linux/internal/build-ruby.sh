@@ -256,7 +256,15 @@ if [[ "$DEBUG_SHELL" = before ]]; then
 	open_debug_shell
 fi
 if [[ -e /system_shared/gemfiles ]]; then
-	run /tmp/ruby/bin/gem update --system  $RUBYGEMS_VERSION --no-document
+
+	header "Updating RubyGems..."
+
+	if /tmp/ruby/bin/gem --version | grep -q $RUBYGEMS_VERSION; then
+		echo "RubyGems is up to date."
+	else
+		echo "RubyGems is out of date, updating..."
+		run /tmp/ruby/bin/gem update --system  $RUBYGEMS_VERSION --no-document
+	fi
 	run /tmp/ruby/bin/gem uninstall -x rubygems-update
 	run /tmp/ruby/bin/gem install bundler -v $BUNDLER_VERSION --no-document
 	if [[ "$DEBUG_SHELL" = after ]]; then
@@ -319,14 +327,8 @@ run chown -R $APP_UID:$APP_GID /tmp/ruby
 run mv /tmp/ruby/* /output/
 
 
-if $SANITY_CHECK_OUTPUT_IGNORE; then
+if $SANITY_CHECK_OUTPUT; then
 	header "Sanity checking build output"
 	env LIBCHECK_ALLOW='libreadline|libtinfo|libformw|libmenuw|libncursesw' \
-	# env LIBCHECK_ALLOW='libreadline|libtinfo|libformw|libmenuw|libncursesw|libffi' \
-		libcheck /output/bin.real/ruby $(find /output -name '*.so') || true
-elif $SANITY_CHECK_OUTPUT; then
-	header "Sanity checking build output"
-	env LIBCHECK_ALLOW='libreadline|libtinfo|libformw|libmenuw|libncursesw' \
-	# env LIBCHECK_ALLOW='libreadline|libtinfo|libformw|libmenuw|libncursesw|libffi' \
 		libcheck /output/bin.real/ruby $(find /output -name '*.so')
 fi

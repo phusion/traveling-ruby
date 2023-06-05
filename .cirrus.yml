@@ -114,19 +114,9 @@ RUBY_VERSIONS_MATRIX_LINUX: &RUBY_VERSIONS_MATRIX_LINUX
 RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER: &RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER
   package_script: cd $PLATFORM && rake
 
-RUBY_VERSIONS_MATRIX_RUNNER: &RUBY_VERSIONS_MATRIX_RUNNER
-  build_script: cd $PLATFORM && $script
-  test_script: cd $PLATFORM && $test
-
 RUBY_VERSIONS_MATRIX_DOCKER_RUNNER: &RUBY_VERSIONS_MATRIX_DOCKER_RUNNER
-  package_script: cd $PLATFORM && rake package
+  package_script: cd $PLATFORM && rake
   testdocker_script: cd $PLATFORM && rake testdocker
-
-ENV_TEMPLATE: &ENV_TEMPLATE
-  SANITY_CHECK_OUTPUT_IGNORE: "true"
-  # ARCHITECTURES: $CIRRUS_ARCH
-  ## Note - $CIRRUS_ARCH is amd64 but scripts expect x86_64
-  ## Note - $CIRRUS_ARCH is arm64 which scripts expect
 
 ENV_CHECK_SCRIPT: &ENV_CHECK_SCRIPT
   check_script: |
@@ -159,7 +149,6 @@ linux_arm64_packager_docker_builder:
     CIRRUS_ARCH: arm64
     PLATFORM: linux
     ARCHITECTURES: arm64
-    <<: *ENV_TEMPLATE
   <<: *ENV_CHECK_SCRIPT
   <<: *RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER
   broken_version_remover_script: |
@@ -178,7 +167,6 @@ linux_x64_packager_docker_builder:
     CIRRUS_ARCH: amd64
     PLATFORM: linux
     ARCHITECTURES: x86_64
-    <<: *ENV_TEMPLATE
   <<: *ENV_CHECK_SCRIPT
   broken_version_remover_script: |
     sed -ie '/3.1.4/d' RUBY_VERSIONS.txt
@@ -206,7 +194,6 @@ linux_arm64_matrix_docker_builder:
     CIRRUS_ARCH: arm64
     PLATFORM: linux
     ARCHITECTURES: arm64
-    <<: *ENV_TEMPLATE
     matrix:
       *RUBY_VERSIONS_MATRIX_LINUX
   <<: *ENV_CHECK_SCRIPT
@@ -223,7 +210,6 @@ linux_x64_matrix_docker_builder:
     CIRRUS_ARCH: amd64
     PLATFORM: linux
     ARCHITECTURES: x86_64
-    <<: *ENV_TEMPLATE
     matrix:
       *RUBY_VERSIONS_MATRIX_LINUX
   <<: *ENV_CHECK_SCRIPT
@@ -307,6 +293,8 @@ mac_ruby_setup: &mac_ruby_setup
       brew install ruby@$RUBY_MAJOR_MINOR
     fi
 
+macos_stash_conflicting_paths: &macos_stash_conflicting_paths
+  stash_conflicting_paths_script: cd $PLATFORM && sudo rake stash_conflicting_paths
 
 # ========================================
 # MacOS - Packager
@@ -323,6 +311,7 @@ macos_packager_task:
   <<: *macos_check
   <<: *cirrus_cli_setup
   # <<: *set_bundler_version
+  <<: *macos_stash_conflicting_paths
   # <<: *download_macos_runtime
   package_script: cd $PLATFORM && rake
   <<: *BINARY_ATRIFACTS
@@ -345,22 +334,21 @@ macos_arm64_matrix_task:
   env:
     PLATFORM: osx
     ARCHITECTURES: arm64
-    ARCHITECTURE: arm64 # temp measure, will be set by rakefile when running targeted x86_64 / arm64 builds
-    <<: *ENV_TEMPLATE
     matrix:
       *RUBY_VERSIONS_MATRIX_MACOS
   <<: *macos_check
   <<: *cirrus_cli_setup
+  <<: *macos_stash_conflicting_paths
   # <<: *download_macos_runtime
-  stash_ruby_script: |
-    which ruby
-    rm -rf $HOME/.rbenv/
-    brew uninstall rbenv
-    brew uninstall gcc
-    brew uninstall cmake
-    ruby --version
-    ln -s /usr/bin/ruby $HOME/foo
-    ruby --version
+  # stash_ruby_script: |
+  #   which ruby
+  #   rm -rf $HOME/.rbenv/
+  #   brew uninstall rbenv
+  #   brew uninstall gcc
+  #   brew uninstall cmake
+  #   ruby --version
+  #   ln -s /usr/bin/ruby $HOME/foo
+  #   ruby --version
   package_script: cd $PLATFORM && rake
   test_script: cd $PLATFORM && rake test
   # upload_output_dir_script: cd $PLATFORM && tar -czvf $PLATFORM-runtime.tar.gz runtime
@@ -375,13 +363,12 @@ macos_x86_64_matrix_task:
   env:
     PLATFORM: osx
     ARCHITECTURES: x86_64
-    ARCHITECTURE: x86_64 # temp measure, will be set by rakefile when running targeted x86_64 / arm64 builds
     # $USE_ROSETTA: arch -m x86_64
-    <<: *ENV_TEMPLATE
     matrix:
       *RUBY_VERSIONS_MATRIX_MACOS
   <<: *macos_check
   <<: *cirrus_cli_setup
+  <<: *macos_stash_conflicting_paths
   # <<: *download_macos_runtime
   install_rosetta_script: softwareupdate --install-rosetta --agree-to-license
   package_script: cd $PLATFORM && $USE_ROSETTA rake

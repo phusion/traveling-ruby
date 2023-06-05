@@ -20,7 +20,7 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "hap:" opt; do
+	while getopts "ha:p:" opt; do
 		case "$opt" in
 		h)
 			usage

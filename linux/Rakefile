@@ -98,7 +98,7 @@ ARCHITECTURES.each do |arch|
     # whenever we update binaries.
     file("output/#{ruby_version}-#{arch}/bin" => "cache/#{ruby_version}-#{arch}") do
       sh "mkdir -p output/#{ruby_version}-#{arch}"
-      sh "./build-ruby.sh -j #{CONCURRENCY} -i you54f/traveling-ruby-builder-#{arch}:#{IMAGE_VERSION}" \
+      sh "./build-ruby.sh -a #{arch} -j #{CONCURRENCY} -i you54f/traveling-ruby-builder-#{arch}:#{IMAGE_VERSION}" \
         " -r #{ruby_version} -c cache/#{ruby_version}-#{arch}" \
         " output/#{ruby_version}-#{arch}"
     end

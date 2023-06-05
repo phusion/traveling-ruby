@@ -7,12 +7,12 @@ See the "System requirements" section.
 To build binary packages for `arm64`, run:
 
     cd osx
-    ARCHITECTURE=arm64 rake
+    ARCHITECTURES=arm64 rake
 
 To build binary packages for `x86_64`, run:
 
     cd osx
-    ARCHITECTURE=x86_64 rake
+    ARCHITECTURES=x86_64 rake
 
 You can view all tasks by running `rake -T`.
 
@@ -36,7 +36,7 @@ In order to cross-compile for `x86_64` from `arm64` hosts, you _must_ install Ro
 
 - `sudo softwareupdate --install-rosetta --agree-to-license`
 
-_Note:_ You don't need to run in a Rosetta enabled shell or prefix your command with `-arch x86_64`, setting the `ARCHITECTURE` value to `x86_64` is sufficient.
+_Note:_ You don't need to run in a Rosetta enabled shell or prefix your command with `-arch x86_64`, setting the `ARCHITECTURES` value to `x86_64` is sufficient.
 
  <!-- 
  

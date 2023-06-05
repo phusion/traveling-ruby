@@ -9,6 +9,7 @@ source "$SELFDIR/../shared/library.sh"
 TEMPDIR=
 
 RUNTIME_DIR=
+ARCHITECTURE=$(uname -m)
 CONCURRENCY=$(sysctl -n hw.ncpu)
 FORCE_CCACHE=false
 SKIP_CCACHE=false
@@ -80,6 +81,7 @@ function usage()
 	echo "Sets up the Traveling Ruby build system's runtime."
 	echo
 	echo "Options:"
+	echo "  -a NAME        Architecture to setup (e.g. x86_64 or arm64)"
 	echo "  -c      Force installing CMake"
 	echo "  -C      Skip installing CMake"
 	echo "  -o      Force installing OpenSSL"
@@ -104,8 +106,6 @@ function usage()
 	echo "  -P      Skip installing PostgreSQL"
 	echo "  -k      Force installing PKG_CONFIG"
 	echo "  -K      Skip installing PKG_CONFIG"
-	echo "  -a      Force installing AUTOCONF"
-	echo "  -A      Skip installing AUTOCONF"
 	echo "  -u      Force installing AUTOMAKE"
 	echo "  -U      Skip installing AUTOMAKE"
 	echo "  -l      Force installing LIBTOOL"
@@ -127,8 +127,11 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "lLuUaAkKcCoOnNeEgGfFyYsSzZmMpPiIbBxXtTj:h" opt; do
+	while getopts "a:lLuUkKcCoOnNeEgGfFyYsSzZmMpPiIbBxXtTj:h" opt; do
 		case "$opt" in
+		a)
+			ARCHITECTURE=$OPTARG
+			;;
 		c)
 			FORCE_CMAKE=true
 			;;
@@ -158,12 +161,6 @@ function parse_options()
 			;;
 		K)
 			SKIP_PKG_CONFIG=true
-			;;
-		a)
-			FORCE_AUTOCONF=true
-			;;
-		A)
-			SKIP_AUTOCONF=true
 			;;
 		u)
 			FORCE_AUTOMAKE=true
@@ -271,7 +268,19 @@ parse_options "$@"
 echo "Runtime directory: $RUNTIME_DIR"
 mkdir -p "$RUNTIME_DIR"
 RUNTIME_DIR="`cd \"$RUNTIME_DIR\" && pwd`"
-"$SELFDIR/internal/check_requirements.sh"
+"$SELFDIR/internal/check_requirements.sh" "$ARCHITECTURE"
+if [[ "$ARCHITECTURE" == "x86_64" ]]; then
+	BUILD_TARGET="darwin64-x86_64-cc"
+	DEPLOY_TARGET="x86_64-apple-darwin22"
+elif [[ "$ARCHITECTURE" == "arm64" ]]; then
+	BUILD_TARGET="darwin64-arm64-cc"
+	DEPLOY_TARGET="aarch64-apple-darwin22"
+else
+	echo "*** ERROR: unknown architecture $ARCHITECTURE, don't know how to build"
+	echo "set ARCHITECTURE to one of: x86_64 arm64"
+	echo "we detected you are running on via uname: $(uname -m)"
+	exit 1
+fi
 
 
 #######################################
@@ -322,19 +331,7 @@ echo
 # export CPPFLAGS="-w"
 # export CXXFLAGS="-w"
 # export CFLAGS="-w"
-	ARCH=$(uname -m)
-	if [[ "$ARCHITECTURE" == "x86_64" ]]; then
-		BUILDTARGET="darwin64-x86_64-cc"
-		DEPLOY_TARGET="x86_64-apple-darwin22"
-	elif [[ "$ARCHITECTURE" == "arm64" ]]; then
-		BUILDTARGET="darwin64-arm64-cc"
-		DEPLOY_TARGET="aarch64-apple-darwin22"
-	else
-		echo "*** ERROR: unknown architecture $ARCHITECTURE, don't know how to build"
-		echo "set ARCHITECTURE to one of: x86_64 arm64"
-		echo "we detected you are running on via uname: $ARCH"
-		exit 1
-	fi
+
 header "Installing tool 1/$TOTAL_TOOLS: CMake..."
 if $SKIP_CMAKE; then
 	echo "Skipped."
@@ -477,7 +474,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/openssl-ok" ]] || $FORCE_OPENSSL; then
 	pushd openssl-$OPENSSL_VERSION >/dev/null
 
 
-	run ./Configure "$BUILDTARGET" --prefix="$RUNTIME_DIR" --openssldir="$RUNTIME_DIR/openssl" threads zlib shared
+	run ./Configure "$BUILD_TARGET" --prefix="$RUNTIME_DIR" --openssldir="$RUNTIME_DIR/openssl" threads zlib shared
 	run make -j$CONCURRENCY
 	run make install_sw
 
