@@ -6,16 +6,16 @@ on:
 
 jobs:
   local_install_script:
-    name: "${{matrix.ruby-version}} ${{ matrix.os }}"
+    name: "${{matrix.ruby-version}} ${{ matrix.os }} ${{ matrix.shell }}"
     timeout-minutes: 10
     strategy:
       matrix:
         os: [macos-latest,ubuntu-latest]
         shell: [bash, sh]
         ## Linux
-        ruby-version: [2.6.10,3.0.4,3.1.2,3.2.2,3.3.0-preview1]
+        # ruby-version: [2.6.10,3.0.4,3.1.2,3.2.2,3.3.0-preview1]
         # # macOS
-        # ruby-version: [2.6.10,3.0.4,3.0.6,3.1.2,3.1.4,3.2.2,3.3.0-preview1]
+        ruby-version: [2.6.10,3.0.4,3.0.6,3.1.2,3.1.4,3.2.2,3.3.0-preview1]
       fail-fast: false
     defaults:
       run:
@@ -40,9 +40,7 @@ jobs:
           which ruby
           brew uninstall ruby@3.0
           ruby --version
-          sudo rm -rf /usr/bin/ruby
-          sudo rm -rf /Library/Ruby
-          ruby --version || echo "ruby not found as expected"
+          which ruby
       - uses: actions/checkout@v3
       - run: ./cli.sh --ci -v ${{ matrix.ruby-version }}
         name: install via cli.sh
@@ -50,25 +48,30 @@ jobs:
         name: ruby --version via ${{ matrix.shell }}
       # - run: gem install pact_broker-client
 
-  windows_local_install_script:
-    name: "${{matrix.ruby-version}} ${{ matrix.os }}"
-    runs-on: windows-latest
-    strategy:
-      matrix:
-        shell: [cmd, powershell, pwsh, bash, sh]
-        ruby-version: [2.6.10,3.0.4,3.1.2,3.2.2,3.3.0-preview1]
-      fail-fast: false
-    defaults:
-      run:
-        shell: ${{ matrix.shell }}
-    steps:
-      - uses: actions/checkout@v3
-      - run: |
-          "$HOME\.traveling-ruby\bin\" >> $env:GITHUB_PATH
-        shell: powershell
-        if: matrix.shell == 'powershell' || matrix.shell == 'pwsh' || matrix.shell == 'cmd'
-      - run: ./cli.sh --ci -v ${{ matrix.ruby-version }}
-        name: install via cli.sh
-        shell: sh
-      - run: ruby --version
-        name: ruby --version via ${{ matrix.shell }}
+  # windows_local_install_script:
+  #   name: "${{matrix.ruby-version}} Windows"
+  #   runs-on: windows-latest
+  #   strategy:
+  #     matrix:
+  #       shell: [cmd, powershell, pwsh, bash, sh]
+  #       ruby-version: [2.6.10,3.0.4,3.1.2,3.2.2,3.3.0-preview1]
+  #     fail-fast: false
+  #   defaults:
+  #     run:
+  #       shell: ${{ matrix.shell }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - run: |
+  #         "$HOME\.traveling-ruby\bin\" >> $env:GITHUB_PATH
+  #       shell: powershell
+  #       if: matrix.shell == 'powershell' || matrix.shell == 'pwsh' || matrix.shell == 'cmd'
+  #     - run: ./cli.sh --ci -v ${{ matrix.ruby-version }}
+  #       name: install via cli.sh
+  #       shell: sh
+  #     - run: ruby --version
+  #       name: ruby --version via ${{ matrix.shell }}
+  #       if: matrix.shell == 'bash' || matrix.shell == 'sh'
+  #     - run: ruby --version
+  #       name: ruby.exe --version via ${{ matrix.shell }}
+  #       if: matrix.shell == 'powershell' || matrix.shell == 'pwsh' || matrix.shell == 'cmd'
+

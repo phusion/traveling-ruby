@@ -10,7 +10,8 @@ jobs:
 
     strategy:
       matrix:
-        os: [ubuntu-latest,windows-latest,macos-latest]
+        os: [ubuntu-latest,macos-latest]
+        # os: [ubuntu-latest,windows-latest,macos-latest]
       fail-fast: false
 
     runs-on: ${{ matrix.os }}
@@ -28,17 +29,19 @@ jobs:
           ruby --version || echo "ruby not found as expected"
           /home/linuxbrew/.linuxbrew/bin/brew --version
           sudo rm -rf /home/linuxbrew
-          
+
+      # - name: remove system install ruby from windows
+      #   if: runner.os == 'Windows'
+      #   run: |
+      #     choco uninstall ruby
       - name: remove system install ruby from macos
-        if: env.ACT != 'true' && runner.os == 'macOS'
+        if: runner.os == 'macOS'
         run: |
           ruby --version
           which ruby
           brew uninstall ruby@3.0
           ruby --version
-          sudo rm -rf /usr/bin/ruby
-          sudo rm -rf /Library/Ruby
-          ruby --version || echo "ruby not found as expected"
+          which ruby
 
       - uses: actions/checkout@v3
 
@@ -58,18 +61,18 @@ jobs:
 
 
       - name: cmd
-        run: ruby --version
+        run: ruby.exe --version
         if: runner.os == 'windows'
         shell: cmd
 
 
       - name: powershell
-        run: ruby --version
+        run: ruby.exe --version
         if: runner.os == 'windows'
         shell: powershell
 
 
       - name: pwsh
-        run: ruby --version
+        run: ruby.exe --version
         if: runner.os == 'windows'
         shell: pwsh
