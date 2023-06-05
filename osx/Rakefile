@@ -65,14 +65,13 @@ task :unstash_conflicting_paths do
 end
 
 ARCHITECTURES.each do |arch|
-
-
-
   RUBY_VERSIONS.each do |ruby_version|
     package = "traveling-ruby-#{VERSION}-#{ruby_version}-osx-#{arch}.tar.gz"
+    package_full = "traveling-ruby-#{VERSION}-#{ruby_version}-osx-#{arch}-full.tar.gz"
     gem_dir = "traveling-ruby-gems-#{VERSION}-#{ruby_version}-osx-#{arch}"
 
     task :package => "package:#{ruby_version}:#{arch}"
+    task :package_full => "package_full:#{ruby_version}:#{arch}"
     task :build   => "build:#{ruby_version}:#{arch}"
     task :test    => "test:#{ruby_version}:#{arch}"
     task :upload  => "upload:#{ruby_version}:#{arch}"
@@ -84,6 +83,10 @@ ARCHITECTURES.each do |arch|
     desc "Build binaries for Ruby #{ruby_version} #{arch}"
     task "build:#{ruby_version}:#{arch}" => "output/#{ruby_version}-#{arch}/bin"
 
+    desc "Create full fat package for Ruby #{ruby_version} #{arch}"
+    task "package_full:#{ruby_version}:#{arch}" => ["#{gem_dir}/ok"] do
+      sh "./package.sh -f -r #{package_full} output/#{ruby_version}-#{arch}"
+    end
 
     file(package => "output/#{ruby_version}-#{arch}/bin") do
       sh "./package.sh -r #{package} output/#{ruby_version}-#{arch}"

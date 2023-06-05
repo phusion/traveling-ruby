@@ -163,13 +163,11 @@ header "checking usr lib dir"
 run ls $USRLIBDIR
 run ls /usr/lib
 run ls /hbb_shlib/lib
-# run ls /hbb_shlib/lib64
 run cp $USRLIBDIR/libtinfo.so.5 /tmp/ruby/lib/
 if [[ $RUBY_MAJOR -lt 3 || $RUBY_MAJOR -eq 3 && $RUBY_MINOR -lt 3 ]]; then
 	run cp $USRLIBDIR/libreadline.so.6 /tmp/ruby/lib/
 fi
-# run cp $USRLIBDIR/libyaml-0.so.2 /tmp/ruby/lib/
-# run cp $USRLIBDIR/libyaml-0.so.2.0.4 /tmp/ruby/lib/
+
 run cp /system_shared/ca-bundle.crt /tmp/ruby/lib/
 run cp /system/traveling_ruby_restore_environment.rb /tmp/ruby/lib/ruby/site_ruby/
 export SSL_CERT_FILE=/tmp/ruby/lib/ca-bundle.crt
@@ -251,6 +249,8 @@ export BUNDLE_BUILD__CHARLOCK_HOLMES=--with-ldflags="'$DEFAULT_LDFLAGS -Wl,--who
 export BUNDLE_BUILD__RUGGED=--with-ldflags="'$DEFAULT_LDFLAGS -Wl,--whole-archive -lssl -lcrypto -Wl,--no-whole-archive'"
 export BUNDLE_BUILD__PUMA=--with-ldflags="'$DEFAULT_LDFLAGS -lz'"
 export BUNDLE_BUILD__EVENTMACHINE=--with-ldflags="'$DEFAULT_LDFLAGS -lz'"
+export BUNDLE_BUILD__SQLLITE=--with-ldflags="'$DEFAULT_LDFLAGS -lz'"
+export BUNDLE_BUILD__MYSQL2="--with-system-libraries"
 
 if [[ "$DEBUG_SHELL" = before ]]; then
 	open_debug_shell
@@ -291,12 +291,34 @@ run rm /tmp/ruby/bin/{erb,rdoc,ri}
 run rm -f /tmp/ruby/bin/testrb # Only Ruby 2.1 has it
 run rm -rf /tmp/ruby/include
 run rm -rf /tmp/ruby/share
-run rm -rf /tmp/ruby/lib/{libruby-static.a,pkgconfig}
+run rm -rf /tmp/ruby/lib/{libruby*static.a,pkgconfig}
 run rm -rf /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
 run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
 run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out}
 run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
 run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/*.{c,h}
+
+# removes rugged libgit2 vendor folder
+find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/vendor | xargs rm -rf
+# Delete every bundled gem except for the bundled version of ruby
+header "Removing bundled gems for versions other than $RUBY_MAJOR_MINOR" 
+find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/lib/*/*.*/ -name '*.so'
+find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/lib/*/*.*/ -name '*.so' -not -path "*/$RUBY_MAJOR_MINOR/*"
+find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/lib/*/*.*/ -name '*.so' -not -path "*/$RUBY_MAJOR_MINOR/*" | xargs rm -rf
+find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/rugg*/  -name '*.so' | xargs rm -rf
+find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/char*/  -name '*.so' | xargs rm -rf
+find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/pg*/  -name '*.so' | xargs rm -rf
+find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/event*/  -name '*.so' | xargs rm -rf
+find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/puma*/  -name '*.so' | xargs rm -rf
+find /tmp/ruby/lib -type f -name '*.java'| xargs rm -f
+find /tmp/ruby/lib -type f -name '*.class'| xargs rm -f
+find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/contrib -type f | grep -v '.rb$'| xargs rm -f
+find . -name '.travis.yml'| xargs rm -rf
+find . -name '.github'| xargs rm -rf
+## Remove all .o and .so files, we will use the extensions folder
+# with exception to nokogiri and sqlite
+find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems -name '*.o' | xargs rm -f
+find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems -name '*.so' -not -path '*sqlite*' -not -path '*nokogiri*' | xargs rm -f
 
 if [[ -e /system_shared/gemfiles ]]; then
 	echo "+ Entering Bundler gem directory"
@@ -326,6 +348,7 @@ header "Committing build output"
 run chown -R $APP_UID:$APP_GID /tmp/ruby
 run mv /tmp/ruby/* /output/
 
+find /output -name '*.so*'
 
 if $SANITY_CHECK_OUTPUT; then
 	header "Sanity checking build output"

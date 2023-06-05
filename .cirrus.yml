@@ -31,7 +31,7 @@ UPLOAD_TASK: &UPLOAD_TASK
     done
     ls -l
     if [[ $CIRRUS_BRANCH == 'main' ]]; then
-      gh release upload "${NEXT_TAG}" traveling-ruby-*.tar.gz --repo "${REPO}"
+      gh release upload "${NEXT_TAG}" traveling-ruby-*.tar.gz --repo "${REPO}" --clobber
     else
       echo "Not on main branch, skipping upload"
     fi
@@ -111,11 +111,14 @@ RUBY_VERSIONS_MATRIX_LINUX: &RUBY_VERSIONS_MATRIX_LINUX
   # 3.1.2 and 3.0.4 are not the latest, but the latest that will build
   # for those branch on linux
 
-RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER: &RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER
+rake_package_and_test: &rake_package_and_test
   package_script: cd $PLATFORM && rake
+  package_full_script: cd $PLATFORM && rake package_full
+  test_script: cd $PLATFORM && rake test
 
-RUBY_VERSIONS_MATRIX_DOCKER_RUNNER: &RUBY_VERSIONS_MATRIX_DOCKER_RUNNER
+rake_package_and_testdocker: &rake_package_and_testdocker
   package_script: cd $PLATFORM && rake
+  package_full_script: cd $PLATFORM && rake package_full
   testdocker_script: cd $PLATFORM && rake testdocker
 
 ENV_CHECK_SCRIPT: &ENV_CHECK_SCRIPT
@@ -150,7 +153,7 @@ linux_arm64_packager_docker_builder:
     PLATFORM: linux
     ARCHITECTURES: arm64
   <<: *ENV_CHECK_SCRIPT
-  <<: *RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER
+  <<: *rake_package_and_test
   broken_version_remover_script: |
     sed -ie '/3.1.4/d' RUBY_VERSIONS.txt
     sed -ie '/3.0.6/d' RUBY_VERSIONS.txt
@@ -172,7 +175,7 @@ linux_x64_packager_docker_builder:
     sed -ie '/3.1.4/d' RUBY_VERSIONS.txt
     sed -ie '/3.0.6/d' RUBY_VERSIONS.txt
     sed -ie '/2.7.8/d' RUBY_VERSIONS.txt
-  <<: *RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER
+  <<: *rake_package_and_test
   <<: *INSTALL_GH_CLI
   <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
@@ -197,7 +200,7 @@ linux_arm64_matrix_docker_builder:
     matrix:
       *RUBY_VERSIONS_MATRIX_LINUX
   <<: *ENV_CHECK_SCRIPT
-  <<: *RUBY_VERSIONS_MATRIX_DOCKER_RUNNER
+  <<: *rake_package_and_testdocker
   <<: *INSTALL_GH_CLI
   <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
@@ -213,7 +216,7 @@ linux_x64_matrix_docker_builder:
     matrix:
       *RUBY_VERSIONS_MATRIX_LINUX
   <<: *ENV_CHECK_SCRIPT
-  <<: *RUBY_VERSIONS_MATRIX_DOCKER_RUNNER
+  <<: *rake_package_and_testdocker
   <<: *INSTALL_GH_CLI
   <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
@@ -314,6 +317,7 @@ macos_packager_task:
   <<: *macos_stash_conflicting_paths
   # <<: *download_macos_runtime
   package_script: cd $PLATFORM && rake
+  package_script: cd $PLATFORM && rake 
   <<: *BINARY_ATRIFACTS
 
 # ========================================
@@ -349,8 +353,7 @@ macos_arm64_matrix_task:
   #   ruby --version
   #   ln -s /usr/bin/ruby $HOME/foo
   #   ruby --version
-  package_script: cd $PLATFORM && rake
-  test_script: cd $PLATFORM && rake test
+  <<: *rake_package_and_test
   # upload_output_dir_script: cd $PLATFORM && tar -czvf $PLATFORM-runtime.tar.gz runtime
   <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
@@ -371,9 +374,7 @@ macos_x86_64_matrix_task:
   <<: *macos_stash_conflicting_paths
   # <<: *download_macos_runtime
   install_rosetta_script: softwareupdate --install-rosetta --agree-to-license
-  package_script: cd $PLATFORM && $USE_ROSETTA rake
-  # package_script: cd $PLATFORM && $USE_ROSETTA rake package
-  test_script: cd $PLATFORM && $USE_ROSETTA rake test
+  <<: *rake_package_and_test
   # upload_output_dir_script: cd $PLATFORM && tar -czvf $PLATFORM-runtime.tar.gz runtime
   <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
@@ -395,8 +396,8 @@ windows_packager_task:
   <<: *cirrus_cli_setup
   no_version_remover_script: |
     sed -ie '/3.3.0-preview1/d' RUBY_VERSIONS.txt
-  <<: *RUBY_VERSIONS_MULTI_RUBY_VERSION_BUILDER
-  # <<: *UPLOAD_TASK
+  package_script: cd $PLATFORM && rake
+  <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 
 

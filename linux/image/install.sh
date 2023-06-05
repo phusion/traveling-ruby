@@ -203,8 +203,7 @@ if [[ ! -e /hbb_shlib/lib64/libffi.a ]]; then
 		source /hbb_shlib/activate
 		export CFLAGS="$STATICLIB_CFLAGS"
 		export CXXFLAGS="$STATICLIB_CXXFLAGS"
-		# rm /usr/lib64/libffi.so.6
-		# rm /usr/lib64/libffi.so.6.0.1
+
 		unset LDFLAGS
 		header "libffi - configure"
 		## This works for libffi, but fiddle has an error

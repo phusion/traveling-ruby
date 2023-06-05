@@ -9,6 +9,7 @@ BUNDLER_VERSION=`cat "$SELFDIR/../BUNDLER_VERSION.txt"`
 BUILD_OUTPUT_DIR=
 RUBY_PACKAGE=
 GEM_NATIVE_EXTENSIONS_DIR=
+RUBY_PACKAGE_FULL=
 
 function load_ruby_info()
 {
@@ -42,6 +43,7 @@ function usage()
 	echo "Options:"
 	echo "  -r PATH    Package Ruby into given file"
 	echo "  -E DIR     Package gem native extensions into the given directory"
+	echo "  -f         Package Ruby with full gem set (not just default gems)"
 	echo "  -h         Show this help"
 }
 
@@ -49,10 +51,13 @@ function parse_options()
 {
 	local OPTIND=1
 	local opt
-	while getopts "r:E:h" opt; do
+	while getopts "r:E:hf" opt; do
 		case "$opt" in
 		r)
 			RUBY_PACKAGE="$OPTARG"
+			;;
+		f)
+			RUBY_PACKAGE_FULL=true
 			;;
 		E)
 			GEM_NATIVE_EXTENSIONS_DIR="$OPTARG"
@@ -94,9 +99,16 @@ parse_options "$@"
 
 export GZIP=--best
 load_ruby_info "$BUILD_OUTPUT_DIR"
-NATIVE_GEMS=(`find_gems_containing_native_extensions "$BUILD_OUTPUT_DIR"`)
 
-if [[ "$RUBY_PACKAGE" != "" ]]; then
+if
+	[[ "$RUBY_PACKAGE_FULL" == "true" ]]
+then
+	header "Packaging Ruby with full gem set and extensions..."
+	run tar -cf "$RUBY_PACKAGE.tmp" -C "$BUILD_OUTPUT_DIR" .
+	echo "+ gzip --best --no-name -c $RUBY_PACKAGE.tmp > $RUBY_PACKAGE"
+	gzip --best --no-name -c "$RUBY_PACKAGE.tmp" > "$RUBY_PACKAGE"
+	run rm "$RUBY_PACKAGE.tmp"
+elif [[ "$RUBY_PACKAGE" != "" ]]; then
 	header "Packaging Ruby..."
 	run tar -cf "$RUBY_PACKAGE.tmp" -C "$BUILD_OUTPUT_DIR" \
 		--exclude "include/*" \
@@ -112,7 +124,11 @@ if [[ "$RUBY_PACKAGE" != "" ]]; then
 	echo "+ gzip --best --no-name -c $RUBY_PACKAGE.tmp > $RUBY_PACKAGE"
 	gzip --best --no-name -c "$RUBY_PACKAGE.tmp" > "$RUBY_PACKAGE"
 	run rm "$RUBY_PACKAGE.tmp"
+	exit 0
 fi
+
+NATIVE_GEMS=(`find_gems_containing_native_extensions "$BUILD_OUTPUT_DIR"`)
+
 
 if [[ "$GEM_NATIVE_EXTENSIONS_DIR" != "" ]]; then
 	echo

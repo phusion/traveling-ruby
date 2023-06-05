@@ -421,6 +421,7 @@ run rm -f lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTEN
 run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
 run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/*.{c,h,Makefile}
 
+# removes rugged libgit2 vendor folder
 find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/vendor | xargs rm -rf
 # Delete every bundled gem except for the bundled version of ruby
 header "Removing bundled gems for versions other than $RUBY_MAJOR_MINOR" 
@@ -435,13 +436,14 @@ find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/lib/*/*.*/ -name '*.bundle' -not 
 # output/3.0.6-x86_64/lib/ruby/gems/3.0.0/gems/sqlite3-1.6.3-x86_64-darwin/lib/sqlite3/3.0//sqlite3_native.bundle
 # output/3.0.6-x86_64/lib/ruby/gems/3.0.0/gems/sqlite3-1.6.3-x86_64-darwin/lib/sqlite3/3.1//sqlite3_native.bundle
 # output/3.0.6-x86_64/lib/ruby/gems/3.0.0/gems/sqlite3-1.6.3-x86_64-darwin/lib/sqlite3/3.2//sqlite3_native.bundle
-find lib/ruby/gems/3.0.0/gems/rugg*/  -name '*.bundle' | xargs rm -rf
-find lib/ruby/gems/3.0.0/gems/char*/  -name '*.bundle' | xargs rm -rf
-find lib/ruby/gems/3.0.0/gems/pg*/  -name '*.bundle' | xargs rm -rf
-find lib/ruby/gems/3.0.0/gems/event*/  -name '*.bundle' | xargs rm -rf
+find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/rugg*/  -name '*.bundle' | xargs rm -rf
+find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/char*/  -name '*.bundle' | xargs rm -rf
+find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/pg*/  -name '*.bundle' | xargs rm -rf
+find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/event*/  -name '*.bundle' | xargs rm -rf
+find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/puma*/  -name '*.bundle' | xargs rm -rf
 find lib -type f -name '*.java'| xargs rm -f
 find lib -type f -name '*.class'| xargs rm -f
-find lib/ruby/gems/3.0.0/gems/*/contrib -type f | grep -v '.rb$'| xargs rm -f
+find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/contrib -type f | grep -v '.rb$'| xargs rm -f
 find . -name '.travis.yml'| xargs rm -rf
 find . -name '.github'| xargs rm -rf
 find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems -name '*.o' | xargs rm -f

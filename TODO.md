@@ -62,3 +62,19 @@ Just some WIP notes to keep some track of testing progress
 
 - `debug`
   - Ruby `3.0.x`
+
+
+## Native Extensions
+
+Currently `sqlite` and `nokogiri` provide native extensions in the 2nd format, where our guides/installers consider the first
+
+- output/3.2.2-arm64/lib/ruby/gems/3.2.0/extensions/aarch64-linux/3.2.0-static/bcrypt-3.1.18/bcrypt_ext.so
+  
+We delete the version numbers, other than the version of ruby we are packaging, but we dont package up the extension
+
+- output/3.2.2-arm64/lib/ruby/gems/3.2.0/gems/sqlite3-1.6.3-aarch64-linux/lib/sqlite3/3.2/sqlite3_native.so
+- output/3.2.2-arm64/lib/ruby/gems/3.2.0/gems/sqlite3-1.6.3-aarch64-linux/lib/sqlite3/3.1/sqlite3_native.so
+- output/3.2.2-arm64/lib/ruby/gems/3.2.0/gems/sqlite3-1.6.3-aarch64-linux/lib/sqlite3/3.0/sqlite3_native.so
+- output/3.2.2-arm64/lib/ruby/gems/3.2.0/gems/sqlite3-1.6.3-aarch64-linux/lib/sqlite3/2.7/sqlite3_native.so
+
+should we create a full fat bundler, that has all the gem extensions pre-installed?
