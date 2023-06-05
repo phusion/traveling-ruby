@@ -149,14 +149,7 @@ echo "Downloading:"
 echo "-------------"
 echo "curl --fail -LO https://github.com/${TRAVELING_RUBY_GH_SOURCE}/releases/download/"${TRAVELING_RUBY_RELEASE_TAG}"/"${TRAVELING_RUBY_FILENAME}""
 (curl --fail -LO https://github.com/${TRAVELING_RUBY_GH_SOURCE}/releases/download/"${TRAVELING_RUBY_RELEASE_TAG}"/"${TRAVELING_RUBY_FILENAME}" && echo downloaded "${TRAVELING_RUBY_FILENAME}") || (echo "Sorry, you'll need to install the ${PROJECT_NAME} manually." && exit 1)
-case $TRAVELING_RUBY_OS in
-'windows')
-  (unzip "${TRAVELING_RUBY_FILENAME}" && echo unarchived "${TRAVELING_RUBY_FILENAME}") || (echo "Sorry, you'll need to unarchive ${PROJECT_NAME} manually." && exit 1)
-  ;;
-'osx' | 'linux')
-  (tar xzf "${TRAVELING_RUBY_FILENAME}" && echo unarchived "${TRAVELING_RUBY_FILENAME}") || (echo "Sorry, you'll need to unarchived ${PROJECT_NAME} manually." && exit 1)
-  ;;
-esac
+(tar xzf "${TRAVELING_RUBY_FILENAME}" && echo unarchived "${TRAVELING_RUBY_FILENAME}") || (echo "Sorry, you'll need to unarchived ${PROJECT_NAME} manually." && exit 1)
 (rm "${TRAVELING_RUBY_FILENAME}" && echo removed "${TRAVELING_RUBY_FILENAME}") || (echo "Sorry, you'll need to remove ${PROJECT_NAME} archive manually." && exit 1)
 
 echo "${PROJECT_NAME} ${TRAVELING_RUBY_RELEASE_TAG} installed to $TRAVELING_RUBY_INSTALL_PATH"
