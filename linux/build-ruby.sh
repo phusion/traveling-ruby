@@ -157,6 +157,7 @@ exec docker run \
 	-e "APP_UID=`id -u`" \
 	-e "APP_GID=`id -g`" \
 	-e "BUNDLER_VERSION=`cat \"$SELFDIR/../BUNDLER_VERSION.txt\"`" \
+	-e "RUBYGEMS_VERSION=`cat \"$SELFDIR/../RUBYGEMS_VERSION.txt\"`" \
 	-e "ARCHITECTURE=$ARCHITECTURE" \
 	-e "RUBY_VERSION=$RUBY_VERSION" \
 	-e "CONCURRENCY=$CONCURRENCY" \

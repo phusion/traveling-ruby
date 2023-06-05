@@ -220,8 +220,6 @@ function install_gems()
 		echo "+ Entering /tmp/ruby"
 		pushd /tmp/ruby >/dev/null
 		run /tmp/ruby/bin/bundle config set --local system true
-		run /tmp/ruby/bin/gem update --system  --no-document
-		run /tmp/ruby/bin/gem uninstall -x rubygems-update
 		run /tmp/ruby/bin/bundle install --retry 3 --jobs $CONCURRENCY
 		run rm Gemfile*
 		echo "+ Leaving /tmp/ruby"
@@ -258,6 +256,8 @@ if [[ "$DEBUG_SHELL" = before ]]; then
 	open_debug_shell
 fi
 if [[ -e /system_shared/gemfiles ]]; then
+	run /tmp/ruby/bin/gem update --system  $RUBYGEMS_VERSION --no-document
+	run /tmp/ruby/bin/gem uninstall -x rubygems-update
 	run /tmp/ruby/bin/gem install bundler -v $BUNDLER_VERSION --no-document
 	if [[ "$DEBUG_SHELL" = after ]]; then
 		install_gems || true

@@ -7,6 +7,7 @@ source "$SELFDIR/../shared/library.sh"
 
 BUNDLER_VERSION=`cat "$SELFDIR/../BUNDLER_VERSION.txt"`
 RUBY_VERSIONS=(`cat "$SELFDIR/../RUBY_VERSIONS.txt"`)
+RUBYGEMS_VERSION=`cat "$SELFDIR/../RUBYGEMS_VERSION.txt"`
 N_RUBY_VERSIONS=${#RUBY_VERSIONS[@]}
 LAST_RUBY_VERSION_INDEX=$((N_RUBY_VERSIONS - 1))
 
@@ -181,6 +182,11 @@ echo $GEM_PLATFORM > "$OUTPUT_DIR/info/GEM_PLATFORM"
 echo $GEM_EXTENSION_API_VERSION > "$OUTPUT_DIR/info/GEM_EXTENSION_API_VERSION"
 echo
 
+
+header "Updating RubyGems..."
+
+run "$CACHE_DIR/bin/gem" update --system $RUBYGEMS_VERSION --no-document
+run "$CACHE_DIR/bin/gem" uninstall -x rubygems-update
 
 header "Installing Bundler..."
 if [[ -e "$CACHE_DIR/bundler-$BUNDLER_VERSION.gem" ]]; then
