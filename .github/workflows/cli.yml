@@ -39,8 +39,6 @@ jobs:
           ruby --version
           which ruby
           brew uninstall ruby@3.0
-          ruby --version
-          which ruby
       - uses: actions/checkout@v3
       - run: ./cli.sh --ci -v ${{ matrix.ruby-version }}
         name: install via cli.sh
