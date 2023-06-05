@@ -18,6 +18,28 @@ jobs:
     name: test traveling-ruby action
 
     steps:
+      - name: remove system installed ruby & linuxbrew from Linux
+        if: env.ACT != 'true' && runner.os == 'Linux'
+        # default act image doesn't contain ruby or linuxbrew
+        run : |
+          ruby --version
+          sudo rm -rf /usr/bin/ruby
+          sudo apt-get --purge remove ruby-full
+          ruby --version || echo "ruby not found as expected"
+          /home/linuxbrew/.linuxbrew/bin/brew --version
+          sudo rm -rf /home/linuxbrew
+          
+      - name: remove system install ruby from macos
+        if: env.ACT != 'true' && runner.os == 'macOS'
+        run: |
+          ruby --version
+          which ruby
+          brew uninstall ruby@3.0
+          ruby --version
+          sudo rm -rf /usr/bin/ruby
+          sudo rm -rf /Library/Ruby
+          ruby --version || echo "ruby not found as expected"
+
       - uses: actions/checkout@v3
 
       - id: traveling-ruby-action

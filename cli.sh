@@ -164,7 +164,7 @@ echo "-------------------"
 echo "$TRAVELING_RUBY_BIN_PATH/ruby --version"
 echo "-------------------"
 
-$TRAVELING_RUBY_BIN_PATH/ruby --version
+$TRAVELING_RUBY_BIN_PATH/ruby --version || echo "Sorry, we couldnt find the right path to ruby to check the installed. Please check your installation at $TRAVELING_RUBY_BIN_PATH!"
 echo "-------------------"
 
 if [ $TRAVELING_RUBY_SET_PATH ]; then

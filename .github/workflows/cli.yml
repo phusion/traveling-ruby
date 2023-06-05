@@ -6,7 +6,7 @@ on:
 
 jobs:
   local_install_script:
-    name: local install script - ${{matrix.os}} - ${{matrix.shell}} - ${{matrix.ruby-version}}
+    name: "${{matrix.ruby-version}} ${{ matrix.os }}"
     timeout-minutes: 10
     strategy:
       matrix:
@@ -38,7 +38,7 @@ jobs:
         run: |
           ruby --version
           which ruby
-          brew uninstall ruby
+          brew uninstall ruby@3.0
           ruby --version
           sudo rm -rf /usr/bin/ruby
           sudo rm -rf /Library/Ruby
@@ -51,10 +51,12 @@ jobs:
       # - run: gem install pact_broker-client
 
   windows_local_install_script:
+    name: "${{matrix.ruby-version}} ${{ matrix.os }}"
     runs-on: windows-latest
     strategy:
       matrix:
         shell: [cmd, powershell, pwsh, bash, sh]
+        ruby-version: [2.6.10,3.0.4,3.1.2,3.2.2,3.3.0-preview1]
       fail-fast: false
     defaults:
       run:
@@ -65,7 +67,7 @@ jobs:
           "$HOME\.traveling-ruby\bin\" >> $env:GITHUB_PATH
         shell: powershell
         if: matrix.shell == 'powershell' || matrix.shell == 'pwsh' || matrix.shell == 'cmd'
-      - run: ./cli.sh
+      - run: ./cli.sh --ci -v ${{ matrix.ruby-version }}
         name: install via cli.sh
         shell: sh
       - run: ruby --version
