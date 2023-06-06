@@ -172,7 +172,7 @@ if [ $TRAVELING_RUBY_SET_PATH ]; then
     echo "Added the following to your path to make ${PROJECT_NAME} available:"
     echo ""
     echo "PATH=$TRAVELING_RUBY_BIN_PATH:\${PATH}"
-    echo "PATH=${PATH}:$TRAVELING_RUBY_BIN_PATH" >>$GITHUB_ENV
+    echo "PATH=$TRAVELING_RUBY_BIN_PATH:${PATH}" >>$GITHUB_ENV
   elif [ $CIRRUS_CI ]; then
     echo "Added the following to your path to make ${PROJECT_NAME} available:"
     echo ""
