@@ -841,8 +841,9 @@ if $SKIP_LIBXML2; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libxml2.a" ]] || $FORCE_LIBXML2; then
 	# FIXME: getting a "Certificate can't be trusted" error while using HTTPS protocol
-	download_and_extract libxml2-$LIBXML2_VERSION.tar.gz \
-		http://xmlsoft.org/download/libxml2-$LIBXML2_VERSION.tar.gz
+	LIBXML2_MAJOR_MINOR_VERSION=$(echo $LIBXML2_VERSION | cut -d. -f1-2)
+	download_and_extract libxml2-$LIBXML2_VERSION.tar.xz \
+		https://download.gnome.org/sources/libxml2/$LIBXML2_MAJOR_MINOR_VERSION/libxml2-$LIBXML2_VERSION.tar.xz
 	echo "Entering $RUNTIME_DIR/libxml2-$LIBXML2_VERSION"
 	pushd libxml2-$LIBXML2_VERSION >/dev/null
 
