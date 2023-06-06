@@ -16,28 +16,28 @@ function create_environment_file() {
 	LOAD_PATHS=`/tmp/ruby/bin.real/ruby /system_shared/dump-load-paths.rb`
 
 	cat > "$FILE" <<'EOF'
-#!/usr/bin/env bash
-ROOT=`dirname "$0"`
-ROOT=`cd "$ROOT/.." && pwd`
+#!/usr/bin/env sh
+ROOT=$(dirname "$0")
+ROOT=$(cd "$ROOT/.." && pwd)
 
-echo ORIG_LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH\"
-echo ORIG_SSL_CERT_DIR=\"$SSL_CERT_DIR\"
-echo ORIG_SSL_CERT_FILE=\"$SSL_CERT_FILE\"
-echo ORIG_RUBYOPT=\"$RUBYOPT\"
-echo ORIG_RUBYLIB=\"$RUBYLIB\"
+echo ORIG_LD_LIBRARY_PATH="$LD_LIBRARY_PATH"
+echo ORIG_SSL_CERT_DIR="$SSL_CERT_DIR"
+echo ORIG_SSL_CERT_FILE="$SSL_CERT_FILE"
+echo ORIG_RUBYOPT="$RUBYOPT"
+echo ORIG_RUBYLIB="$RUBYLIB"
 
-echo LD_LIBRARY_PATH=\"$LD_LIBRARY_PATH:$ROOT/lib\"
-echo SSL_CERT_FILE=\"$ROOT/lib/ca-bundle.crt\"
-echo RUBYOPT=\"-rtraveling_ruby_restore_environment\"
+echo LD_LIBRARY_PATH="$LD_LIBRARY_PATH:$ROOT/lib"
+echo SSL_CERT_FILE="$ROOT/lib/ca-bundle.crt"
+echo RUBYOPT="-rtraveling_ruby_restore_environment"
 for DIR in "$ROOT"/lib/ruby/gems/*/deplibs/*/*; do
-	echo LD_LIBRARY_PATH=\"\$LD_LIBRARY_PATH:$DIR\"
+	echo LD_LIBRARY_PATH="\$LD_LIBRARY_PATH:$DIR"
 done
 EOF
-	echo "echo GEM_HOME=\\\"\$ROOT/lib/ruby/gems/$RUBY_COMPAT_VERSION\\\"" >> "$FILE"
-	echo "echo GEM_PATH=\\\"\$ROOT/lib/ruby/gems/$RUBY_COMPAT_VERSION\\\"" >> "$FILE"
+	echo "echo GEM_HOME=\"\$ROOT/lib/ruby/gems/$RUBY_COMPAT_VERSION\"" >> "$FILE"
+	echo "echo GEM_PATH=\"\$ROOT/lib/ruby/gems/$RUBY_COMPAT_VERSION\"" >> "$FILE"
 
 	cat >> "$FILE" <<EOF
-echo RUBYLIB=\"$LOAD_PATHS\"
+echo RUBYLIB="$LOAD_PATHS"
 
 echo export ORIG_LD_LIBRARY_PATH
 echo export ORIG_SSL_CERT_DIR
@@ -64,11 +64,11 @@ function create_wrapper()
 	local IS_RUBY_SCRIPT="$3"
 
 	cat > "$FILE" <<'EOF'
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 set -e
-ROOT=`dirname "$0"`
-ROOT=`cd "$ROOT/.." && pwd`
-eval "`\"$ROOT/bin/ruby_environment\"`"
+ROOT=$(dirname "$0")
+ROOT=$(cd "$ROOT/.." && pwd)
+eval "$("$ROOT/bin/ruby_environment")"
 EOF
 	if $IS_RUBY_SCRIPT; then
 		cat >> "$FILE" <<EOF
@@ -92,11 +92,19 @@ source /hbb_shlib/activate
 export CFLAGS="${CFLAGS//-fvisibility=hidden/}"
 export CXXFLAGS="${CXXFLAGS//-fvisibility=hidden/}"
 
+RUBY_MAJOR=`echo $RUBY_VERSION | cut -d . -f 1`
+RUBY_MINOR=`echo $RUBY_VERSION | cut -d . -f 2`
+RUBY_PATCH=`echo $RUBY_VERSION | cut -d . -f 3 | cut -d - -f 1`
+RUBY_PREVIEW=`echo $RUBY_VERSION | grep -e '-' | cut -d - -f 2`
+RUBY_MAJOR_MINOR="$RUBY_MAJOR.$RUBY_MINOR"
+echo "RUBY_MAJOR=$RUBY_MAJOR"
+echo "RUBY_MINOR=$RUBY_MINOR"
+echo "RUBY_PATCH=$RUBY_PATCH"
+echo "RUBY_PREVIEW=$RUBY_PREVIEW"
+echo "RUBY_MAJOR_MINOR=$RUBY_MAJOR_MINOR"
+
 if [[ ! -e /ruby-$RUBY_VERSION.tar.gz ]]; then
 	header "Downloading Ruby source"
-	RUBY_MAJOR=`echo $RUBY_VERSION | cut -d . -f 1`
-	RUBY_MINOR=`echo $RUBY_VERSION | cut -d . -f 2`
-	RUBY_MAJOR_MINOR="$RUBY_MAJOR.$RUBY_MINOR"
 	run rm -f /ruby-$RUBY_VERSION.tar.gz.tmp
 	run wget -O /ruby-$RUBY_VERSION.tar.gz.tmp \
 		http://cache.ruby-lang.org/pub/ruby/$RUBY_MAJOR_MINOR/ruby-$RUBY_VERSION.tar.gz
@@ -159,6 +167,7 @@ header "finding libs"
 find -name libyam*  
 find -name psy*
 find -name libffi*
+find -name libz*
 header "checking usr lib dir"
 run ls $USRLIBDIR
 run ls /usr/lib
@@ -249,8 +258,8 @@ export BUNDLE_BUILD__CHARLOCK_HOLMES=--with-ldflags="'$DEFAULT_LDFLAGS -Wl,--who
 export BUNDLE_BUILD__RUGGED=--with-ldflags="'$DEFAULT_LDFLAGS -Wl,--whole-archive -lssl -lcrypto -Wl,--no-whole-archive'"
 export BUNDLE_BUILD__PUMA=--with-ldflags="'$DEFAULT_LDFLAGS -lz'"
 export BUNDLE_BUILD__EVENTMACHINE=--with-ldflags="'$DEFAULT_LDFLAGS -lz'"
-export BUNDLE_BUILD__SQLLITE=--with-ldflags="'$DEFAULT_LDFLAGS -lz'"
-export BUNDLE_BUILD__MYSQL2="--with-system-libraries"
+export BUNDLE_BUILD__SQLITE3=--with-ldflags="'$DEFAULT_LDFLAGS -lz'"
+export BUNDLE_BUILD__MYSQL2=--with-ldflags="'$DEFAULT_LDFLAGS -lz'"
 
 if [[ "$DEBUG_SHELL" = before ]]; then
 	open_debug_shell
@@ -297,28 +306,35 @@ run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
 run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out}
 run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
 run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/*.{c,h}
-
 # removes rugged libgit2 vendor folder
 find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/vendor | xargs rm -rf
-# Delete every bundled gem except for the bundled version of ruby
-header "Removing bundled gems for versions other than $RUBY_MAJOR_MINOR" 
-find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/lib/*/*.*/ -name '*.so'
-find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/lib/*/*.*/ -name '*.so' -not -path "*/$RUBY_MAJOR_MINOR/*"
-find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/lib/*/*.*/ -name '*.so' -not -path "*/$RUBY_MAJOR_MINOR/*" | xargs rm -rf
-find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/rugg*/  -name '*.so' | xargs rm -rf
-find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/char*/  -name '*.so' | xargs rm -rf
-find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/pg*/  -name '*.so' | xargs rm -rf
-find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/event*/  -name '*.so' | xargs rm -rf
-find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/puma*/  -name '*.so' | xargs rm -rf
+find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/* -path '*/ports/*' | xargs rm -rf
+find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/* -name '*.so' | xargs rm -rf
+find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/tmp | xargs rm -rf
+find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext| xargs rm -rf
+find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/contrib | xargs rm -rf
 find /tmp/ruby/lib -type f -name '*.java'| xargs rm -f
 find /tmp/ruby/lib -type f -name '*.class'| xargs rm -f
-find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/contrib -type f | grep -v '.rb$'| xargs rm -f
 find . -name '.travis.yml'| xargs rm -rf
 find . -name '.github'| xargs rm -rf
+# if [[ "$RUBY_PREVIEW" == "" ]]; then
+# header "Removing bundled gems for versions other than $RUBY_MAJOR_MINOR" 
+# # Delete every bundled gem except for the bundled version of ruby
+	# find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/lib
+# 	find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/lib/*/*.*/ -name '*.so'
+# 	find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/lib/*/*.*/ -name '*.so' -not -path "*/$RUBY_MAJOR_MINOR/*"
+# 	find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/lib/*/*.*/ -name '*.so' -not -path "*/$RUBY_MAJOR_MINOR/*" | xargs rm -rf
+# else
+# echo "no versioned gems to remove on preview ruby versions"
+# fi
+# find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/char*/  -name '*.so' | xargs rm -rf
+# find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/pg*/  -name '*.so' | xargs rm -rf
+# find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/event*/  -name '*.so' | xargs rm -rf
+# find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/puma*/  -name '*.so' | xargs rm -rf
 ## Remove all .o and .so files, we will use the extensions folder
 # with exception to nokogiri and sqlite
-find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems -name '*.o' | xargs rm -f
-find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems -name '*.so' -not -path '*sqlite*' -not -path '*nokogiri*' | xargs rm -f
+# find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems -name '*.o' | xargs rm -f
+# find /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems -name '*.so' | xargs rm -f
 
 if [[ -e /system_shared/gemfiles ]]; then
 	echo "+ Entering Bundler gem directory"
