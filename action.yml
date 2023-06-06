@@ -1,11 +1,29 @@
 name: traveling-ruby
 description: Traveling Ruby at your fingertips
+inputs:
+  ruby-version:
+    description: 'Version of Traveling Ruby to install'
+    required: false
+    default: '3.2.2'
+  release:
+    description: 'Date of the package to install'
+    required: false
+    default: '20230605'
+  gems:
+    description: 'List of gems and optionally versions, white space seperated (e.g. "nokogiri-1.10.10 rails")'
+    required: false
+    default: ''
+  
 runs:
   using: "composite"
   steps:
-    - run: ./cli.sh
+    - run: ./cli.sh --ci
       shell: bash
+      env:
+        TRAVELING_RUBY_VERSION: ${{ github.event.inputs.ruby-version }}
+        TRAVELING_RUBY_PKG_DATE: ${{ github.event.inputs.pkg-date }}
+        TRAVELING_RUBY_GEM_LIST: ${{ github.event.inputs.gems }}
     - run: |
-        "$HOME\.traveling-ruby\bin\" >> $env:GITHUB_PATH
+        "/c/Users/runneradmin/.travelling-ruby/bin" >> $env:GITHUB_PATH
       if: runner.os == 'windows'
       shell: powershell

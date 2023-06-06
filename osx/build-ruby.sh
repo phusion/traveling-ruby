@@ -430,13 +430,6 @@ run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/*.{c,h,Makefile}
 
 # removes rugged libgit2 vendor folder
 find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/vendor | xargs rm -rf
-# run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
-run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
-run rm -f lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out}
-run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
-run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/*.{c,h}
-# removes rugged libgit2 vendor folder
-find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/vendor | xargs rm -rf
 find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/* -path '*/ports/*' | xargs rm -rf
 find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/* -name '*.bundle' | xargs rm -rf
 find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/tmp | xargs rm -rf

@@ -33,10 +33,11 @@ usage() {
   echo "  --set-path            Add the traveling ruby bin path to the PATH environment variable (default: false)"
   echo "  --clean-install       Remove any existing traveling ruby installation before installing (default: false)"
   echo "  --ci                  Set --set-path to true and --clean-install to true (default: false)"
+  echo "  -g                    list of gems to install"
   exit 0
 }
 
-while getopts "hv:d:-:" opt; do
+while getopts "hg:v:d:-:" opt; do
   case $opt in
   v)
     TRAVELING_RUBY_VERSION=$OPTARG
@@ -44,6 +45,9 @@ while getopts "hv:d:-:" opt; do
   d)
     TRAVELING_RUBY_PKG_DATE=$OPTARG
     ;;
+  g)
+  TRAVELING_RUBY_GEM_LIST=$OPTARG
+  ;;
   h)
   usage
   ;;
@@ -184,4 +188,22 @@ if [ $TRAVELING_RUBY_SET_PATH ]; then
     echo ""
     echo "  PATH=:$TRAVELING_RUBY_BIN_PATH:\${PATH}"
   fi
+fi
+
+if [ $TRAVELING_RUBY_GEM_LIST ]; then
+  GEM_LIST=($TRAVELING_RUBY_GEM_LIST)
+  for GEM in "${GEM_LIST[@]}"; do
+  GEM_NAME=$(echo $GEM | sed -E 's/(.*)-.*/\1/')
+  GEM_VERSION=$(echo $GEM | sed -E 's/(.*)-.*/\2/'|| echo "")
+  echo "-------------------"
+  echo "gem install $GEM"
+  echo "version: $GEM_VERSION"
+  echo "-------------------"
+  if [ $GEM_VERSION ]; then
+    $TRAVELING_RUBY_BIN_PATH/gem install $GEM_NAME -v $GEM_VERSION
+  else
+    $TRAVELING_RUBY_BIN_PATH/gem install $GEM_NAME
+  fi
+  echo "-------------------"
+done
 fi
