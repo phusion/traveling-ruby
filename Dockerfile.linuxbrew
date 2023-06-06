@@ -6,22 +6,17 @@ RUN apt-get update && \
       apt-get install -y curl build-essential git && \
       apt-get clean && rm -rf /var/lib/apt/lists
 
-### Install homebrew for aarch64 linux ##
-ENV PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"
+# Install homebrew for aarch64 linux
 # Uses modified installer script to allow for aarch64
-# 1. ./install.sh allows for linux-aarch64
-# 2. you54f/brew git remote allows successful path lookup on install so you can use a custom ruby version
-# RUN HOMEBREW_BREW_GIT_REMOTE="https://github.com/you54f/brew"  \
-#       NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/you54f/install/HEAD/install.sh)"
-# # 3. set remote back to homebrew
-# RUN git -C "/home/linuxbrew/.linuxbrew/Homebrew" remote set-url origin https://github.com/Homebrew/brew
-
-
-RUN NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/HomeBrew/install/HEAD/install.sh)"
-# RUN NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/you54f/install/HEAD/install.sh)"
-
+ENV PATH="$PATH:/home/linuxbrew/.linuxbrew/bin"
+# 1. you54f/brew git remote allows successful path lookup on install so you can use a custom ruby version
+RUN HOMEBREW_BREW_GIT_REMOTE="https://github.com/you54f/brew"  \
+# 2. ./install.sh allows for linux-aarch64
+      NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/you54f/install/HEAD/install.sh)"
+# 3. set remote back to homebrew
+RUN git -C "/home/linuxbrew/.linuxbrew/Homebrew" remote set-url origin https://github.com/Homebrew/brew
 RUN brew --version
 RUN brew config
-RUN brew doctor || echo "expected brew doctor failre regarding unsupported hardware (arm64) "
+RUN brew doctor || echo "expected brew doctor failure regarding unsupported hardware (arm64) "
 RUN brew upgrade
 ENTRYPOINT [ "brew" ]
