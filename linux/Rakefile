@@ -29,7 +29,7 @@ task :test do
 end
 
 desc "Test via Docker all Ruby versions (#{RUBY_VERSIONS.join(' ')})"
-task :testdocker do
+task :test_docker do
   # Do nothing
 end
 
@@ -76,7 +76,7 @@ ARCHITECTURES.each do |arch|
     task :package_full => "package_full:#{ruby_version}:#{arch}"
     task :build   => "build:#{ruby_version}:#{arch}"
     task :test    => "test:#{ruby_version}:#{arch}"
-    task :testdocker    => "testdocker:#{ruby_version}:#{arch}"
+    task :test_docker    => "test_docker:#{ruby_version}:#{arch}"
     task :upload  => "upload:#{ruby_version}:#{arch}"
     task :clean   => "clean:#{ruby_version}:#{arch}"
 
@@ -119,7 +119,7 @@ ARCHITECTURES.each do |arch|
     end
 
     desc "Test via Docker Ruby #{ruby_version} #{arch}"
-    task "testdocker:#{ruby_version}:#{arch}" => "output/#{ruby_version}-#{arch}/bin" do
+    task "test_docker:#{ruby_version}:#{arch}" => "output/#{ruby_version}-#{arch}/bin" do
       sh "./test-gems-docker.sh output/#{ruby_version}-#{arch}"
     end
 

@@ -108,6 +108,7 @@ then
 	echo "+ gzip --best --no-name -c $RUBY_PACKAGE.tmp > $RUBY_PACKAGE"
 	gzip --best --no-name -c "$RUBY_PACKAGE.tmp" > "$RUBY_PACKAGE"
 	run rm "$RUBY_PACKAGE.tmp"
+	exit 0
 elif [[ "$RUBY_PACKAGE" != "" ]]; then
 	header "Packaging Ruby..."
 	run tar -cf "$RUBY_PACKAGE.tmp" -C "$BUILD_OUTPUT_DIR" \
@@ -124,7 +125,6 @@ elif [[ "$RUBY_PACKAGE" != "" ]]; then
 	echo "+ gzip --best --no-name -c $RUBY_PACKAGE.tmp > $RUBY_PACKAGE"
 	gzip --best --no-name -c "$RUBY_PACKAGE.tmp" > "$RUBY_PACKAGE"
 	run rm "$RUBY_PACKAGE.tmp"
-	exit 0
 fi
 
 NATIVE_GEMS=(`find_gems_containing_native_extensions "$BUILD_OUTPUT_DIR"`)
