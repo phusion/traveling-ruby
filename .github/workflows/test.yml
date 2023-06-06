@@ -2,22 +2,14 @@ name: Test you54f/traveling-ruby@main
 
 on: 
   workflow_dispatch:
-  push:
-    branches: [ main ]
+  # push:
+  #   branches: [ main ]
   
 jobs:
-  test_cli_action:
 
-    strategy:
-      matrix:
-        os: [ubuntu-latest,macos-latest]
-        # os: [ubuntu-latest,windows-latest,macos-latest]
-      fail-fast: false
-
-    runs-on: ${{ matrix.os }}
-
-    name: test traveling-ruby action
-
+  linux:
+    runs-on: ubuntu-latest
+    name: test traveling-ruby action on Linux
     steps:
       - name: remove system installed ruby & linuxbrew from Linux
         if: env.ACT != 'true' && runner.os == 'Linux'
@@ -30,22 +22,49 @@ jobs:
           /home/linuxbrew/.linuxbrew/bin/brew --version
           sudo rm -rf /home/linuxbrew
 
-      # - name: remove system install ruby from windows
-      #   if: runner.os == 'Windows'
-      #   run: |
-      #     choco uninstall ruby
+      - uses: actions/checkout@v3
+
+      - id: traveling-ruby-action
+        uses: you54f/traveling-ruby@main
+
+      - name: bash
+        run: ruby --version
+        shell: bash
+
+      - name: sh
+        run: ruby --version
+        shell: sh
+
+  macos:
+    runs-on: macos-latest
+    name: test traveling-ruby action on macOS
+    steps:
       - name: remove system install ruby from macos
         if: runner.os == 'macOS'
         run: |
           ruby --version
           which ruby
           brew uninstall ruby@3.0
-
-      - uses: actions/checkout@v3
-
+          
       - id: traveling-ruby-action
         uses: you54f/traveling-ruby@main
 
+      - name: bash
+        run: ruby --version
+        shell: bash
+
+      - name: sh
+        run: ruby --version
+        shell: sh     
+
+
+  windows:
+    runs-on: windows-latest
+    name: test traveling-ruby action
+    steps:
+      - uses: actions/checkout@v3
+      - id: traveling-ruby-action
+        uses: you54f/traveling-ruby@main
 
       - name: bash
         run: ruby --version
@@ -54,13 +73,11 @@ jobs:
 
       - name: sh
         run: ruby --version
-        if: runner.os != 'windows'
         shell: sh
 
 
       - name: cmd
         run: ruby.exe --version
-        if: runner.os == 'windows'
         shell: cmd
 
 

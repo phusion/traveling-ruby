@@ -5,17 +5,41 @@ on:
   workflow_dispatch:
 
 jobs:
-  local_install_script:
+  macos:
     name: "${{matrix.ruby-version}} ${{ matrix.os }} ${{ matrix.shell }}"
     timeout-minutes: 10
     strategy:
       matrix:
-        os: [macos-latest,ubuntu-latest]
+        os: [macos-latest]
         shell: [bash, sh]
-        ## Linux
-        # ruby-version: [2.6.10,3.0.4,3.1.2,3.2.2,3.3.0-preview1]
-        # # macOS
-        ruby-version: [2.6.10,3.0.4,3.0.6,3.1.2,3.1.4,3.2.2,3.3.0-preview1]
+        ruby-version: [3.0.6,3.1.4,3.2.2,3.3.0-preview1]
+      fail-fast: false
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: remove system install ruby from macos
+        if: env.ACT != 'true'
+        run: |
+          ruby --version
+          which ruby
+          brew uninstall ruby@3.0
+      - uses: actions/checkout@v3
+      - run: ./cli.sh --ci -v ${{ matrix.ruby-version }}
+        name: install via cli.sh
+      - run: ruby --version
+        name: ruby --version via ${{ matrix.shell }}
+
+  linux:
+    name: "${{matrix.ruby-version}} ${{ matrix.os }} ${{ matrix.shell }}"
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        shell: [bash, sh]
+        ruby-version: [2.6.10,3.0.4,3.1.2,3.2.2,3.3.0-preview1]
       fail-fast: false
     defaults:
       run:
@@ -33,12 +57,6 @@ jobs:
           ruby --version || echo "ruby not found as expected"
           /home/linuxbrew/.linuxbrew/bin/brew --version
           sudo rm -rf /home/linuxbrew
-      - name: remove system install ruby from macos
-        if: env.ACT != 'true' && runner.os == 'macOS'
-        run: |
-          ruby --version
-          which ruby
-          brew uninstall ruby@3.0
       - uses: actions/checkout@v3
       - run: ./cli.sh --ci -v ${{ matrix.ruby-version }}
         name: install via cli.sh
