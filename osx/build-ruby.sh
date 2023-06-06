@@ -232,7 +232,14 @@ fi
 #######################################
 RUBY_MAJOR=`echo $RUBY_VERSION | cut -d . -f 1`
 RUBY_MINOR=`echo $RUBY_VERSION | cut -d . -f 2`
+RUBY_PATCH=`echo $RUBY_VERSION | cut -d . -f 3 | cut -d - -f 1`
+RUBY_PREVIEW=`echo $RUBY_VERSION | grep -e '-' | cut -d - -f 2`
 RUBY_MAJOR_MINOR="$RUBY_MAJOR.$RUBY_MINOR"
+echo "RUBY_MAJOR=$RUBY_MAJOR"
+echo "RUBY_MINOR=$RUBY_MINOR"
+echo "RUBY_PATCH=$RUBY_PATCH"
+echo "RUBY_PREVIEW=$RUBY_PREVIEW"
+echo "RUBY_MAJOR_MINOR=$RUBY_MAJOR_MINOR"
 
 if [[ ! -e "$RUNTIME_DIR/ruby-$RUBY_VERSION.tar.gz" ]]; then
 	header "Downloading Ruby source code..."
@@ -370,7 +377,7 @@ if [[ "$GEMFILE" != "" ]]; then
 			"$RUNTIME_DIR/vendor/cache/"
 	fi
 
-	export BUNDLE_BUILD__NOKOGIRI="--use-system-libraries"
+	export BUNDLE_BUILD__NOKOGIRI="--with-xml2-include=$RUNTIME_DIR/include/libxml2"
 	export BUNDLE_BUILD__FFI="--use-system-libraries"
 	export BUNDLE_BUILD__MYSQL2="--with-mysql_config"
 	export BUNDLE_BUILD__CHARLOCK_HOLMES="--with-icu-dir=$RUNTIME_DIR"
@@ -423,31 +430,21 @@ run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/*.{c,h,Makefile}
 
 # removes rugged libgit2 vendor folder
 find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/vendor | xargs rm -rf
-# Delete every bundled gem except for the bundled version of ruby
-header "Removing bundled gems for versions other than $RUBY_MAJOR_MINOR" 
-find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/lib/*/*.*/ -name '*.bundle'
-find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/lib/*/*.*/ -name '*.bundle' -not -path "*/$RUBY_MAJOR_MINOR/*"
-find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/lib/*/*.*/ -name '*.bundle' -not -path "*/$RUBY_MAJOR_MINOR/*" | xargs rm -rf
-# output/3.0.6-x86_64/lib/ruby/gems/3.0.0/gems/nokogiri-1.15.2-x86_64-darwin/lib/nokogiri/2.7//nokogiri.bundle
-# output/3.0.6-x86_64/lib/ruby/gems/3.0.0/gems/nokogiri-1.15.2-x86_64-darwin/lib/nokogiri/3.0//nokogiri.bundle
-# output/3.0.6-x86_64/lib/ruby/gems/3.0.0/gems/nokogiri-1.15.2-x86_64-darwin/lib/nokogiri/3.1//nokogiri.bundle
-# output/3.0.6-x86_64/lib/ruby/gems/3.0.0/gems/nokogiri-1.15.2-x86_64-darwin/lib/nokogiri/3.2//nokogiri.bundle
-# output/3.0.6-x86_64/lib/ruby/gems/3.0.0/gems/sqlite3-1.6.3-x86_64-darwin/lib/sqlite3/2.7//sqlite3_native.bundle
-# output/3.0.6-x86_64/lib/ruby/gems/3.0.0/gems/sqlite3-1.6.3-x86_64-darwin/lib/sqlite3/3.0//sqlite3_native.bundle
-# output/3.0.6-x86_64/lib/ruby/gems/3.0.0/gems/sqlite3-1.6.3-x86_64-darwin/lib/sqlite3/3.1//sqlite3_native.bundle
-# output/3.0.6-x86_64/lib/ruby/gems/3.0.0/gems/sqlite3-1.6.3-x86_64-darwin/lib/sqlite3/3.2//sqlite3_native.bundle
-find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/rugg*/  -name '*.bundle' | xargs rm -rf
-find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/char*/  -name '*.bundle' | xargs rm -rf
-find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/pg*/  -name '*.bundle' | xargs rm -rf
-find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/event*/  -name '*.bundle' | xargs rm -rf
-find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/puma*/  -name '*.bundle' | xargs rm -rf
+run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
+run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
+run rm -f lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out}
+run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
+run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/*.{c,h}
+# removes rugged libgit2 vendor folder
+find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/vendor | xargs rm -rf
+find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/* -path '*/ports/*' | xargs rm -rf
+find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/* -name '*.bundle' | xargs rm -rf
+find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/tmp | xargs rm -rf
+find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/contrib | xargs rm -rf
 find lib -type f -name '*.java'| xargs rm -f
 find lib -type f -name '*.class'| xargs rm -f
-find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/contrib -type f | grep -v '.rb$'| xargs rm -f
 find . -name '.travis.yml'| xargs rm -rf
 find . -name '.github'| xargs rm -rf
-find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems -name '*.o' | xargs rm -f
-find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems -name '*.so'| xargs rm -f
 
 # Remove absolute rpaths to the runtime
 echo "Removing absolute rpaths to the runtime..."
