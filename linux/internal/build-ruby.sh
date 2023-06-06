@@ -301,7 +301,7 @@ run rm -f /tmp/ruby/bin/testrb # Only Ruby 2.1 has it
 run rm -rf /tmp/ruby/include
 run rm -rf /tmp/ruby/share
 run rm -rf /tmp/ruby/lib/{libruby*static.a,pkgconfig}
-run rm -rf /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
+# run rm -rf /tmp/ruby/lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
 run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
 run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out}
 run rm -rf /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}

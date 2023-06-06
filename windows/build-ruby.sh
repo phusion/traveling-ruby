@@ -218,7 +218,7 @@ run rm -rf lib/tcltk
 run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/{tcltk,tk,sdbm,gdbm,dbm,dl,coverage}
 run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/{tk,sdbm,gdbm,dbm,dl,coverage}.rb
 run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/tk*
-run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
+# run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
 run rm -f lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
 run rm -f /tmp/ruby/lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out,mkmf.log}
 run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}

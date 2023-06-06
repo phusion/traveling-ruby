@@ -422,7 +422,7 @@ run rm -rf lib/{libruby*static.a,pkgconfig}
 # 	find output -type f -exec du -ah {} + | sort -rh | head -n 10
 #  21M    output/3.2.2-arm64/lib/libruby.3.2-static.a
 
-run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
+# run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
 run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
 run rm -f lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out,mkmf.log}
 run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
@@ -430,7 +430,7 @@ run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/ext/*/*.{c,h,Makefile}
 
 # removes rugged libgit2 vendor folder
 find lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/vendor | xargs rm -rf
-run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
+# run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
 run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*
 run rm -f lib/ruby/gems/$RUBY_COMPAT_VERSION/extensions/$GEM_PLATFORM/$GEM_EXTENSION_API_VERSION/*/{gem_make.out}
 run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/gems/*/{test,spec,*.md,*.rdoc}
