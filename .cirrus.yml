@@ -116,10 +116,10 @@ rake_package_and_test: &rake_package_and_test
   package_full_script: cd $PLATFORM && rake package_full
   test_script: cd $PLATFORM && rake test
 
-rake_package_and_testdocker: &rake_package_and_testdocker
+rake_package_and_test_docker: &rake_package_and_test_docker
   package_script: cd $PLATFORM && rake
   package_full_script: cd $PLATFORM && rake package_full
-  testdocker_script: cd $PLATFORM && rake testdocker
+  test_docker_script: cd $PLATFORM && rake test_docker
 
 ENV_CHECK_SCRIPT: &ENV_CHECK_SCRIPT
   check_script: |
@@ -200,7 +200,7 @@ linux_arm64_matrix_docker_builder:
     matrix:
       *RUBY_VERSIONS_MATRIX_LINUX
   <<: *ENV_CHECK_SCRIPT
-  <<: *rake_package_and_testdocker
+  <<: *rake_package_and_test_docker
   <<: *INSTALL_GH_CLI
   <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
@@ -216,7 +216,7 @@ linux_x64_matrix_docker_builder:
     matrix:
       *RUBY_VERSIONS_MATRIX_LINUX
   <<: *ENV_CHECK_SCRIPT
-  <<: *rake_package_and_testdocker
+  <<: *rake_package_and_test_docker
   <<: *INSTALL_GH_CLI
   <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
@@ -343,16 +343,7 @@ macos_arm64_matrix_task:
   <<: *macos_check
   <<: *cirrus_cli_setup
   <<: *macos_stash_conflicting_paths
-  # <<: *download_macos_runtime
-  # stash_ruby_script: |
-  #   which ruby
-  #   rm -rf $HOME/.rbenv/
-  #   brew uninstall rbenv
-  #   brew uninstall gcc
-  #   brew uninstall cmake
-  #   ruby --version
-  #   ln -s /usr/bin/ruby $HOME/foo
-  #   ruby --version
+  <<: *download_macos_runtime
   <<: *rake_package_and_test
   # upload_output_dir_script: cd $PLATFORM && tar -czvf $PLATFORM-runtime.tar.gz runtime
   <<: *UPLOAD_TASK
@@ -372,7 +363,7 @@ macos_x86_64_matrix_task:
   <<: *macos_check
   <<: *cirrus_cli_setup
   <<: *macos_stash_conflicting_paths
-  # <<: *download_macos_runtime
+  <<: *download_macos_runtime
   install_rosetta_script: softwareupdate --install-rosetta --agree-to-license
   <<: *rake_package_and_test
   # upload_output_dir_script: cd $PLATFORM && tar -czvf $PLATFORM-runtime.tar.gz runtime
