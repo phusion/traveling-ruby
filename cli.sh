@@ -1,5 +1,7 @@
-#!/bin/sh -e
+#!/usr/bin/env sh
+set -e
 ## Tested with https://www.shellcheck.net/
+
 # Usage: (install latest release & latest ruby version)
 #   $ curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/main/install.sh | sh
 # or
@@ -48,9 +50,6 @@ while getopts "hg:v:d:-:" opt; do
   g)
   TRAVELING_RUBY_GEM_LIST=$OPTARG
   ;;
-  h)
-  usage
-  ;;
   -)
     case "${OPTARG}" in
     set-path)
@@ -63,11 +62,11 @@ while getopts "hg:v:d:-:" opt; do
       TRAVELING_RUBY_SET_PATH=true
       TRAVELING_RUBY_CLEAN_INSTALL=true
       ;;
-    * | h)
-      usage
-      ;;
     esac
     ;;
+  h|*)
+  usage
+  ;;
   esac
 done
 
@@ -142,16 +141,16 @@ echo "TRAVELING_RUBY_FILENAME: $TRAVELING_RUBY_FILENAME"
 if [ "$TRAVELING_RUBY_CLEAN_INSTALL" = "true" ]; then
   echo "-------------"
   echo "Cleaning up ${PROJECT_NAME} @ $TRAVELING_RUBY_INSTALL_PATH"
-  rm -rf $TRAVELING_RUBY_INSTALL_PATH
+  rm -rf "$TRAVELING_RUBY_INSTALL_PATH"
 fi
 
-mkdir -p $TRAVELING_RUBY_INSTALL_PATH
-cd $TRAVELING_RUBY_INSTALL_PATH
+mkdir -p "$TRAVELING_RUBY_INSTALL_PATH"
+cd "$TRAVELING_RUBY_INSTALL_PATH"
 
 echo "-------------"
 echo "Downloading:"
 echo "-------------"
-echo "curl --fail -LO https://github.com/${TRAVELING_RUBY_GH_SOURCE}/releases/download/"${TRAVELING_RUBY_RELEASE_TAG}"/"${TRAVELING_RUBY_FILENAME}""
+echo curl --fail -LO https://github.com/${TRAVELING_RUBY_GH_SOURCE}/releases/download/"${TRAVELING_RUBY_RELEASE_TAG}"/"${TRAVELING_RUBY_FILENAME}"
 (curl --fail -LO https://github.com/${TRAVELING_RUBY_GH_SOURCE}/releases/download/"${TRAVELING_RUBY_RELEASE_TAG}"/"${TRAVELING_RUBY_FILENAME}" && echo downloaded "${TRAVELING_RUBY_FILENAME}") || (echo "Sorry, you'll need to install the ${PROJECT_NAME} manually." && exit 1)
 (tar xzf "${TRAVELING_RUBY_FILENAME}" && echo unarchived "${TRAVELING_RUBY_FILENAME}") || (echo "Sorry, you'll need to unarchived ${PROJECT_NAME} manually." && exit 1)
 (rm "${TRAVELING_RUBY_FILENAME}" && echo removed "${TRAVELING_RUBY_FILENAME}") || (echo "Sorry, you'll need to remove ${PROJECT_NAME} archive manually." && exit 1)
@@ -163,25 +162,25 @@ echo "  $TRAVELING_RUBY_INSTALL_PATH:"
 echo "-------------------"
 echo "ls -1 $TRAVELING_RUBY_INSTALL_PATH"
 echo "-------------------"
-ls -1 $TRAVELING_RUBY_INSTALL_PATH
+ls -1 "$TRAVELING_RUBY_INSTALL_PATH"
 echo "-------------------"
 echo "$TRAVELING_RUBY_BIN_PATH/ruby --version"
 echo "-------------------"
 
-$TRAVELING_RUBY_BIN_PATH/ruby --version || echo "Sorry, we couldnt find the right path to ruby to check the installed. Please check your installation at $TRAVELING_RUBY_BIN_PATH!"
+"$TRAVELING_RUBY_BIN_PATH"/ruby --version || echo "Sorry, we couldnt find the right path to ruby to check the installed. Please check your installation at $TRAVELING_RUBY_BIN_PATH!"
 echo "-------------------"
 
-if [ $TRAVELING_RUBY_SET_PATH ]; then
-  if [ $GITHUB_ENV ]; then
+if [ "$TRAVELING_RUBY_SET_PATH" ]; then
+  if [ "$GITHUB_ENV" ]; then
     echo "Added the following to your path to make ${PROJECT_NAME} available:"
     echo ""
     echo "PATH=$TRAVELING_RUBY_BIN_PATH:\${PATH}"
-    echo "PATH=$TRAVELING_RUBY_BIN_PATH:${PATH}" >>$GITHUB_ENV
-  elif [ $CIRRUS_CI ]; then
+    echo "PATH=$TRAVELING_RUBY_BIN_PATH:${PATH}" >>"$GITHUB_ENV"
+  elif [ "$CIRRUS_CI" ]; then
     echo "Added the following to your path to make ${PROJECT_NAME} available:"
     echo ""
     echo "PATH=$TRAVELING_RUBY_BIN_PATH:\${PATH}"
-    echo "PATH=$TRAVELING_RUBY_BIN_PATH:${PATH}" >>$CIRRUS_ENV
+    echo "PATH=$TRAVELING_RUBY_BIN_PATH:${PATH}" >>"$CIRRUS_ENV"
   else
     echo "Add the following to your path to make ${PROJECT_NAME} available:"
     echo "--- Linux/MacOS/Windows Bash Users --------"
@@ -190,20 +189,19 @@ if [ $TRAVELING_RUBY_SET_PATH ]; then
   fi
 fi
 
-if [ $TRAVELING_RUBY_GEM_LIST ]; then
-  GEM_LIST=($TRAVELING_RUBY_GEM_LIST)
-  for GEM in "${GEM_LIST[@]}"; do
-  GEM_NAME=$(echo $GEM | sed -E 's/(.*)-.*/\1/')
-  GEM_VERSION=$(echo $GEM | sed -E 's/(.*)-.*/\2/'|| echo "")
-  echo "-------------------"
-  echo "gem install $GEM"
-  echo "version: $GEM_VERSION"
-  echo "-------------------"
-  if [ $GEM_VERSION ]; then
-    $TRAVELING_RUBY_BIN_PATH/gem install $GEM_NAME -v $GEM_VERSION
-  else
-    $TRAVELING_RUBY_BIN_PATH/gem install $GEM_NAME
-  fi
-  echo "-------------------"
-done
+if [ "$TRAVELING_RUBY_GEM_LIST" ]; then
+  for GEM in $TRAVELING_RUBY_GEM_LIST; do
+    GEM_NAME=$(echo "$GEM" | sed -E 's/(.*)-.*/\1/')
+    GEM_VERSION=$(echo "$GEM" | sed -E 's/(.*)-.*/\2/' || echo "")
+    echo "-------------------"
+    echo "gem install $GEM"
+    echo "version: $GEM_VERSION"
+    echo "-------------------"
+    if [ "$GEM_VERSION" ]; then
+      "$TRAVELING_RUBY_BIN_PATH/gem" install "$GEM_NAME" -v "$GEM_VERSION"
+    else
+      "$TRAVELING_RUBY_BIN_PATH/gem" install "$GEM_NAME"
+    fi
+    echo "-------------------"
+  done
 fi
