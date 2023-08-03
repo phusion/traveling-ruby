@@ -2,7 +2,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     RedCloth (4.3.2)
-    bcrypt (3.1.18)
+    bcrypt (3.1.19)
     charlock_holmes (0.7.7)
     curses (1.4.4)
     daemons (1.4.1)
@@ -13,20 +13,20 @@ GEM
     hitimes (2.0.0)
     json (2.6.3)
     kgio (2.11.4)
-    mini_portile2 (2.8.2)
+    mini_portile2 (2.8.4)
     nio4r (2.5.9)
-    nokogiri (1.15.2)
+    nokogiri (1.15.3)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     pg (1.5.3)
     posix-spawn (0.3.15)
     puma (6.3.0)
       nio4r (~> 2.0)
-    racc (1.6.2)
-    rack (2.2.7)
+    racc (1.7.1)
+    rack (2.2.8)
     raindrops (0.20.1)
     redcarpet (3.6.0)
-    rexml (3.2.5)
+    rexml (3.2.6)
     rugged (1.6.3)
     sqlite3 (1.6.3)
       mini_portile2 (~> 2.8.0)
@@ -76,4 +76,4 @@ DEPENDENCIES
   yajl-ruby
 
 BUNDLED WITH
-   2.4.13
+   2.4.18

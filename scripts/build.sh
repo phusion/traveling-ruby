@@ -23,14 +23,14 @@ cd $PLATFORM
 if [[ ("$PLATFORM" == "osx") && "$USE_ROSETTA" == "true" ]]; then
     softwareupdate --install-rosetta --agree-to-license
     rbenv local system
-    sudo gem install bundler:2.4.13
+    sudo gem install bundler:2.4.18
     rbenv global ${RB_VERSION}
     rake stash_conflicting_paths
     arch -x86_64 rake --trace
     rake unstash_conflicting_paths
 elif [[ "$PLATFORM" == "osx" ]]; then
     rbenv local system
-    sudo gem install bundler:2.4.13
+    sudo gem install bundler:2.4.18
     rbenv global ${RB_VERSION}
     rake stash_conflicting_paths
     rake --trace
