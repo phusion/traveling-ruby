@@ -1,8 +1,8 @@
 #!/bin/bash
 
-export RB_VERSION=${TRAVELING_RUBY_RB_VERSION:-3.2.2}
+export RB_VERSION=${TRAVELING_RUBY_RB_VERSION:-3.3.0}
 export ARCHITECTURES=${TRAVELING_RUBY_ARCHITECTURE:-arm64}
-export PKG_DATE=${TRAVELING_RUBY_PKG_DATE:-20230428}
+export PKG_DATE=${TRAVELING_RUBY_PKG_DATE:-20240116}
 export PLATFORM=${TRAVELING_RUBY_PLATFORM:-linux}
 rm VERSION.txt
 echo $TRAVELING_RUBY_PKG_DATE > VERSION.txt
@@ -23,14 +23,14 @@ cd $PLATFORM
 if [[ ("$PLATFORM" == "osx") && "$USE_ROSETTA" == "true" ]]; then
     softwareupdate --install-rosetta --agree-to-license
     rbenv local system
-    sudo gem install bundler:2.4.18
+    sudo gem install bundler:2.5.3
     rbenv global ${RB_VERSION}
     rake stash_conflicting_paths
     arch -x86_64 rake --trace
     rake unstash_conflicting_paths
 elif [[ "$PLATFORM" == "osx" ]]; then
     rbenv local system
-    sudo gem install bundler:2.4.18
+    sudo gem install bundler:2.5.3
     rbenv global ${RB_VERSION}
     rake stash_conflicting_paths
     rake --trace

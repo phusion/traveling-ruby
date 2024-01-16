@@ -25,7 +25,7 @@ FORCE_LIBTOOL=false
 SKIP_LIBTOOL=false
 FORCE_OPENSSL=false
 SKIP_OPENSSL=false
-FORCE_NCURSES=false
+FORCE_NCURSES=true
 SKIP_NCURSES=false
 FORCE_LIBEDIT=false
 SKIP_LIBEDIT=false
@@ -289,28 +289,68 @@ fi
 TOTAL_TOOLS=6
 TOTAL_LIBS=14
 CCACHE_VERSION=4.6.1
+# CCACHE_VERSION=4.9
+# https://github.com/ccache/ccache/releases
 CMAKE_VERSION=3.23.2
+# CMAKE_VERSION=3.28.1
+# https://github.com/Kitware/CMake/releases/
 PKG_CONFIG_VERSION=0.29.2
+# https://pkgconfig.freedesktop.org/releases/
 AUTOCONF_VERSION=2.71
+# AUTOCONF_VERSION=2.72
+# https://ftp.gnu.org/gnu/autoconf/
 AUTOMAKE_VERSION=1.16.5
+# https://ftp.gnu.org/gnu/automake/
 LIBTOOL_VERSION=2.4.7
+# https://ftp.gnu.org/gnu/libtool/
 OPENSSL_VERSION=1.1.1p
+# OPENSSL_VERSION=1.1.1w
+# OPENSSL_VERSION=3.1.4
+# OPENSSL_VERSION=3.0.12
+# OPENSSL_VERSION=3.2.0
+# https://www.openssl.org/source/
 NCURSES_VERSION=6.1 # the newer 6.2 and 6.3 are not build on ARM64
+# NCURSES_VERSION=6.4
+# https://ftp.gnu.org/pub/gnu/ncurses/
 LIBEDIT_VERSION=20210910-3.1
 LIBEDIT_DIR_VERSION=20210910-3.1
+# https://thrysoee.dk/editline/
+# LIBEDIT_VERSION=20210910-3.1
+# LIBEDIT_DIR_VERSION=20230828-3.1
 GMP_VERSION=6.2.1
 GMP_DIR_VERSION=6.2.1
+# https://gmplib.org/download/gmp/
+# GMP_VERSION=6.3.0
+# GMP_DIR_VERSION=6.3.0
 LIBFFI_VERSION=3.4.2
+# https://github.com/libffi/libffi/releases/
+# LIBFFI_VERSION=3.4.4
 LIBYAML_VERSION=0.2.5
+# https://pyyaml.org/download/libyaml/
 SQLITE3_VERSION=3340000
+SQLITE3_VERSION_YEAR=2020
+# https://www.sqlite.org/download.html
+# SQLITE3_VERSION=3450000
+# SQLITE3_VERSION_YEAR=2024
 XZ_VERSION=5.2.5
+# https://tukaani.org/xz/
+# XZ_VERSION=5.4.5
 MYSQL_LIB_VERSION=6.1.5
+# MYSQL_LIB_VERSION=8.3.0
 POSTGRESQL_VERSION=13.1
+# POSTGRESQL_VERSION=16.1
 ICU_RELEASE_VERSION=71-1
 ICU_FILE_VERSION=71_1
+# https://github.com/unicode-org/icu/releases/
+# ICU_RELEASE_VERSION=74-2
+# ICU_FILE_VERSION=74_1
 LIBSSH2_VERSION=1.10.0
+# https://www.libssh2.org/download/
+# LIBSSH2_VERSION=1.11.0
 LIBXML2_VERSION=2.9.12
+# LIBXML2_VERSION=2.9.14
 LIBXSLT_VERSION=1.1.34
+# LIBXSLT_VERSION=1.1.34
 export PATH="$RUNTIME_DIR/bin:$PATH"
 export LIBRARY_PATH="$RUNTIME_DIR/lib"
 export PKG_CONFIG_PATH="$RUNTIME_DIR/lib/pkgconfig:/usr/lib/pkgconfig"
@@ -328,9 +368,9 @@ cd "$RUNTIME_DIR"
 echo
 
 # To many warnings, suppress them all (disable in case of troubleshooting)
-# export CPPFLAGS="-w"
-# export CXXFLAGS="-w"
-# export CFLAGS="-w"
+export CPPFLAGS="-Wno-error=unused-command-line-argument"
+export CXXFLAGS="-Wno-error=unused-command-line-argument"
+export CFLAGS="-Wno-error=unused-command-line-argument"
 
 header "Installing tool 1/$TOTAL_TOOLS: CMake..."
 if $SKIP_CMAKE; then
@@ -517,7 +557,7 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libncurses.6.dylib" ]] || $FORCE_NCURSES; then
 	pushd ncurses-$NCURSES_VERSION >/dev/null
 
 	run ./configure --prefix="$RUNTIME_DIR" --with-shared --without-normal --without-cxx --without-cxx-binding \
-		--without-ada --without-manpages --without-progs --without-tests --enable-pc-files \
+		--without-ada --without-manpages --without-tests --enable-pc-files \
 		--without-develop --build=$DEPLOY_TARGET
 	run make -j$CONCURRENCY
 	run make install
@@ -526,20 +566,36 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libncurses.6.dylib" ]] || $FORCE_NCURSES; then
 	popd >/dev/null
 	run rm -rf ncurses-$NCURSES_VERSION
 
-	run rm -f "$RUNTIME_DIR/lib"/{libpanel,libmenu}*
+	run rm -f "$RUNTIME_DIR/lib"/{libpanel}*
 	run rm -f "$RUNTIME_DIR/lib"/{libncurses,libform}*.a
 	run strip -S "$RUNTIME_DIR/lib/libncurses.6.dylib"
 	run strip -S "$RUNTIME_DIR/lib/libform.6.dylib"
+	run strip -S "$RUNTIME_DIR/lib/libmenu.6.dylib"
+	run strip -S "$RUNTIME_DIR/lib/libpanel.6.dylib"
 	run install_name_tool -id \
 		"@rpath/libncurses.6.dylib" \
 		"$RUNTIME_DIR/lib/libncurses.6.dylib"
 	run install_name_tool -id \
+		"@rpath/libmenu.6.dylib" \
+		"$RUNTIME_DIR/lib/libmenu.6.dylib"
+	run install_name_tool -id \
 		"@rpath/libform.6.dylib" \
 		"$RUNTIME_DIR/lib/libform.6.dylib"
+	run install_name_tool -id \
+		"@rpath/libpanel.6.dylib" \
+		"$RUNTIME_DIR/lib/libpanel.6.dylib"
 	run install_name_tool -change \
 		"$RUNTIME_DIR/lib/libncurses.6.dylib" \
 		"@rpath/libncurses.6.dylib" \
 		"$RUNTIME_DIR/lib/libform.6.dylib"
+	run install_name_tool -change \
+		"$RUNTIME_DIR/lib/libncurses.6.dylib" \
+		"@rpath/libmenu.6.dylib" \
+		"$RUNTIME_DIR/lib/libmenu.6.dylib"
+	run install_name_tool -change \
+		"$RUNTIME_DIR/lib/libncurses.6.dylib" \
+		"@rpath/libpanel.6.dylib" \
+		"$RUNTIME_DIR/lib/libpanel.6.dylib"
 	pushd "$RUNTIME_DIR/lib" >/dev/null
 	run ln -sf libncurses.6.dylib libtermcap.dylib
 
@@ -668,7 +724,7 @@ if $SKIP_SQLITE3; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libsqlite3.a" ]] || $FORCE_SQLITE3; then
 	download_and_extract sqlite-autoconf-$SQLITE3_VERSION.tar.gz \
-		https://www.sqlite.org/2020/sqlite-autoconf-$SQLITE3_VERSION.tar.gz
+		https://www.sqlite.org/$SQLITE3_VERSION_YEAR/sqlite-autoconf-$SQLITE3_VERSION.tar.gz
 	echo "Entering $RUNTIME_DIR/sqlite-autoconf-$SQLITE3_VERSION"
 	pushd sqlite-autoconf-$SQLITE3_VERSION >/dev/null
 
@@ -730,7 +786,8 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libmysqlclient.a" ]] || $FORCE_MYSQL; then
 		-DCMAKE_C_FLAGS="-fPIC -fvisibility=hidden" \
 		-DCMAKE_CXX_FLAGS="-fPIC -fvisibility=hidden" . \
 		-DDISABLE_SHARED=1 \
-		-DCMAKE_VERBOSE_MAKEFILE=1
+		-DCMAKE_VERBOSE_MAKEFILE=1 \
+		-DCMAKE_OSX_ARCHITECTURES=$ARCHITECTURE -DCMAKE_MACOSX_DEPLOYMENT_TARGET=12.2
 	run make -j$CONCURRENCY libmysql
 	run make -C libmysql install
 	run make -C include install
@@ -745,12 +802,48 @@ else
 fi
 echo
 
+# header "Compiling runtime libraries 9/$TOTAL_LIBS: MySQL..."
+# if $SKIP_MYSQL; then
+# 	echo "Skipped."
+# elif [[ ! -e "$RUNTIME_DIR/lib/libmysqlclient.a" ]] || $FORCE_MYSQL; then
+# 	download_and_extract mysql-connector-c++-$MYSQL_LIB_VERSION-src.tar.gz \
+# 		https://dev.mysql.com/get/Downloads/Connector-C++/mysql-connector-c++-$MYSQL_LIB_VERSION-src.tar.gz
+# 	echo "Entering $RUNTIME_DIR/mysql-connector-c++-$MYSQL_LIB_VERSION-src"
+# 	pushd mysql-connector-c++-$MYSQL_LIB_VERSION-src >/dev/null
+
+# 	# We do not use internal/bin/cc and c++ because MySQL includes
+# 	# yassl, which has an OpenSSL compatibility layer. We want the
+# 	# yassl headers to be used, not the OpenSSL headers in the runtime.
+# 	run cmake -DCMAKE_INSTALL_PREFIX="$RUNTIME_DIR" \
+# 		-DCMAKE_C_COMPILER=/usr/bin/cc \
+# 		-DCMAKE_CXX_COMPILER=/usr/bin/c++ \
+# 		-DCMAKE_C_FLAGS="-fPIC -fvisibility=hidden" \
+# 		-DCMAKE_CXX_FLAGS="-fPIC -fvisibility=hidden" . \
+# 		-DDISABLE_SHARED=1 \
+# 		-DCMAKE_VERBOSE_MAKEFILE=1
+# 		# -DBUILD_STATIC=true \
+# 		# -DSTATIC_CONCPP=1
+# 	run cmake --build . --config=build_type
+# 	# run make -j$CONCURRENCY libmysql
+# 	# run make -C libmysql install
+# 	# run make -C include install
+# 	# run make -C scripts install
+
+# 	echo "Leaving source directory"
+# 	popd >/dev/null
+# 	run rm -rf mysql-connector-c++-$MYSQL_LIB_VERSION-src
+# 	run lipo -info "$RUNTIME_DIR/lib/libmysqlclient.a"
+# else
+# 	echo "Already installed."
+# fi
+# echo
+
 header "Compiling runtime libraries 10/$TOTAL_LIBS: PostgreSQL..."
 if $SKIP_POSTGRESQL; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libpq.a" ]] || $FORCE_POSTGRESQL; then
 	download_and_extract postgresql-$POSTGRESQL_VERSION.tar.bz2 \
-		https://ftp.postgresql.org/pub/source/v13.1/postgresql-$POSTGRESQL_VERSION.tar.bz2
+		https://ftp.postgresql.org/pub/source/v$POSTGRESQL_VERSION/postgresql-$POSTGRESQL_VERSION.tar.bz2
 	echo "Entering $RUNTIME_DIR/postgresql-$POSTGRESQL_VERSION"
 	pushd postgresql-$POSTGRESQL_VERSION >/dev/null
 
