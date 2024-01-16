@@ -25,7 +25,7 @@ FORCE_LIBTOOL=false
 SKIP_LIBTOOL=false
 FORCE_OPENSSL=false
 SKIP_OPENSSL=false
-FORCE_NCURSES=true
+FORCE_NCURSES=false
 SKIP_NCURSES=false
 FORCE_LIBEDIT=false
 SKIP_LIBEDIT=false
@@ -288,11 +288,9 @@ fi
 
 TOTAL_TOOLS=6
 TOTAL_LIBS=14
-CCACHE_VERSION=4.6.1
-# CCACHE_VERSION=4.9
+CCACHE_VERSION=4.9
 # https://github.com/ccache/ccache/releases
-CMAKE_VERSION=3.23.2
-# CMAKE_VERSION=3.28.1
+CMAKE_VERSION=3.28.1
 # https://github.com/Kitware/CMake/releases/
 PKG_CONFIG_VERSION=0.29.2
 # https://pkgconfig.freedesktop.org/releases/
@@ -303,54 +301,42 @@ AUTOMAKE_VERSION=1.16.5
 # https://ftp.gnu.org/gnu/automake/
 LIBTOOL_VERSION=2.4.7
 # https://ftp.gnu.org/gnu/libtool/
-OPENSSL_VERSION=1.1.1p
 # OPENSSL_VERSION=1.1.1w
-# OPENSSL_VERSION=3.1.4
 # OPENSSL_VERSION=3.0.12
-# OPENSSL_VERSION=3.2.0
+# OPENSSL_VERSION=3.1.4
+OPENSSL_VERSION=3.2.0
 # https://www.openssl.org/source/
-NCURSES_VERSION=6.1 # the newer 6.2 and 6.3 are not build on ARM64
-# NCURSES_VERSION=6.4
+NCURSES_VERSION=6.4
 # https://ftp.gnu.org/pub/gnu/ncurses/
-LIBEDIT_VERSION=20210910-3.1
-LIBEDIT_DIR_VERSION=20210910-3.1
 # https://thrysoee.dk/editline/
-# LIBEDIT_VERSION=20210910-3.1
-# LIBEDIT_DIR_VERSION=20230828-3.1
-GMP_VERSION=6.2.1
-GMP_DIR_VERSION=6.2.1
+LIBEDIT_VERSION=20230828-3.1
+LIBEDIT_DIR_VERSION=20230828-3.1
 # https://gmplib.org/download/gmp/
-# GMP_VERSION=6.3.0
-# GMP_DIR_VERSION=6.3.0
-LIBFFI_VERSION=3.4.2
+GMP_VERSION=6.3.0
+GMP_DIR_VERSION=6.3.0
 # https://github.com/libffi/libffi/releases/
-# LIBFFI_VERSION=3.4.4
-LIBYAML_VERSION=0.2.5
+LIBFFI_VERSION=3.4.4
 # https://pyyaml.org/download/libyaml/
-SQLITE3_VERSION=3340000
-SQLITE3_VERSION_YEAR=2020
+LIBYAML_VERSION=0.2.5
 # https://www.sqlite.org/download.html
-# SQLITE3_VERSION=3450000
-# SQLITE3_VERSION_YEAR=2024
-XZ_VERSION=5.2.5
+SQLITE3_VERSION=3450000
+SQLITE3_VERSION_YEAR=2024
 # https://tukaani.org/xz/
-# XZ_VERSION=5.4.5
-MYSQL_LIB_VERSION=6.1.5
+XZ_VERSION=5.4.5
+MYSQL_LIB_VERSION=6.1.9
 # MYSQL_LIB_VERSION=8.3.0
-POSTGRESQL_VERSION=13.1
-# POSTGRESQL_VERSION=16.1
-ICU_RELEASE_VERSION=71-1
-ICU_FILE_VERSION=71_1
+POSTGRESQL_VERSION=15.5
+# ICU_RELEASE_VERSION=71-1
+# ICU_FILE_VERSION=71_1
 # https://github.com/unicode-org/icu/releases/
-# ICU_RELEASE_VERSION=74-2
-# ICU_FILE_VERSION=74_1
-LIBSSH2_VERSION=1.10.0
+ICU_RELEASE_VERSION=74-1
+ICU_FILE_VERSION=74_1
 # https://www.libssh2.org/download/
-# LIBSSH2_VERSION=1.11.0
-LIBXML2_VERSION=2.9.12
-# LIBXML2_VERSION=2.9.14
+LIBSSH2_VERSION=1.11.0
+# http://xmlsoft.org/download
+LIBXML2_VERSION=2.9.14
 LIBXSLT_VERSION=1.1.34
-# LIBXSLT_VERSION=1.1.34
+# http://xmlsoft.org/download
 export PATH="$RUNTIME_DIR/bin:$PATH"
 export LIBRARY_PATH="$RUNTIME_DIR/lib"
 export PKG_CONFIG_PATH="$RUNTIME_DIR/lib/pkgconfig:/usr/lib/pkgconfig"
@@ -528,14 +514,14 @@ elif [[ ! -e "$RUNTIME_DIR/lib/openssl-ok" ]] || $FORCE_OPENSSL; then
 	run strip bin/openssl
 	run strip -S lib/libcrypto.dylib
 	run strip -S lib/libssl.dylib
-	run install_name_tool -id "@rpath/libssl.1.1.dylib" \
-		"$RUNTIME_DIR/lib/libssl.1.1.dylib"
+	run install_name_tool -id "@rpath/libssl.3.dylib" \
+		"$RUNTIME_DIR/lib/libssl.3.dylib"
 	run install_name_tool -change \
-		"$RUNTIME_DIR/lib/libcrypto.1.1.dylib" \
-		"@rpath/libcrypto.1.1.dylib" \
-		"$RUNTIME_DIR/lib/libssl.1.1.dylib"
-	run install_name_tool -id "@rpath/libcrypto.1.1.dylib" \
-		"$RUNTIME_DIR/lib/libcrypto.1.1.dylib"
+		"$RUNTIME_DIR/lib/libcrypto.3.dylib" \
+		"@rpath/libcrypto.3.dylib" \
+		"$RUNTIME_DIR/lib/libssl.3.dylib"
+	run install_name_tool -id "@rpath/libcrypto.3.dylib" \
+		"$RUNTIME_DIR/lib/libcrypto.3.dylib"
 
 	run sed -i '' 's/^Libs:.*/Libs: -L${libdir} -lcrypto -lz -ldl -lpthread/' "$RUNTIME_DIR"/lib/pkgconfig/libcrypto.pc
 	run sed -i '' '/^Libs.private:.*/d' "$RUNTIME_DIR"/lib/pkgconfig/libcrypto.pc
