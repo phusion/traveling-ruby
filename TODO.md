@@ -4,7 +4,7 @@ Just some WIP notes to keep some track of testing progress
 
 ### Latest Ruby Versions
  
-- `3.3.0-preview1`
+- `3.3.0`
 - `3.2.2`
 - `3.1.4`
 - `3.1.2`
@@ -14,7 +14,7 @@ Just some WIP notes to keep some track of testing progress
 
 #### Ruby Build Caveats
 
-- Windows 3.3.0-preview1 builds not provdided
+- Windows 3.3.0 builds not provdided
   - https://github.com/oneclick/rubyinstaller2/releases
 - Linux
   - Cannot build latest `3.1.4` / `3.0.6`
@@ -26,7 +26,7 @@ Just some WIP notes to keep some track of testing progress
 
 ### Ruby Versions failing to build
 
-- Ruby `3.3.0-preview1`
+- Ruby `3.3.0`
   - Windows
     - Not Available
 

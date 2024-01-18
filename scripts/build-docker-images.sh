@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# ./scripts/build-docker-images.sh -m -p -v 3.3.0-preview1
+# ./scripts/build-docker-images.sh -m -p -v 3.3.0
 
 # Define the default values for the arguments
 DEFAULT_TRAVELING_RUBY_VERSION=2.6.10

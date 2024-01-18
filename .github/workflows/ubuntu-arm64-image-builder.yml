@@ -1,0 +1,44 @@
+name: Linux - arm64 - image builder
+on:
+  push:
+    branches: [ main, ci, ruby-3.3  ]
+    paths-ignore:
+      - '.circleci/**'
+      - '.cirrus.yml'
+  pull_request:
+    branches: [ main, ci, ruby-3.3  ]
+    paths-ignore:
+      - '.circleci/**'
+      - '.cirrus.yml'
+
+jobs:
+  make-ubuntu-arm64-image:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          all_but_latest: true
+      - uses: actions/checkout@v3
+      - name: "Set up Ruby"
+        uses: ruby/setup-ruby@v1
+        with:
+            ruby-version: 3.3.0
+      - name: build image
+        run: |
+            docker run --privileged --rm tonistiigi/binfmt --install all
+            cd linux
+            ARCHITECTURES="arm64" rake image
+            docker images
+        env:
+          ARCHITECTURES: "arm64"
+      - name: build from image
+        run: |
+          cd linux
+          ARCHITECTURES="arm64" rake
+        env:
+          ARCHITECTURES: "arm64"

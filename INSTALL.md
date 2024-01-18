@@ -68,8 +68,8 @@ jobs:
 https://hub.docker.com/r/you54f/traveling-ruby/tags
 
 
-docker run --platform=linux/arm64 --rm -it you54f/traveling-ruby:3.3.0-preview1 --version
-docker run --platform=linux/amd64 --rm -it you54f/traveling-ruby:3.3.0-preview1 --version
+docker run --platform=linux/arm64 --rm -it you54f/traveling-ruby:3.3.0 --version
+docker run --platform=linux/amd64 --rm -it you54f/traveling-ruby:3.3.0 --version
 docker run --platform=linux/arm64 --rm -it you54f/traveling-ruby:3 --version
 docker run --platform=linux/amd64 --rm -it you54f/traveling-ruby:3 --version
 docker run --platform=linux/arm64 --rm -it you54f/traveling-ruby:3.1 --version

@@ -1,0 +1,53 @@
+name: Linux - arm64 - self-hosted build from dockerhub builder
+on:
+  push:
+    branches: [ main ]
+    paths-ignore:
+      - '.circleci/**'
+      - '.cirrus.yml'
+  pull_request:
+    branches: [ main ]
+    paths-ignore:
+      - '.circleci/**'
+      - '.cirrus.yml'
+
+jobs:
+  make-ubuntu-arm64-native:
+    strategy:
+      matrix:
+        os: [self-hosted]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Cancel Previous Runs
+        uses: styfle/cancel-workflow-action@0.11.0
+        with:
+          all_but_latest: true
+      - uses: actions/checkout@v3
+      - name: setup self-hosted deps
+        run: |
+          # sudo apt install -y snapd
+          # sudo snap install docker
+          # sudo addgroup --system docker
+          # sudo adduser ubuntu docker
+          # newgrp docker
+          # sudo snap disable docker
+          # sudo snap enable docker
+          sudo apt install -y git curl libssl-dev libreadline-dev zlib1g-dev autoconf bison build-essential libyaml-dev libreadline-dev libncurses5-dev libffi-dev libgdbm-dev
+          curl -fsSL https://github.com/rbenv/rbenv-installer/raw/HEAD/bin/rbenv-installer | bash
+          eval "$(/home/ubuntu/.rbenv/bin/rbenv init - bash)"
+          rbenv install 3.2.2
+          rbenv global 3.2.2
+      - name: package
+        run: |
+            eval "$(/home/ubuntu/.rbenv/bin/rbenv init - bash)"
+            cd linux
+            rake
+            ls
+        env:
+          ARCHITECTURES: "arm64"
+      - name: 'Upload Artifact - linux arm64'
+        uses: actions/upload-artifact@v3
+        with:
+          name: traveling-ruby-20240116-3.3.0-linux-arm64.tar.gz
+          path: linux/traveling-ruby-20240116-3.3.0-linux-arm64.tar.gz
