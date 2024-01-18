@@ -88,6 +88,7 @@ echo
 
 # shellcheck disable=SC1091
 source /hbb_shlib/activate
+run openssl version
 # -fvisibility=hidden interferes with native extension compilation
 export CFLAGS="${CFLAGS//-fvisibility=hidden/}"
 export CXXFLAGS="${CXXFLAGS//-fvisibility=hidden/}"
@@ -135,7 +136,7 @@ fi
 
 if $COMPILE; then
 	header "Compiling"
-	run sed -i 's|dir_config("openssl")|$libs << " -lz "; dir_config("openssl")|' ext/openssl/extconf.rb
+	# run sed -i 's|dir_config("openssl")|$libs << " -lz "; dir_config("openssl")|' ext/openssl/extconf.rb
 	# Do not link to ncurses. We want it to link to libtermcap instead, which is much smaller.
 	if [[ $RUBY_MAJOR -lt 3 || $RUBY_MAJOR -eq 3 && $RUBY_MINOR -lt 3 ]]; then
 		echo overwriting ext/readline/extconf.rb as a workaround for https://bugs.ruby-lang.org/issues/17123

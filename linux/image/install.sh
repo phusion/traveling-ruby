@@ -3,20 +3,19 @@ set -e
 # shellcheck source=linux/image/functions.sh
 source /tr_build/functions.sh
 
-MYSQL_LIB_VERSION=6.1.5
-POSTGRESQL_VERSION=13.1
-ICU_RELEASE_VERSION=68-2
-ICU_FILE_VERSION=68_2
-LIBSSH2_VERSION=1.9.0
+MYSQL_LIB_VERSION=6.1.9
+POSTGRESQL_VERSION=15.5
+ICU_RELEASE_VERSION=74-1
+ICU_FILE_VERSION=74_1
+LIBSSH2_VERSION=1.11.0
 LIBFFI_VERSION=3.4.4
 LIBYAML_VERSION=0.2.5
-MAKE_CONCURRENCY=2
+MAKE_CONCURRENCY=10
 ARCHITECTURE_BITS=64
 
 ### Install base software
 
 echo "$ARCHITECTURE" >/ARCHITECTURE
-
 run yum install -y wget sudo readline-devel ncurses-devel s3cmd
 # run yum install -y wget sudo readline-devel ncurses-devel s3cmd libyaml-devel libffi-devel
 run mkdir -p /ccache
@@ -60,7 +59,7 @@ header "Installing PostgreSQL"
 if [[ ! -e /hbb_shlib/lib/libpq.a ]]; then
 	download_and_extract postgresql-$POSTGRESQL_VERSION.tar.bz2 \
 		postgresql-$POSTGRESQL_VERSION \
-		http://ftp.postgresql.org/pub/source/v13.1/postgresql-$POSTGRESQL_VERSION.tar.bz2
+		http://ftp.postgresql.org/pub/source/v$POSTGRESQL_VERSION/postgresql-$POSTGRESQL_VERSION.tar.bz2
 
 	(
 		source /hbb_shlib/activate
