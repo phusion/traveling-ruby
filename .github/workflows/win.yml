@@ -6,7 +6,7 @@ on:
     branches: [ main, ci, ruby-3.3  ]
 
 env:
-  RB_VERSION: 3.2.2
+  RB_VERSION: 3.3.0
   PKG_DATE: 20240116
 
 jobs:
