@@ -9,14 +9,14 @@ set -e
 
 # Options
 # TRAVELING_RUBY_VERSION - set ruby version eg TRAVELING_RUBY_VERSION=2.7.3
-# TRAVELING_RUBY_RELEASE_TAG - set release tag eg TRAVELING_RUBY_RELEASE_TAG=rel20240116
+# TRAVELING_RUBY_RELEASE_TAG - set release tag eg TRAVELING_RUBY_RELEASE_TAG=rel20240201
 # TRAVELING_RUBY_INSTALL_PATH - set install path eg TRAVELING_RUBY_INSTALL_PATH=$HOME/.travelling-ruby
 # TRAVELING_RUBY_CLEAN_INSTALL - set to true to remove existing install eg TRAVELING_RUBY_CLEAN_INSTALL=true
 
 # Usage: (install fixed version of a release) -
-#   $ curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/main/install.sh | TRAVELING_RUBY_RELEASE_TAG=rel-20240116 sh
+#   $ curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/main/install.sh | TRAVELING_RUBY_RELEASE_TAG=rel-20240201 sh
 # or
-#   $ wget -q https://raw.githubusercontent.com/you54f/traveling-ruby/main/install.sh -O- | TRAVELING_RUBY_RELEASE_TAG=rel-20240116 sh
+#   $ wget -q https://raw.githubusercontent.com/you54f/traveling-ruby/main/install.sh -O- | TRAVELING_RUBY_RELEASE_TAG=rel-20240201 sh
 
 # Usage: (install fixed version of ruby) -
 #   $ curl -fsSL https://raw.githubusercontent.com/you54f/traveling-ruby/main/install.sh | TRAVELING_RUBY_VERSION=2.6.10 sh
@@ -25,12 +25,12 @@ set -e
 
 PROJECT_NAME='traveling-ruby'
 TRAVELING_RUBY_GH_SOURCE=YOU54F/${PROJECT_NAME}
-TRAVELING_RUBY_VERSION=${TRAVELING_RUBY_VERSION:-3.2.2}
+TRAVELING_RUBY_VERSION=${TRAVELING_RUBY_VERSION:-3.2.3}
 
 usage() {
   echo "Usage: $0 [-v <version>] [-d <release-date>] [--set-path] [--clean-install] [--ci]"
   echo ""
-  echo "  -v <version>          Ruby version to install (default: 3.2.2)"
+  echo "  -v <version>          Ruby version to install (default: 3.2.3)"
   echo "  -d <release-date>     Release date of the traveling ruby package to download (default: latest)"
   echo "  --set-path            Add the traveling ruby bin path to the PATH environment variable (default: false)"
   echo "  --clean-install       Remove any existing traveling ruby installation before installing (default: false)"
@@ -71,7 +71,7 @@ while getopts "hg:v:d:-:" opt; do
 done
 
 if [ -z "$TRAVELING_RUBY_VERSION" ]; then
-  TRAVELING_RUBY_VERSION=3.2.2
+  TRAVELING_RUBY_VERSION=3.2.3
 fi
 
 if [ -z "$TRAVELING_RUBY_PKG_DATE" ]; then

@@ -1,6 +1,6 @@
 env:
   REPO: you54f/traveling-ruby
-  PKG_DATE: 20240116
+  PKG_DATE: 20240201
   NEXT_TAG: rel-$PKG_DATE
   GITHUB_TOKEN: ENCRYPTED[7f3663f35400d0e1f8e0fec456af6b75a07b0fd2d0632fe1697b8fb73af5e78245144216288d88d2daa681ccd159e07d]
 
@@ -89,27 +89,25 @@ download_task:
 
 RUBY_VERSIONS_LATEST_MATRIX: &RUBY_VERSIONS_LATEST_MATRIX
   RUBY_VERSIONS: 3.3.0
-  RUBY_VERSIONS: 3.2.2
+  RUBY_VERSIONS: 3.2.3
   RUBY_VERSIONS: 3.1.4
   RUBY_VERSIONS: 3.0.6
-  RUBY_VERSIONS: 2.7.8
-  RUBY_VERSIONS: 2.6.10
+  # RUBY_VERSIONS: 2.7.8
+  # RUBY_VERSIONS: 2.6.10
 
 RUBY_VERSIONS_MATRIX_MACOS: &RUBY_VERSIONS_MATRIX_MACOS
   RUBY_VERSIONS: 3.3.0
-  RUBY_VERSIONS: 3.2.2
+  RUBY_VERSIONS: 3.2.3
   RUBY_VERSIONS: 3.1.4
   RUBY_VERSIONS: 3.0.6
 
 RUBY_VERSIONS_MATRIX_LINUX: &RUBY_VERSIONS_MATRIX_LINUX
   RUBY_VERSIONS: 3.3.0
-  RUBY_VERSIONS: 3.2.2
+  RUBY_VERSIONS: 3.2.3
   # RUBY_VERSIONS: 2.7.8
-  RUBY_VERSIONS: 2.6.10
-  RUBY_VERSIONS: 3.1.2
-  RUBY_VERSIONS: 3.0.4
-  # 3.1.2 and 3.0.4 are not the latest, but the latest that will build
-  # for those branch on linux
+  # RUBY_VERSIONS: 2.6.10
+  RUBY_VERSIONS: 3.1.4
+  RUBY_VERSIONS: 3.0.6
 
 rake_package_and_test: &rake_package_and_test
   package_script: cd $PLATFORM && rake
@@ -275,7 +273,7 @@ set_bundler_version: &set_bundler_version
     $USE_ROSETTA rbenv global system
     $USE_ROSETTA sudo gem install bundler -v $(cat BUNDLER_VERSION.txt)
     $USE_ROSETTA bundler --version
-    $USE_ROSETTA rbenv global 3.2.2
+    $USE_ROSETTA rbenv global 3.2.3
 
 macos_check_task: 
   only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(mac-check\).*'
@@ -518,12 +516,12 @@ run_commands: &run_commands
   install_homebrew_script: *install_homebrew_script
   test_homebrew_script: *test_homebrew_script
 
-cli_arm_task:
-  arm_container:
-    image: ubuntu:22.04
-  <<: *run_commands
+# cli_arm_task:
+#   arm_container:
+#     image: ubuntu:22.04
+#   <<: *run_commands
 
-cli_amd_task:
-  container:
-    image: ubuntu:22.04
-  <<: *run_commands
+# cli_amd_task:
+#   container:
+#     image: ubuntu:22.04
+#   <<: *run_commands

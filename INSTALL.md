@@ -14,7 +14,7 @@
 curl -fsSL https://gist.githubusercontent.com/YOU54F/2e47eb0b653b6810dd6a0be9fc6820ea/raw/install.sh | sh -s -- --help
 Usage: sh [-v <version>] [-d <release-date>] [--set-path] [--clean-install] [--ci]
 
-  -v <version>          Ruby version to install (default: 3.2.2)
+  -v <version>          Ruby version to install (default: 3.2.3)
   -d <release-date>     Release date of the traveling ruby package to download (default: latest)
   --set-path            Add the traveling ruby bin path to the PATH environment variable (default: false)
   --clean-install       Remove any existing traveling ruby installation before installing (default: false)

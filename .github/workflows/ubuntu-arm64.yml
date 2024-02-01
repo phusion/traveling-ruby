@@ -16,6 +16,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
+        ruby-version: [3.3.0]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -27,7 +28,7 @@ jobs:
       - name: "Set up Ruby"
         uses: ruby/setup-ruby@v1
         with:
-            ruby-version: 3.3.0
+            ruby-version: ${{ matrix.ruby-version }}
       - name: package
         run: |
             docker run --privileged --rm tonistiigi/binfmt --install all
@@ -39,5 +40,5 @@ jobs:
       - name: 'Upload Artifact - linux arm64'
         uses: actions/upload-artifact@v3
         with:
-          name: traveling-ruby-20240116-3.3.0-linux-arm64.tar.gz
-          path: linux/traveling-ruby-20240116-3.3.0-linux-arm64.tar.gz
+          name: traveling-ruby-20240201-${{ matrix.ruby-version }}-linux-arm64.tar.gz
+          path: linux/traveling-ruby-20240201-${{ matrix.ruby-version }}-linux-arm64.tar.gz

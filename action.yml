@@ -4,11 +4,11 @@ inputs:
   ruby-version:
     description: 'Version of Traveling Ruby to install'
     required: false
-    default: '3.2.2'
+    default: '3.2.3'
   release:
     description: 'Date of the package to install'
     required: false
-    default: '20240116'
+    default: '20240201'
   gems:
     description: 'List of gems and optionally versions, white space seperated (e.g. "nokogiri-1.10.10 rails")'
     required: false

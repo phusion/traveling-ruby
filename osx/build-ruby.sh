@@ -420,7 +420,7 @@ run rm -rf lib/{libruby*static.a,pkgconfig}
 # NOTE:- Updated the above to consider the below library, otherwise
 # the size of our bundle doubles
 # 	find output -type f -exec du -ah {} + | sort -rh | head -n 10
-#  21M    output/3.2.2-arm64/lib/libruby.3.2-static.a
+#  21M    output/3.2.3-arm64/lib/libruby.3.2-static.a
 
 # run rm -rf lib/ruby/$RUBY_COMPAT_VERSION/rdoc/generator/
 run rm -rf lib/ruby/gems/$RUBY_COMPAT_VERSION/cache/*

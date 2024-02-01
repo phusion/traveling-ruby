@@ -42,5 +42,5 @@ jobs:
       - name: 'Upload Artifact- osx x86_64'
         uses: actions/upload-artifact@v3
         with:
-          name: traveling-ruby-20240116-3.3.0-osx-x86_64.tar.gz
-          path: osx/traveling-ruby-20240116-3.3.0-osx-x86_64.tar.gz
+          name: traveling-ruby-20240201-3.3.0-osx-x86_64.tar.gz
+          path: osx/traveling-ruby-20240201-3.3.0-osx-x86_64.tar.gz

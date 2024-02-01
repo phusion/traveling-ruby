@@ -7,7 +7,7 @@ on:
 
 env:
   RB_VERSION: 3.3.0
-  PKG_DATE: 20240116
+  PKG_DATE: 20240201
 
 jobs:
   make-windows:
@@ -32,8 +32,8 @@ jobs:
           uname -m
           cd windows
           sh -c 'mkdir -p cache output/${{ env.RB_VERSION }}'
-          sh -c './build-ruby -a ${{ matrix.arch }} -r ${{ env.RB_VERSION }} cache output/${{ env.RB_VERSION }}'
-          sh -c './package -r traveling-ruby-${{ env.PKG_DATE }}-${{ env.RB_VERSION }}-${{ matrix.arch }}-windows.tar.gz output/${{ env.RB_VERSION }}'
+          sh -c './build-ruby.sh -a ${{ matrix.arch }} -r ${{ env.RB_VERSION }} cache output/${{ env.RB_VERSION }}'
+          sh -c './package.sh -r traveling-ruby-${{ env.PKG_DATE }}-${{ env.RB_VERSION }}-${{ matrix.arch }}-windows.tar.gz output/${{ env.RB_VERSION }}'
           sh -c 'ls'
       - name: 'Upload Artifact - traveling-ruby-${{ env.PKG_DATE }}-${{ env.RB_VERSION }}-${{ matrix.arch }}-windows'
         uses: actions/upload-artifact@v3

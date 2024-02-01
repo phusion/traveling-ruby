@@ -5,7 +5,7 @@ RUN apt-get update && \
       apt-get clean && rm -rf /var/lib/apt/lists
 
 ARG TRAVELING_RUBY_VERSION=2.6.10
-ARG TRAVELING_RUBY_PKG_DATE=20240116
+ARG TRAVELING_RUBY_PKG_DATE=20240201
 ARG TRAVELING_RUBY_GH_SOURCE=YOU54F/traveling-ruby 
 
 ENV PATH="/home/.traveling-ruby/bin:$PATH"

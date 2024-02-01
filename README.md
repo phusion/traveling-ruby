@@ -8,13 +8,13 @@ Traveling Ruby is a project which supplies self-contained, "portable" Ruby binar
 
 | OS     | Ruby      | Architecture | Supported |
 | -------| ------- | ------------ | --------- |
-| OSX    | 3.2.2     | x86_64       | ✅         |
-| OSX    | 3.2.2     | arm64| ✅         |
-| Linux  | 3.2.2   | x86_64       | ✅         |
-| Linux  | 3.2.2   | arm64 | ✅         |
-| Windows| 3.2.2 | x86_64       | ✅         |
-| Windows| 3.2.2 | x86      | ✅         |
-| Windows| 3.2.2 | arm64 | 🚧         |
+| OSX    | 3.2.3     | x86_64       | ✅         |
+| OSX    | 3.2.3     | arm64| ✅         |
+| Linux  | 3.2.3   | x86_64       | ✅         |
+| Linux  | 3.2.3   | arm64 | ✅         |
+| Windows| 3.2.3 | x86_64       | ✅         |
+| Windows| 3.2.3 | x86      | ✅         |
+| Windows| 3.2.3 | arm64 | 🚧         |
 
 🚧 - Works under emulation with x86 or x64 packages on Windows on Arm.
 
@@ -106,7 +106,7 @@ Windows support:
  * Traveling Ruby supports creating packages *for* Windows, but it does not yet support creating packages *on* Windows. That is, the Traveling Ruby tutorials and the documentation do not work when you are a Ruby developer on Windows. To create Windows packages, you must use macOS or Linux.
 
    This is because in our documentation we make heavy use of standard Unix tools. Tools which are not available on Windows. In the future we may replace the use of such tools with Ruby tools so that the documentation works on Windows too.
- * Traveling Ruby currently supports Ruby 3.2.2.
+ * Traveling Ruby currently supports Ruby 3.2.3.
  * Native extensions are not yet supported.
 
 ## Building binaries

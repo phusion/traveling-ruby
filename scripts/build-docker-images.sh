@@ -4,7 +4,7 @@
 
 # Define the default values for the arguments
 DEFAULT_TRAVELING_RUBY_VERSION=2.6.10
-DEFAULT_TRAVELING_RUBY_PKG_DATE=20240116
+DEFAULT_TRAVELING_RUBY_PKG_DATE=20240201
 DEFAULT_TRAVELING_RUBY_GH_SOURCE=YOU54F/traveling-ruby
 DOCKER_IMAGE_ORG_AND_NAME="you54f/traveling-ruby"
 
@@ -73,7 +73,7 @@ usage() {
   echo "Building Docker image for Traveling Ruby version ${TRAVELING_RUBY_VERSION}..."
 
   # Define the latest major and minor versions
-  LATEST_MAJOR_MINOR=("2.7.8" "3.2.2")
+  LATEST_MAJOR_MINOR=("2.7.8" "3.2.3")
   # Set the values for the arguments
   TRAVELING_RUBY_VERSION=${TRAVELING_RUBY_VERSION:-$DEFAULT_TRAVELING_RUBY_VERSION}
   TRAVELING_RUBY_PKG_DATE=${TRAVELING_RUBY_PKG_DATE:-$DEFAULT_TRAVELING_RUBY_PKG_DATE}
