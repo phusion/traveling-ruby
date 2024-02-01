@@ -11,6 +11,9 @@ on:
       - '.circleci/**'
       - '.cirrus.yml'
 
+env:
+  PKG_DATE: 20240201
+
 jobs:
   make-ubuntu-x86_64:
     strategy:
@@ -36,8 +39,9 @@ jobs:
             ls
         env:
           ARCHITECTURES: "x86_64"
+          RUBY_VERSIONS: ${{ matrix.ruby-version }}
       - name: 'Upload Artifact - linux x86_64'
         uses: actions/upload-artifact@v3
         with:
-          name: traveling-ruby-20240201-${{ matrix.ruby-version }}-linux-x86_64.tar.gz
-          path: linux/traveling-ruby-20240201-${{ matrix.ruby-version }}-linux-x86_64.tar.gz
+          name: traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-linux-x86_64.tar.gz
+          path: linux/traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-linux-x86_64.tar.gz
