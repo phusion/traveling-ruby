@@ -24,7 +24,4 @@ gem 'thin'
 gem 'unf_ext'
 gem 'unicorn', force_ruby_platform: true
 gem 'nokogiri', force_ruby_platform: true
-# nokogumbo is now part of nokogiri
-
-# Fails to build on Linux/MacOS
-# gem 'mysql2', force_ruby_platform: true
+gem 'mysql2', force_ruby_platform: true

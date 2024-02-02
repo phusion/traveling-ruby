@@ -99,7 +99,6 @@ GEMS_TO_FAIL=(
 	"win32ole"
 	) 
 GEMS_TO_SKIP=(
-	mysql2
 	"sinatra"
 	"nio4r" 
 	test-unit 

@@ -43,8 +43,7 @@ if [[ ! -e /hbb_shlib/lib/libmysqlclient.a ]]; then
 		run make -C libmysql install
 		run make -C include install
 		run make -C scripts install
-		run sed -i -E 's|-lmysqlclient |-lmysqlclient -lstdc++ |' /hbb_shlib/bin/mysql_config
-		run sed -i -E 's|-lmysqlclient_r |-lmysqlclient_r -lstdc++ |' /hbb_shlib/bin/mysql_config
+		run sed -i 's|libs="$libs -l "|libs="$libs -l mysqlclient -lstdc++"|' /hbb_shlib/bin/mysql_config
 	)
 	if [[ "$?" != 0 ]]; then false; fi
 
