@@ -576,11 +576,11 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libncurses.6.dylib" ]] || $FORCE_NCURSES; then
 		"$RUNTIME_DIR/lib/libform.6.dylib"
 	run install_name_tool -change \
 		"$RUNTIME_DIR/lib/libncurses.6.dylib" \
-		"@rpath/libmenu.6.dylib" \
+		"@rpath/libncurses.6.dylib" \
 		"$RUNTIME_DIR/lib/libmenu.6.dylib"
 	run install_name_tool -change \
 		"$RUNTIME_DIR/lib/libncurses.6.dylib" \
-		"@rpath/libpanel.6.dylib" \
+		"@rpath/libncurses.6.dylib" \
 		"$RUNTIME_DIR/lib/libpanel.6.dylib"
 	pushd "$RUNTIME_DIR/lib" >/dev/null
 	run ln -sf libncurses.6.dylib libtermcap.dylib
