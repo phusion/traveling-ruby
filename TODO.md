@@ -17,7 +17,7 @@ Just some WIP notes to keep some track of testing progress
 - Windows 3.3.0 builds not provdided
   - https://github.com/oneclick/rubyinstaller2/releases
 - Linux
-  - Cannot build latest `3.1.4` / `3.0.6`
+  - Cannot build latest `3.0.6`
 - MacOS
   - Cannot build latest `3.1.4` / `3.0.6` on x86_64
   - Cannot build latest `2.7.8` on arm64

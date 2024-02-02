@@ -3,7 +3,7 @@
 /linux/traveling-ruby-gems*
 /osx/traveling-ruby-gems*
 /windows/traveling-ruby-gems*
-/osx/runtime
+/osx/runtime*
 /osx/output
 /osx/work
 /windows/cache
