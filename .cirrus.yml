@@ -89,22 +89,22 @@ download_task:
 
 RUBY_VERSIONS_LATEST_MATRIX: &RUBY_VERSIONS_LATEST_MATRIX
   RUBY_VERSIONS: 3.3.0
-  RUBY_VERSIONS: 3.2.3
-  RUBY_VERSIONS: 3.1.4
+  # RUBY_VERSIONS: 3.2.3
+  # RUBY_VERSIONS: 3.1.4
   # RUBY_VERSIONS: 3.0.6
   # RUBY_VERSIONS: 2.7.8
   # RUBY_VERSIONS: 2.6.10
 
 RUBY_VERSIONS_MATRIX_MACOS: &RUBY_VERSIONS_MATRIX_MACOS
   RUBY_VERSIONS: 3.3.0
-  RUBY_VERSIONS: 3.2.3
-  RUBY_VERSIONS: 3.1.4
+  # RUBY_VERSIONS: 3.2.3
+  # RUBY_VERSIONS: 3.1.4
   # RUBY_VERSIONS: 3.0.6
 
 RUBY_VERSIONS_MATRIX_LINUX: &RUBY_VERSIONS_MATRIX_LINUX
   RUBY_VERSIONS: 3.3.0
-  RUBY_VERSIONS: 3.2.3
-  RUBY_VERSIONS: 3.1.4
+  # RUBY_VERSIONS: 3.2.3
+  # RUBY_VERSIONS: 3.1.4
   # RUBY_VERSIONS: 2.7.8
   # RUBY_VERSIONS: 2.6.10
   # RUBY_VERSIONS: 3.0.6
@@ -332,7 +332,7 @@ macos_arm64_matrix_task:
   macos_instance:
     # image: traveling-ruby-builder
     # image: ghcr.io/cirruslabs/macos-ventura-vanilla:latest
-    image: ghcr.io/cirruslabs/macos-ventura-base:latest
+    image: ghcr.io/cirruslabs/macos-sonoma-base:latest
   env:
     PLATFORM: osx
     ARCHITECTURES: arm64
@@ -341,9 +341,9 @@ macos_arm64_matrix_task:
   <<: *macos_check
   <<: *cirrus_cli_setup
   <<: *macos_stash_conflicting_paths
-  <<: *download_macos_runtime
+  # <<: *download_macos_runtime
   <<: *rake_package_and_test
-  # upload_output_dir_script: cd $PLATFORM && tar -czvf $PLATFORM-runtime.tar.gz runtime
+  upload_output_dir_script: cd $PLATFORM && tar -czvf $PLATFORM-runtime.tar.gz runtime
   <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 
@@ -351,7 +351,7 @@ macos_x86_64_matrix_task:
   only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos-x86_64\).*' || $CIRRUS_BRANCH =~ 'main'
   macos_instance:
     # image: traveling-ruby-builder
-    image: ghcr.io/cirruslabs/macos-ventura-base:latest
+    image: ghcr.io/cirruslabs/macos-sonoma-base:latest
   env:
     PLATFORM: osx
     ARCHITECTURES: x86_64
@@ -361,10 +361,10 @@ macos_x86_64_matrix_task:
   <<: *macos_check
   <<: *cirrus_cli_setup
   <<: *macos_stash_conflicting_paths
-  <<: *download_macos_runtime
+  # <<: *download_macos_runtime
   install_rosetta_script: softwareupdate --install-rosetta --agree-to-license
   <<: *rake_package_and_test
-  # upload_output_dir_script: cd $PLATFORM && tar -czvf $PLATFORM-runtime.tar.gz runtime
+  upload_output_dir_script: cd $PLATFORM && tar -czvf $PLATFORM-runtime.tar.gz runtime
   <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 
