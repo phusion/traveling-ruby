@@ -629,7 +629,9 @@ if $SKIP_GMP; then
 	echo "Skipped."
 elif [[ ! -e "$RUNTIME_DIR/lib/libgmp.10.dylib" ]] || $FORCE_GMP; then
 	run rm -f gmp-$GMP_VERSION.tar.bz2
-	run curl --fail -L -O https://gmplib.org/download/gmp/gmp-$GMP_VERSION.tar.bz2
+	# https://github.com/actions/runner-images/issues/7901
+	# GH Action runners are barred access to https://gmplib.org/download/gmp/gmp-$GMP_VERSION.tar.bz2
+	run curl --fail -L -O  https://ftp.gnu.org/gnu/gmp/gmp-$GMP_VERSION.tar.bz2
 	run tar xjf gmp-$GMP_VERSION.tar.bz2
 	run rm gmp-$GMP_VERSION.tar.bz2
 	echo "Entering $RUNTIME_DIR/gmp-$GMP_VERSION"
