@@ -88,6 +88,15 @@ echo
 
 # shellcheck disable=SC1091
 source /hbb_shlib/activate
+
+# Required for OpenSSL as it is stored in /hbb_shlib/lib64
+if [ "$(uname -m)" = "x86_64" ]; then
+	export LDFLAGS="$LDFLAGS -L/hbb_shlib/lib64"
+	export SHLIB_LDFLAGS="$SHLIB_LDFLAGS -L/hbb_shlib/lib64"
+	export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:hbb_shlib/lib64/pkgconfig"
+fi
+
+
 run openssl version
 # -fvisibility=hidden interferes with native extension compilation
 export CFLAGS="${CFLAGS//-fvisibility=hidden/}"
