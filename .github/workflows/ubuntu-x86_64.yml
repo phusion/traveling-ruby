@@ -45,3 +45,10 @@ jobs:
         with:
           name: traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-linux-x86_64.tar.gz
           path: linux/traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-linux-x86_64.tar.gz
+      - name: test
+        run: |
+            cd linux
+            rake test_docker
+        env:
+          ARCHITECTURES: "x86_64"
+          RUBY_VERSIONS: ${{ matrix.ruby-version }}

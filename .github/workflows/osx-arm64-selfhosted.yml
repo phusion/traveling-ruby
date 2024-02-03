@@ -1,15 +1,7 @@
-name: MacOS arm64
+name: SH - MacOS arm64
 on:
-  push:
-    branches: [ main ]
-    paths-ignore:
-      - '.circleci/**'
-      - '.cirrus.yml'
-  pull_request:
-    branches: [ main ]
-    paths-ignore:
-      - '.circleci/**'
-      - '.cirrus.yml'
+  workflow_dispatch:
+
 jobs:
   make-osx-arm64:
     strategy:

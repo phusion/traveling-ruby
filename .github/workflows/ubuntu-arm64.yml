@@ -1,15 +1,19 @@
 name: Linux - arm64 - build from dockerhub builder
 on:
-  push:
-    branches: [ main, ci, ruby-3.3  ]
-    paths-ignore:
-      - '.circleci/**'
-      - '.cirrus.yml'
-  pull_request:
-    branches: [ main ]
-    paths-ignore:
-      - '.circleci/**'
-      - '.cirrus.yml'
+  workflow_dispatch:
+  # Broken on GitHub Actions with QEMU
+
+# on:
+#   push:
+#     branches: [ main, ci, ruby-3.3  ]
+#     paths-ignore:
+#       - '.circleci/**'
+#       - '.cirrus.yml'
+#   pull_request:
+#     branches: [ main ]
+#     paths-ignore:
+#       - '.circleci/**'
+#       - '.cirrus.yml'
 
 env:
   PKG_DATE: 20240201
@@ -46,3 +50,10 @@ jobs:
         with:
           name: traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-linux-arm64.tar.gz
           path: linux/traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-linux-arm64.tar.gz
+      - name: test
+        run: |
+            cd linux
+            rake test_docker
+        env:
+          ARCHITECTURES: "arm64"
+          RUBY_VERSIONS: ${{ matrix.ruby-version }}

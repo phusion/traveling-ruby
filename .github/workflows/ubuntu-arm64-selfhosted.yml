@@ -1,15 +1,6 @@
-name: Linux - arm64 - self-hosted build from dockerhub builder
+name: SH - Linux arm64 build from dockerhub builder
 on:
-  push:
-    branches: [ main ]
-    paths-ignore:
-      - '.circleci/**'
-      - '.cirrus.yml'
-  pull_request:
-    branches: [ main ]
-    paths-ignore:
-      - '.circleci/**'
-      - '.cirrus.yml'
+  workflow_dispatch:
 
 jobs:
   make-ubuntu-arm64-native:

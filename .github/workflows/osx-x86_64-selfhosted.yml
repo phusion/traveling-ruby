@@ -1,15 +1,6 @@
-name: MacOS x86_64 - self hosted
+name: SH - MacOS x86_64
 on:
-  push:
-    branches: [ main ]
-    paths-ignore:
-      - '.circleci/**'
-      - '.cirrus.yml'
-  pull_request:
-    branches: [ main ]
-    paths-ignore:
-      - '.circleci/**'
-      - '.cirrus.yml'
+  workflow_dispatch:
 
 jobs:
   make-osx-x86_64:

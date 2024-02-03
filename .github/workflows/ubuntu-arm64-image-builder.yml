@@ -1,15 +1,18 @@
 name: Linux - arm64 - image builder
 on:
-  push:
-    branches: [ main, ci, ruby-3.3  ]
-    paths-ignore:
-      - '.circleci/**'
-      - '.cirrus.yml'
-  pull_request:
-    branches: [ main, ci, ruby-3.3  ]
-    paths-ignore:
-      - '.circleci/**'
-      - '.cirrus.yml'
+  workflow_dispatch:
+  # Broken on GitHub Actions with QEMU
+
+  # push:
+  #   branches: [ main, ci, ruby-3.3  ]
+  #   paths-ignore:
+  #     - '.circleci/**'
+  #     - '.cirrus.yml'
+  # pull_request:
+  #   branches: [ main, ci, ruby-3.3  ]
+  #   paths-ignore:
+  #     - '.circleci/**'
+  #     - '.cirrus.yml'
 
 jobs:
   make-ubuntu-arm64-image:
@@ -36,9 +39,3 @@ jobs:
             docker images
         env:
           ARCHITECTURES: "arm64"
-      # - name: build from image
-      #   run: |
-      #     cd linux
-      #     ARCHITECTURES="arm64" rake
-      #   env:
-      #     ARCHITECTURES: "arm64"
