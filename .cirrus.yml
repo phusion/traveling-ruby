@@ -348,6 +348,7 @@ macos_arm64_matrix_task:
   <<: *BINARY_ATRIFACTS
 
 macos_x86_64_matrix_task:
+  timeout_in: 120m
   only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-macos-x86_64\).*' || $CIRRUS_BRANCH =~ 'main'
   macos_instance:
     # image: traveling-ruby-builder
