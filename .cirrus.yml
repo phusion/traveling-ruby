@@ -383,8 +383,6 @@ windows_packager_task:
   windows_setup_script: |
     brew install sevenzip
   <<: *cirrus_cli_setup
-  no_version_remover_script: |
-    sed -ie '/3.3.0/d' RUBY_VERSIONS.txt
   package_script: cd $PLATFORM && rake
   <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
