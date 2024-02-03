@@ -9,6 +9,8 @@ elif [[ "$XCODEPATH" == "/Applications/Xcode.app/Contents/Developer" ]]; then
   XCODEPATH="$XCODEPATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
 elif [[ "$XCODEPATH" == "/Applications/Xcode_14.2.app/Contents/Developer" ]]; then
   XCODEPATH="$XCODEPATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
+elif [[ "$XCODEPATH" == "/Applications/Xcode_14.3.1app/Contents/Developer" ]]; then
+  XCODEPATH="$XCODEPATH/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk"
 else
   echo "*** ERROR: unknown developer path \"$XCODEPATH\""
   exit 1
