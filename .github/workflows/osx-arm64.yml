@@ -50,8 +50,8 @@ jobs:
           path: osx/traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-osx-arm64.tar.gz
       - name: test
         run: |
-            cd linux
+            cd osx
             rake test
         env:
-          ARCHITECTURES: "x86_64"
+          ARCHITECTURES: "arm64"
           RUBY_VERSIONS: ${{ matrix.ruby-version }}
