@@ -783,6 +783,8 @@ elif [[ ! -e "$RUNTIME_DIR/lib/libmysqlclient.a" ]] || $FORCE_MYSQL; then
 	popd >/dev/null
 	run rm -rf mysql-connector-c-$MYSQL_LIB_VERSION-src
 	run lipo -info "$RUNTIME_DIR/lib/libmysqlclient.a"
+	# https://stackoverflow.com/a/44790834/11598969
+	run sed -i '' 's/^libs="$libs -l "*/libs="$libs -l mysqlclient "/' "$RUNTIME_DIR"/bin/mysql_config
 else
 	echo "Already installed."
 fi
