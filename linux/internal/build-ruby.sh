@@ -93,7 +93,7 @@ source /hbb_shlib/activate
 if [ "$(uname -m)" = "x86_64" ]; then
 	export LDFLAGS="$LDFLAGS -L/hbb_shlib/lib64"
 	export SHLIB_LDFLAGS="$SHLIB_LDFLAGS -L/hbb_shlib/lib64"
-	export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:hbb_shlib/lib64/pkgconfig"
+	export PKG_CONFIG_PATH="$PKG_CONFIG_PATH:/hbb_shlib/lib64/pkgconfig"
 fi
 
 
