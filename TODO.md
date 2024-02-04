@@ -7,54 +7,31 @@ Just some WIP notes to keep some track of testing progress
 - `3.3.0`
 - `3.2.3`
 - `3.1.4`
-- `3.1.2`
 - `3.0.6`
-- `3.0.4`
 - `2.6.10`
 
 #### Ruby Build Caveats
 
 - 3.0.x and below builds no longer possible as switched to openssl 3.2 in linux/macos builders
-- Linux
-  - Cannot build latest `3.0.6`
-- MacOS
-  - Cannot build latest `3.1.4` / `3.0.6` on x86_64
-  - Cannot build latest `2.7.8` on arm64
-  - Cannot build `2.6.10` on either
-  - `-dead_strip` linker command unused when running configure
+  - Set `OPENSSL_1_1_LEGACY` to build OpenSSL 1.1.1 for macos.
+  - Set image tag to `openssl1_1` for linux
+    - TODO:-
+      - publish openssl1_1 holy build box (published arm64) `you54f/holy-build-box:3.1.0-openssl1.1.1-arm64`
+        - amd64
+      - build traveling-ruby builder with openssl1_1 holy build box `you54f/traveling-ruby-builder-arm64:next-openssl1.1.1`
+        - amd64
+      - configure build scripts to support `OPENSSL_1_1_LEGACY` value - done
+- Linux 2.6.10 - Requires bundler version 2.3.x (latest 2.3.27 at time of writing)
 
 ### Ruby Versions failing to build
 
-- Ruby `3.3.0`
-  - Windows
-    - Not Available
-
-- Ruby  `3.1.3` / `3.1.4`
-  - Linux 
-    - OpenSSL not found error
-  - MacOS (`x86_64`)
-
-- Ruby  `3.0.5` / `3.0.6`
-  - Linux
-    - OpenSSL not found error
-
-
-- Ruby  `2.7.8` / `3.0.6`
-  - Linux
-    - OpenSSL not found error
-
-### Gems failing to install
-
-- mysql2 `gem 'mysql2', :platforms => :ruby`
-  - Linux
+- Linux  `3.0.5` / `3.0.6`
+  - OpenSSL not found error (when using OpenSSL 3.2 or OpenSSL 1.1.1)
+- MacOS  `2.6.10` / `2.7.8`
 
 ### Gems failing testing
 
 - `test-unit`
-  - MacOS
-  - Linux
-
-- `win32ole`
   - MacOS
   - Linux
 
@@ -75,3 +52,5 @@ We delete the version numbers, other than the version of ruby we are packaging, 
 - output/3.2.3-arm64/lib/ruby/gems/3.2.0/gems/sqlite3-1.6.3-aarch64-linux/lib/sqlite3/2.7/sqlite3_native.so
 
 should we create a full fat bundler, that has all the gem extensions pre-installed?
+
+- Now created as `-full` packages (Linux/MacOS only)

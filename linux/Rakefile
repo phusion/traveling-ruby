@@ -1,4 +1,5 @@
 IMAGE_VERSION = "next"
+IMAGE_VERSION += "-openssl1.1.1" if ENV['OPENSSL_1_1_LEGACY']
 VERSION       = File.read("../VERSION.txt").strip
 RUBY_VERSIONS = ENV['RUBY_VERSIONS'] ? [].push(ENV['RUBY_VERSIONS']) : File.read("../RUBY_VERSIONS.txt").strip.split(/\s+/)
 ARCHITECTURES = ENV['ARCHITECTURES'] ? [].push(ENV['ARCHITECTURES']) : ["x86_64","arm64"]
@@ -45,12 +46,15 @@ end
 
 ARCHITECTURES.each do |arch|
   task :image => "image:#{arch}"
-
+  
   desc "Build the #{arch} Docker image"
   task "image:#{arch}" do
+    IMAGE_FILE = "image/Dockerfile-#{arch}"
+    IMAGE_FILE += "-openssl1.1.1" if ENV['OPENSSL_1_1_LEGACY']
+    puts "Building Docker image for #{arch} from #{IMAGE_FILE}"
     sh "docker build --pull" \
       " -t you54f/traveling-ruby-builder-#{arch}:#{IMAGE_VERSION}" \
-      " -f image/Dockerfile-#{arch} image"
+      " -f #{IMAGE_FILE} image"
   end
 
   desc "Open a shell for testing building the #{arch} Docker image"

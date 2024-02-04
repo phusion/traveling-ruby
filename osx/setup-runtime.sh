@@ -301,10 +301,14 @@ AUTOMAKE_VERSION=1.16.5
 # https://ftp.gnu.org/gnu/automake/
 LIBTOOL_VERSION=2.4.7
 # https://ftp.gnu.org/gnu/libtool/
-# OPENSSL_VERSION=1.1.1w
+
+if [[ "$OPENSSL_1_1_LEGACY" = true ]]; then
+	OPENSSL_VERSION=1.1.1w
+else
+	OPENSSL_VERSION=3.2.0
+fi
 # OPENSSL_VERSION=3.0.12
 # OPENSSL_VERSION=3.1.4
-OPENSSL_VERSION=3.2.0
 # https://www.openssl.org/source/
 NCURSES_VERSION=6.4
 # https://ftp.gnu.org/pub/gnu/ncurses/
@@ -514,14 +518,26 @@ elif [[ ! -e "$RUNTIME_DIR/lib/openssl-ok" ]] || $FORCE_OPENSSL; then
 	run strip bin/openssl
 	run strip -S lib/libcrypto.dylib
 	run strip -S lib/libssl.dylib
-	run install_name_tool -id "@rpath/libssl.3.dylib" \
-		"$RUNTIME_DIR/lib/libssl.3.dylib"
-	run install_name_tool -change \
-		"$RUNTIME_DIR/lib/libcrypto.3.dylib" \
-		"@rpath/libcrypto.3.dylib" \
-		"$RUNTIME_DIR/lib/libssl.3.dylib"
-	run install_name_tool -id "@rpath/libcrypto.3.dylib" \
-		"$RUNTIME_DIR/lib/libcrypto.3.dylib"
+
+	if [[ "$OPENSSL_1_1_LEGACY" = true ]]; then
+		run install_name_tool -id "@rpath/libssl.1.1.dylib" \
+			"$RUNTIME_DIR/lib/libssl.1.1.dylib"
+		run install_name_tool -change \
+			"$RUNTIME_DIR/lib/libcrypto.1.1.dylib" \
+			"@rpath/libcrypto.1.1.dylib" \
+			"$RUNTIME_DIR/lib/libssl.1.1.dylib"
+		run install_name_tool -id "@rpath/libcrypto.1.1.dylib" \
+			"$RUNTIME_DIR/lib/libcrypto.1.1.dylib"
+	else
+		run install_name_tool -id "@rpath/libssl.3.dylib" \
+			"$RUNTIME_DIR/lib/libssl.3.dylib"
+		run install_name_tool -change \
+			"$RUNTIME_DIR/lib/libcrypto.3.dylib" \
+			"@rpath/libcrypto.3.dylib" \
+			"$RUNTIME_DIR/lib/libssl.3.dylib"
+		run install_name_tool -id "@rpath/libcrypto.3.dylib" \
+			"$RUNTIME_DIR/lib/libcrypto.3.dylib"
+	fi
 
 	run sed -i '' 's/^Libs:.*/Libs: -L${libdir} -lcrypto -lz -ldl -lpthread/' "$RUNTIME_DIR"/lib/pkgconfig/libcrypto.pc
 	run sed -i '' '/^Libs.private:.*/d' "$RUNTIME_DIR"/lib/pkgconfig/libcrypto.pc

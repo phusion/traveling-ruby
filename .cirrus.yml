@@ -89,25 +89,25 @@ download_task:
 
 RUBY_VERSIONS_LATEST_MATRIX: &RUBY_VERSIONS_LATEST_MATRIX
   RUBY_VERSIONS: 3.3.0
-  # RUBY_VERSIONS: 3.2.3
-  # RUBY_VERSIONS: 3.1.4
-  # RUBY_VERSIONS: 3.0.6
+  RUBY_VERSIONS: 3.2.3
+  RUBY_VERSIONS: 3.1.4
+  # RUBY_VERSIONS: 3.0.4
   # RUBY_VERSIONS: 2.7.8
   # RUBY_VERSIONS: 2.6.10
 
 RUBY_VERSIONS_MATRIX_MACOS: &RUBY_VERSIONS_MATRIX_MACOS
   RUBY_VERSIONS: 3.3.0
-  # RUBY_VERSIONS: 3.2.3
-  # RUBY_VERSIONS: 3.1.4
+  RUBY_VERSIONS: 3.2.3
+  RUBY_VERSIONS: 3.1.4
   # RUBY_VERSIONS: 3.0.6
 
 RUBY_VERSIONS_MATRIX_LINUX: &RUBY_VERSIONS_MATRIX_LINUX
   RUBY_VERSIONS: 3.3.0
-  # RUBY_VERSIONS: 3.2.3
-  # RUBY_VERSIONS: 3.1.4
+  RUBY_VERSIONS: 3.2.3
+  RUBY_VERSIONS: 3.1.4
+  # RUBY_VERSIONS: 3.0.6
   # RUBY_VERSIONS: 2.7.8
   # RUBY_VERSIONS: 2.6.10
-  # RUBY_VERSIONS: 3.0.6
 
 rake_package_and_test: &rake_package_and_test
   package_script: cd $PLATFORM && rake
@@ -151,11 +151,10 @@ linux_arm64_packager_docker_builder:
     PLATFORM: linux
     ARCHITECTURES: arm64
   <<: *ENV_CHECK_SCRIPT
-  <<: *rake_package_and_test
   broken_version_remover_script: |
-    sed -ie '/3.1.4/d' RUBY_VERSIONS.txt
-    sed -ie '/3.0.6/d' RUBY_VERSIONS.txt
+    sed -ie 's/3.0.6/3.0.4/' RUBY_VERSIONS.txt
     sed -ie '/2.7.8/d' RUBY_VERSIONS.txt
+  <<: *rake_package_and_test
   <<: *INSTALL_GH_CLI
   <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
@@ -170,8 +169,7 @@ linux_x64_packager_docker_builder:
     ARCHITECTURES: x86_64
   <<: *ENV_CHECK_SCRIPT
   broken_version_remover_script: |
-    sed -ie '/3.1.4/d' RUBY_VERSIONS.txt
-    sed -ie '/3.0.6/d' RUBY_VERSIONS.txt
+    sed -ie 's/3.0.6/3.0.4/' RUBY_VERSIONS.txt
     sed -ie '/2.7.8/d' RUBY_VERSIONS.txt
   <<: *rake_package_and_test
   <<: *INSTALL_GH_CLI
