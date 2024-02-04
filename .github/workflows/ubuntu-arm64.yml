@@ -23,7 +23,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        ruby-version: [3.3.0]
+        ruby-version: [3.1.4,3.2.3,3.3.0]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -52,7 +52,7 @@ jobs:
       - name: 'Upload Artifact - linux arm64'
         uses: actions/upload-artifact@v3
         with:
-          name: traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-linux-arm64
+          name: traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-linux-arm64.tar.gz
           path: linux/traveling-ruby*.tar.gz
       - name: test
         run: |

@@ -19,7 +19,7 @@ jobs:
     strategy:
       matrix:
         os: [macos-14]
-        ruby-version: [3.3.0]
+        ruby-version: [3.1.4,3.2.3,3.3.0]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -53,7 +53,7 @@ jobs:
       # - name: 'Upload Runtime - osx arm64'
       #   uses: actions/upload-artifact@v3
       #   with:
-      #     name: osx-runtime-arm64
+      #     name: osx-runtime-arm64-gha.tar.gz
       #     path: osx/osx-runtime-arm64.tar.gz
       - name: package gems
         run: ./scripts/package-gems.sh     
@@ -62,7 +62,7 @@ jobs:
       - name: 'Upload Artifact- osx arm64'
         uses: actions/upload-artifact@v3
         with:
-          name: traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-osx-arm64
+          name: traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-osx-arm64.tar.gz
           path: osx/traveling-ruby*.tar.gz
       - name: test
         run: |
