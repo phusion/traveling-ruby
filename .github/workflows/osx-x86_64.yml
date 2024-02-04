@@ -1,7 +1,7 @@
 name: MacOS x86_64
 on:
   push:
-    branches: [ main, ci, ruby-3.3  ]
+    branches: [ main, ci, ruby-3.3, gh_osx_store_runtime ]
     paths-ignore:
       - '.circleci/**'
       - '.cirrus.yml'
@@ -31,6 +31,11 @@ jobs:
       - uses: maxim-lobanov/setup-xcode@v1
         with:
             xcode-version: '14.2'
+      # - name: download osx x86_64 runtime
+      #   run: ./scripts/download-osx-runtime.sh     
+      #   env:
+      #     PLATFORM: osx
+      #     ARCHITECTURES: "x86_64"
       - name: build x86
         run: |
             cd osx
@@ -42,6 +47,16 @@ jobs:
           DEVELOPER_DIR: /Applications/Xcode_14.2.app/Contents/Developer
           ARCHITECTURES: "x86_64"
           RUBY_VERSIONS: ${{ matrix.ruby-version }}
+      - name: package osx x86_64 runtime
+        run: ./scripts/package-osx-runtime.sh     
+        env:
+          PLATFORM: osx
+          ARCHITECTURES: "x86_64"
+      - name: 'Upload Runtime - osx x86_64'
+        uses: actions/upload-artifact@v3
+        with:
+          name: osx-runtime-x86_64
+          path: osx/osx-runtime-x86_64.tar.gz
       - name: 'Upload Artifact- osx x86_64'
         uses: actions/upload-artifact@v3
         with:
