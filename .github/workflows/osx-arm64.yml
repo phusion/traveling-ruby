@@ -28,11 +28,11 @@ jobs:
       #   with:
       #     all_but_latest: true
       - uses: actions/checkout@v3
-      # - name: download osx arm64 runtime
-      #   run: ./scripts/download-osx-runtime.sh     
-      #   env:
-      #     PLATFORM: osx
-      #     ARCHITECTURES: "arm64"
+      - name: download osx arm64 runtime
+        run: ./scripts/download-osx-runtime.sh     
+        env:
+          PLATFORM: osx
+          ARCHITECTURES: "arm64"
       - name: build arm64
         run: |
             ls /Applications/Xcode*
@@ -45,21 +45,25 @@ jobs:
           DEVELOPER_DIR: /Applications/Xcode_14.3.1.app/Contents/Developer
           ARCHITECTURES: "arm64"
           RUBY_VERSIONS: ${{ matrix.ruby-version }}
-      - name: package osx arm64 runtime
-        run: ./scripts/package-osx-runtime.sh     
+      # - name: package osx arm64 runtime
+      #   run: ./scripts/package-osx-runtime.sh     
+      #   env:
+      #     PLATFORM: osx
+      #     ARCHITECTURES: "arm64"
+      # - name: 'Upload Runtime - osx arm64'
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: osx-runtime-arm64
+      #     path: osx/osx-runtime-arm64.tar.gz
+      - name: package gems
+        run: ./scripts/package-gems.sh     
         env:
           PLATFORM: osx
-          ARCHITECTURES: "arm64"
-      - name: 'Upload Runtime - osx arm64'
-        uses: actions/upload-artifact@v3
-        with:
-          name: osx-runtime-arm64
-          path: osx/osx-runtime-arm64.tar.gz
       - name: 'Upload Artifact- osx arm64'
         uses: actions/upload-artifact@v3
         with:
-          name: traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-osx-arm64.tar.gz
-          path: osx/traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-osx-arm64.tar.gz
+          name: traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-osx-arm64
+          path: osx/traveling-ruby*.tar.gz
       - name: test
         run: |
             cd osx

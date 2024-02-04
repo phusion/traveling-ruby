@@ -40,11 +40,15 @@ jobs:
         env:
           ARCHITECTURES: "x86_64"
           RUBY_VERSIONS: ${{ matrix.ruby-version }}
+      - name: package gems
+        run: ./scripts/package-gems.sh     
+        env:
+          PLATFORM: linux
       - name: 'Upload Artifact - linux x86_64'
         uses: actions/upload-artifact@v3
         with:
-          name: traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-linux-x86_64.tar.gz
-          path: linux/traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-linux-x86_64.tar.gz
+          name: traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-linux-x86_64
+          path: linux/traveling-ruby*.tar.gz
       - name: test
         run: |
             cd linux
