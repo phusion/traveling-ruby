@@ -1,9 +1,9 @@
 name: Windows
 on:
   push:
-    branches: [ main, ci, ruby-3.3 ]
+    branches: [main, ci, ruby-3.3, gh_osx_store_runtime]
   pull_request:
-    branches: [ main, ci, ruby-3.3 ]
+    branches: [main, ci, ruby-3.3]
 
 env:
   PKG_DATE: 20240201
@@ -13,11 +13,11 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest]
-        arch: [x86_64,x86]
-        ruby-version: [3.1.4,3.2.3,3.3.0]
+        arch: [x86_64, x86]
+        ruby-version: [2.6.10, 2.7.8, 3.0.6, 3.1.4, 3.2.3, 3.3.0]
       fail-fast: false
     runs-on: ${{ matrix.os }}
-    steps:      
+    steps:
       # - name: Cancel Previous Runs
       #   uses: styfle/cancel-workflow-action@0.11.0
       #   with:
@@ -26,7 +26,7 @@ jobs:
       - name: "Set up Ruby"
         uses: ruby/setup-ruby@v1
         with:
-            ruby-version: ${{ matrix.ruby-version }}
+          ruby-version: ${{ matrix.ruby-version }}
       - name: package ${{ matrix.arch }}
         run: |
           uname -m
@@ -35,7 +35,7 @@ jobs:
           sh -c './build-ruby.sh -a ${{ matrix.arch }} -r ${{ matrix.ruby-version }} cache output/${{ matrix.ruby-version }}'
           sh -c './package.sh -r traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-${{ matrix.arch }}-windows.tar.gz output/${{ matrix.ruby-version }}'
           sh -c 'ls'
-      - name: 'Upload Artifact - traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-${{ matrix.arch }}-windows'
+      - name: "Upload Artifact - traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-${{ matrix.arch }}-windows"
         uses: actions/upload-artifact@v3
         with:
           name: traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-${{ matrix.arch }}-windows.tar.gz
