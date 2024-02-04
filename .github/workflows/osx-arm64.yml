@@ -2,11 +2,15 @@ name: MacOS arm64
 
 on:
   push:
-  pull_request:
     branches: [ main, all_rubies_test, openssl_1_1_osx_builder ]
+  pull_request:
+    branches: [ main ]
 
 env:
   PKG_DATE: 20240201
+  PLATFORM: osx
+  ARCHITECTURES: "arm64"
+  DEVELOPER_DIR: /Applications/Xcode_14.3.1.app/Contents/Developer
 
 jobs:
   make-osx-arm64:
@@ -23,11 +27,11 @@ jobs:
       #   with:
       #     all_but_latest: true
       - uses: actions/checkout@v3
-      - name: download osx arm64 runtime
-        run: ./scripts/download-osx-runtime.sh     
-        env:
-          PLATFORM: osx
-          ARCHITECTURES: "arm64"
+      # - name: download osx arm64 runtime
+      #   run: ./scripts/download-osx-runtime.sh     
+      #   env:
+      #     PLATFORM: osx
+      #     ARCHITECTURES: "arm64"
       - name: build arm64
         run: |
             ls /Applications/Xcode*
@@ -37,19 +41,17 @@ jobs:
             rake unstash_conflicting_paths
             ls
         env:
-          DEVELOPER_DIR: /Applications/Xcode_14.3.1.app/Contents/Developer
-          ARCHITECTURES: "arm64"
           RUBY_VERSIONS: ${{ matrix.ruby-version }}
       - name: package osx arm64 runtime
         run: ./scripts/package-osx-runtime.sh     
         env:
-          PLATFORM: osx
-          ARCHITECTURES: "arm64"
+
+          RUBY_VERSIONS: ${{ matrix.ruby-version }}
       - name: 'Upload Runtime - osx arm64'
         uses: actions/upload-artifact@v3
         with:
-          name: osx-runtime-arm64-gha.tar.gz
-          path: osx/osx-runtime-arm64.tar.gz
+          name: osx-runtime-arm64-gha-openssl_1_1.tar.gz
+          path: osx/osx-runtime-*.tar.gz
       - name: package gems
         run: ./scripts/package-gems.sh     
         env:

@@ -2,9 +2,11 @@ name: Linux - x86_64 - image builder
 
 on:
   workflow_dispatch:
-  # push:
-  # pull_request:
-  #   branches: [ main ]
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
 
 jobs:
   make-ubuntu-x86_64-image:

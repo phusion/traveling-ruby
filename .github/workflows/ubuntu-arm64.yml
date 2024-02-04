@@ -2,9 +2,10 @@ name: Linux - arm64 - build from dockerhub builder
 # Broken on GitHub Actions with QEMU
 on:
   workflow_dispatch:
-  push:
-  pull_request:
-    branches: [ main ]
+  # push:
+  #   branches: [ main ]
+  # pull_request:
+  #   branches: [ main ]
 
 env:
   PKG_DATE: 20240201

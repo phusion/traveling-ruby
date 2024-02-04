@@ -2,8 +2,9 @@ name: Linux - x86_64 - build from dockerhub builder
 
 on:
   push:
+    branches: [ main ]
   pull_request:
-    branches: [ main, all_rubies_test ]
+    branches: [ main ]
 
 env:
   PKG_DATE: 20240201

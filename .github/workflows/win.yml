@@ -1,7 +1,7 @@
 name: Windows
 on:
   push:
-    branches: [ main, all_rubies_test ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
