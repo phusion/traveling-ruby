@@ -1,15 +1,10 @@
 name: Linux - x86_64 - image builder
+
 on:
-  push:
-    branches: [ main, ci, ruby-3.3  ]
-    paths-ignore:
-      - '.circleci/**'
-      - '.cirrus.yml'
-  pull_request:
-    branches: [ main, ci, ruby-3.3  ]
-    paths-ignore:
-      - '.circleci/**'
-      - '.cirrus.yml'
+  workflow_dispatch:
+  # push:
+  # pull_request:
+  #   branches: [ main ]
 
 jobs:
   make-ubuntu-x86_64-image:

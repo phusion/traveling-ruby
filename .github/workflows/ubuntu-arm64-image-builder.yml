@@ -1,18 +1,9 @@
 name: Linux - arm64 - image builder
 on:
   workflow_dispatch:
-  # Broken on GitHub Actions with QEMU
-
-  # push:
-  #   branches: [ main, ci, ruby-3.3  ]
-  #   paths-ignore:
-  #     - '.circleci/**'
-  #     - '.cirrus.yml'
-  # pull_request:
-  #   branches: [ main, ci, ruby-3.3  ]
-  #   paths-ignore:
-  #     - '.circleci/**'
-  #     - '.cirrus.yml'
+    # push:
+    # pull_request:
+    #   branches: [ main ]
 
 jobs:
   make-ubuntu-arm64-image:

@@ -1,15 +1,9 @@
 name: Linux - x86_64 - build from dockerhub builder
+
 on:
   push:
-    branches: [ main, ci, ruby-3.3, gh_osx_store_runtime ]
-    paths-ignore:
-      - '.circleci/**'
-      - '.cirrus.yml'
   pull_request:
-    branches: [ main ]
-    paths-ignore:
-      - '.circleci/**'
-      - '.cirrus.yml'
+    branches: [ main, all_rubies_test ]
 
 env:
   PKG_DATE: 20240201
@@ -19,7 +13,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        ruby-version: [3.1.4,3.2.3,3.3.0]
+        ruby-version: [2.6.10, 2.7.8, 3.0.6, 3.1.4, 3.2.3, 3.3.0]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:

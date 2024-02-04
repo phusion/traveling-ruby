@@ -5,6 +5,11 @@ RUBY_VERSIONS = ENV['RUBY_VERSIONS'] ? [].push(ENV['RUBY_VERSIONS']) : File.read
 ARCHITECTURES = ENV['ARCHITECTURES'] ? [].push(ENV['ARCHITECTURES']) : ["x86_64","arm64"]
 CONCURRENCY   = `./internal/cpucount.sh`.to_i
 
+if RUBY_VERSIONS.any? { |version| Gem::Version.new(version) < Gem::Version.new('3.1.0') }
+  ENV['OPENSSL_1_1_LEGACY'] = 'true'
+  puts "OpenSSL 1.1.1 legacy mode enabled"
+end
+
 desc "Build all packages"
 
 task :default => :package
@@ -45,6 +50,10 @@ task :clean do
 end
 
 ARCHITECTURES.each do |arch|
+  # if RUBY_VERSIONS.any? { |version| Gem::Version.new(version) < Gem::Version.new('3.1.0') }
+  #   ENV['OPENSSL_1_1_LEGACY'] = 'true'
+  #   puts "OpenSSL 1.1.1 legacy mode enabled"
+  # end
   task :image => "image:#{arch}"
   
   desc "Build the #{arch} Docker image"

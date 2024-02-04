@@ -2,6 +2,11 @@ VERSION       = File.read("../VERSION.txt").strip
 RUBY_VERSIONS = ENV['RUBY_VERSIONS'] ? [].push(ENV['RUBY_VERSIONS']) : File.read("../RUBY_VERSIONS.txt").strip.split(/\s+/)
 ARCHITECTURES = ENV['ARCHITECTURES'] ? [].push(ENV['ARCHITECTURES']) : ["x86_64","arm64"]
 
+if RUBY_VERSIONS.any? { |version| Gem::Version.new(version) < Gem::Version.new('3.1.0') }
+  ENV['OPENSSL_1_1_LEGACY'] = 'true'
+  puts "OpenSSL 1.1.1 legacy mode enabled"
+end
+
 desc "Build all packages"
 task :default => :package
 
@@ -66,6 +71,7 @@ end
 
 ARCHITECTURES.each do |arch|
   RUBY_VERSIONS.each do |ruby_version|
+
     package = "traveling-ruby-#{VERSION}-#{ruby_version}-osx-#{arch}.tar.gz"
     package_full = "traveling-ruby-#{VERSION}-#{ruby_version}-osx-#{arch}-full.tar.gz"
     gem_dir = "traveling-ruby-gems-#{VERSION}-#{ruby_version}-osx-#{arch}"

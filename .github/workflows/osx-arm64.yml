@@ -1,15 +1,9 @@
 name: MacOS arm64
+
 on:
   push:
-    branches: [ main, ci, ruby-3.3, gh_osx_store_runtime ]
-    paths-ignore:
-      - '.circleci/**'
-      - '.cirrus.yml'
   pull_request:
-    branches: [ main, ci, ruby-3.3  ]
-    paths-ignore:
-      - '.circleci/**'
-      - '.cirrus.yml'
+    branches: [ main, all_rubies_test, openssl_1_1_osx_builder ]
 
 env:
   PKG_DATE: 20240201
@@ -19,7 +13,8 @@ jobs:
     strategy:
       matrix:
         os: [macos-14]
-        ruby-version: [3.1.4,3.2.3,3.3.0]
+        ruby-version: [3.0.6] # Pre 3.1.0 builds with openssl 1.1.1
+        # ruby-version: [3.0.6, 3.1.4, 3.2.3, 3.3.0]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -45,16 +40,16 @@ jobs:
           DEVELOPER_DIR: /Applications/Xcode_14.3.1.app/Contents/Developer
           ARCHITECTURES: "arm64"
           RUBY_VERSIONS: ${{ matrix.ruby-version }}
-      # - name: package osx arm64 runtime
-      #   run: ./scripts/package-osx-runtime.sh     
-      #   env:
-      #     PLATFORM: osx
-      #     ARCHITECTURES: "arm64"
-      # - name: 'Upload Runtime - osx arm64'
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: osx-runtime-arm64-gha.tar.gz
-      #     path: osx/osx-runtime-arm64.tar.gz
+      - name: package osx arm64 runtime
+        run: ./scripts/package-osx-runtime.sh     
+        env:
+          PLATFORM: osx
+          ARCHITECTURES: "arm64"
+      - name: 'Upload Runtime - osx arm64'
+        uses: actions/upload-artifact@v3
+        with:
+          name: osx-runtime-arm64-gha.tar.gz
+          path: osx/osx-runtime-arm64.tar.gz
       - name: package gems
         run: ./scripts/package-gems.sh     
         env:

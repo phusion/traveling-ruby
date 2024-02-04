@@ -1,19 +1,10 @@
 name: Linux - arm64 - build from dockerhub builder
+# Broken on GitHub Actions with QEMU
 on:
   workflow_dispatch:
-  # Broken on GitHub Actions with QEMU
-
-# on:
-#   push:
-#     branches: [ main, ci, ruby-3.3  ]
-#     paths-ignore:
-#       - '.circleci/**'
-#       - '.cirrus.yml'
-#   pull_request:
-#     branches: [ main ]
-#     paths-ignore:
-#       - '.circleci/**'
-#       - '.cirrus.yml'
+  push:
+  pull_request:
+    branches: [ main ]
 
 env:
   PKG_DATE: 20240201
@@ -23,7 +14,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        ruby-version: [3.1.4,3.2.3,3.3.0]
+        ruby-version: [2.6.10, 2.7.8, 3.0.6, 3.1.4, 3.2.3, 3.3.0]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:

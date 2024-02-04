@@ -1,9 +1,9 @@
 name: Windows
 on:
   push:
-    branches: [main, ci, ruby-3.3, gh_osx_store_runtime]
+    branches: [ main, all_rubies_test ]
   pull_request:
-    branches: [main, ci, ruby-3.3]
+    branches: [ main ]
 
 env:
   PKG_DATE: 20240201
