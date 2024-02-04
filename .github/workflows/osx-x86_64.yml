@@ -9,7 +9,7 @@ on:
 env:
   PKG_DATE: 20240201
   PLATFORM: osx
-  ARCHITECTURES: "x86_64"
+  ARCHITECTURES: x86_64
   DEVELOPER_DIR: /Applications/Xcode_14.2.app/Contents/Developer
 
 jobs:

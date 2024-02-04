@@ -9,7 +9,7 @@ on:
 env:
   PKG_DATE: 20240201
   PLATFORM: osx
-  ARCHITECTURES: "arm64"
+  ARCHITECTURES: arm64
   DEVELOPER_DIR: /Applications/Xcode_14.3.1.app/Contents/Developer
 
 jobs:
@@ -30,8 +30,7 @@ jobs:
       - name: download osx arm64 runtime
         run: ./scripts/download-osx-runtime.sh     
         env:
-          PLATFORM: osx
-          ARCHITECTURES: "arm64"
+          RUBY_VERSIONS: ${{ matrix.ruby-version }}
       - name: build arm64
         run: |
             ls /Applications/Xcode*
