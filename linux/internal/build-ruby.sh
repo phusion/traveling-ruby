@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -e
-
+if [[ "$RUBY_VERSION" < "3.0" ]]; then
+    BUNDLER_VERSION="2.4.22"
+fi
 # shellcheck source=shared/library.sh
 source /system_shared/library.sh
 

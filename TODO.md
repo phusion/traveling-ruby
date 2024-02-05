@@ -12,21 +12,16 @@ Just some WIP notes to keep some track of testing progress
 
 #### Ruby Build Caveats
 
-- 3.0.x and below builds no longer possible as switched to openssl 3.2 in linux/macos builders
+- 3.0.x and below builds require openssl 1.1.1
   - Set `OPENSSL_1_1_LEGACY` to build OpenSSL 1.1.1 for macos.
-  - Set image tag to `openssl1_1` for linux
-    - TODO:-
-      - publish openssl1_1 holy build box (published arm64) `you54f/holy-build-box:3.1.0-openssl1.1.1-arm64`
-        - amd64
-      - build traveling-ruby builder with openssl1_1 holy build box `you54f/traveling-ruby-builder-arm64:next-openssl1.1.1`
-        - amd64
-      - configure build scripts to support `OPENSSL_1_1_LEGACY` value - done
-- Linux 2.6.10 - Requires bundler version 2.3.x (latest 2.3.27 at time of writing)
+- Linux 2.6.10 - Requires bundler version 2.4.x (latest 2.4.22 at time of writing)
 
 ### Ruby Versions failing to build
 
 - Linux  `3.0.5` / `3.0.6`
   - OpenSSL not found error (when using OpenSSL 3.2 or OpenSSL 1.1.1)
+ - Linux  `2.7.8`
+  - OpenSSL gem fails to build 
 - MacOS  `2.6.10` / `2.7.8`
 
 ### Gems failing testing

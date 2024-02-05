@@ -105,6 +105,7 @@ RUBY_VERSIONS_MATRIX_LINUX: &RUBY_VERSIONS_MATRIX_LINUX
   RUBY_VERSIONS: 3.3.0
   RUBY_VERSIONS: 3.2.3
   RUBY_VERSIONS: 3.1.4
+  RUBY_VERSIONS: 3.0.6
   RUBY_VERSIONS: 3.0.4
   RUBY_VERSIONS: 2.7.8
   RUBY_VERSIONS: 2.6.10
@@ -151,9 +152,9 @@ linux_arm64_packager_docker_builder:
     PLATFORM: linux
     ARCHITECTURES: arm64
   <<: *ENV_CHECK_SCRIPT
-  broken_version_remover_script: |
-    sed -ie 's/3.0.6/3.0.4/' RUBY_VERSIONS.txt
-    sed -ie '/2.7.8/d' RUBY_VERSIONS.txt
+  # broken_version_remover_script: |
+  #   sed -ie 's/3.0.6/3.0.4/' RUBY_VERSIONS.txt
+  #   sed -ie '/2.7.8/d' RUBY_VERSIONS.txt
   <<: *rake_package_and_test
   <<: *INSTALL_GH_CLI
   <<: *UPLOAD_TASK
@@ -168,9 +169,9 @@ linux_x64_packager_docker_builder:
     PLATFORM: linux
     ARCHITECTURES: x86_64
   <<: *ENV_CHECK_SCRIPT
-  broken_version_remover_script: |
-    sed -ie 's/3.0.6/3.0.4/' RUBY_VERSIONS.txt
-    sed -ie '/2.7.8/d' RUBY_VERSIONS.txt
+  # broken_version_remover_script: |
+  #   sed -ie 's/3.0.6/3.0.4/' RUBY_VERSIONS.txt
+  #   sed -ie '/2.7.8/d' RUBY_VERSIONS.txt
   <<: *rake_package_and_test
   <<: *INSTALL_GH_CLI
   <<: *UPLOAD_TASK
