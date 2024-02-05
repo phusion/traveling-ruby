@@ -1,5 +1,5 @@
 IMAGE_VERSION = "next"
-IMAGE_VERSION += "-openssl1.1.1" if ENV['OPENSSL_1_1_LEGACY']
+
 VERSION       = File.read("../VERSION.txt").strip
 RUBY_VERSIONS = ENV['RUBY_VERSIONS'] ? [].push(ENV['RUBY_VERSIONS']) : File.read("../RUBY_VERSIONS.txt").strip.split(/\s+/)
 ARCHITECTURES = ENV['ARCHITECTURES'] ? [].push(ENV['ARCHITECTURES']) : ["x86_64","arm64"]
@@ -9,7 +9,7 @@ if RUBY_VERSIONS.any? { |version| Gem::Version.new(version) < Gem::Version.new('
   ENV['OPENSSL_1_1_LEGACY'] = 'true'
   puts "OpenSSL 1.1.1 legacy mode enabled"
 end
-
+IMAGE_VERSION += "-openssl1.1.1" if ENV['OPENSSL_1_1_LEGACY']
 desc "Build all packages"
 
 task :default => :package
