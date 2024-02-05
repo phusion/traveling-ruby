@@ -2,12 +2,12 @@ name: MacOS arm64
 
 on:
   push:
-    branches: [ main, all_rubies_test, openssl_1_1_osx_builder ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
 env:
-  PKG_DATE: 20240201
+  PKG_DATE: 20240205
   PLATFORM: osx
   ARCHITECTURES: arm64
   DEVELOPER_DIR: /Applications/Xcode_14.3.1.app/Contents/Developer

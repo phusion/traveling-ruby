@@ -1,4 +1,3 @@
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -17,7 +16,7 @@ GEM
     mini_portile2 (2.8.5)
     mysql2 (0.5.5)
     nio4r (2.7.0)
-    nokogiri (1.16.0)
+    nokogiri (1.16.2)
       mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     pg (1.5.4)
