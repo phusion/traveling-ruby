@@ -22,10 +22,6 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
-      # - name: Cancel Previous Runs
-      #   uses: styfle/cancel-workflow-action@0.11.0
-      #   with:
-      #     all_but_latest: true
       - uses: actions/checkout@v3
       - name: download osx arm64 runtime
         run: ./scripts/download-osx-runtime.sh     

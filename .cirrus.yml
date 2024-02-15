@@ -218,6 +218,38 @@ linux_x64_matrix_docker_builder:
   <<: *UPLOAD_TASK
   <<: *BINARY_ATRIFACTS
 
+linux_arm64_alpine_matrix_docker_builder:
+  cpu: 4
+  memory: 4G
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-musl-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_BRANCH =~ 'main'
+  env:
+    CIRRUS_ARCH: arm64
+    PLATFORM: alpine
+    ARCHITECTURES: arm64
+    matrix:
+      *RUBY_VERSIONS_MATRIX_LINUX
+  <<: *ENV_CHECK_SCRIPT
+  <<: *rake_package_and_test_docker
+  <<: *INSTALL_GH_CLI
+  <<: *UPLOAD_TASK
+  <<: *BINARY_ATRIFACTS
+
+linux_x64_alpine_matrix_docker_builder:
+  cpu: 4
+  memory: 4G
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-musl-x86_64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_BRANCH =~ 'main'
+  env:
+    CIRRUS_ARCH: amd64
+    PLATFORM: alpine
+    ARCHITECTURES: x86_64
+    matrix:
+      *RUBY_VERSIONS_MATRIX_LINUX
+  <<: *ENV_CHECK_SCRIPT
+  <<: *rake_package_and_test_docker
+  <<: *INSTALL_GH_CLI
+  <<: *UPLOAD_TASK
+  <<: *BINARY_ATRIFACTS
+
 # ========================================
 # MacOS
 # ========================================
