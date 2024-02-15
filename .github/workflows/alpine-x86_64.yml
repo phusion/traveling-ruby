@@ -30,7 +30,6 @@ jobs:
       - name: package
         run: |
             cd alpine
-            rake image
             rake
             ls
         env:
