@@ -61,7 +61,7 @@ ARCHITECTURES.each do |arch|
     IMAGE_FILE = "image/Dockerfile-#{arch}"
     IMAGE_FILE += "-openssl1.1.1" if ENV['OPENSSL_1_1_LEGACY']
     puts "Building Docker image for #{arch} from #{IMAGE_FILE}"
-    sh "docker build" \
+    sh "docker build --pull" \
       " -t you54f/traveling-ruby-builder-#{arch}:#{IMAGE_VERSION}" \
       " -f #{IMAGE_FILE} image"
   end
@@ -81,9 +81,9 @@ ARCHITECTURES.each do |arch|
 
 
   RUBY_VERSIONS.each do |ruby_version|
-    package = "traveling-ruby-#{VERSION}-#{ruby_version}-linux-#{arch}.tar.gz"
-    package_full = "traveling-ruby-#{VERSION}-#{ruby_version}-linux-#{arch}-full.tar.gz"
-    gem_dir = "traveling-ruby-gems-#{VERSION}-#{ruby_version}-linux-#{arch}"
+    package = "traveling-ruby-#{VERSION}-#{ruby_version}-linux-musl-#{arch}.tar.gz"
+    package_full = "traveling-ruby-#{VERSION}-#{ruby_version}-linux-musl-#{arch}-full.tar.gz"
+    gem_dir = "traveling-ruby-gems-#{VERSION}-#{ruby_version}-linux-musl-#{arch}"
 
     task :package => "package:#{ruby_version}:#{arch}"
     task :package_full => "package_full:#{ruby_version}:#{arch}"

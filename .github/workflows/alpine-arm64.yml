@@ -1,9 +1,9 @@
-name: Linux - arm64 - build from dockerhub builder
+name: Alpine Musl - arm64 - build from dockerhub builder
 # Broken on GitHub Actions with QEMU
 on:
   workflow_dispatch:
-  # push:
-  #   branches: [ main ]
+  push:
+    branches: [ main, alpine ]
   # pull_request:
   #   branches: [ main ]
 
@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest]
-        ruby-version: [2.6.10, 3.0.4, 3.1.4, 3.2.3, 3.3.0]
+        ruby-version: [3.1.4, 3.2.3, 3.3.0]
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
@@ -31,7 +31,7 @@ jobs:
       - name: package
         run: |
             docker run --privileged --rm tonistiigi/binfmt --install all
-            cd linux
+            cd alpine
             rake
             ls
         env:
@@ -40,15 +40,15 @@ jobs:
       - name: package gems
         run: ./scripts/package-gems.sh     
         env:
-          PLATFORM: linux
+          PLATFORM: alpine
       - name: 'Upload Artifact - linux arm64'
         uses: actions/upload-artifact@v3
         with:
-          name: traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-linux-arm64.tar.gz
-          path: linux/traveling-ruby*.tar.gz
+          name: traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-linux-musl-arm64.tar.gz
+          path: alpine/traveling-ruby*.tar.gz
       - name: test
         run: |
-            cd linux
+            cd alpine
             rake test_docker
         env:
           ARCHITECTURES: "arm64"

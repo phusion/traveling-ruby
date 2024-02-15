@@ -6,10 +6,6 @@ fi
 # shellcheck source=shared/library.sh
 source /system_shared/library.sh
 
-# add to holy build box
-apk add --no-cache xz python2
-####
-
 function grep_without_fail()
 {
 	grep "$@" || true

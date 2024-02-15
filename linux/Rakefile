@@ -61,7 +61,7 @@ ARCHITECTURES.each do |arch|
     IMAGE_FILE = "image/Dockerfile-#{arch}"
     IMAGE_FILE += "-openssl1.1.1" if ENV['OPENSSL_1_1_LEGACY']
     puts "Building Docker image for #{arch} from #{IMAGE_FILE}"
-    sh "docker build -" \
+    sh "docker build --pull" \
       " -t you54f/traveling-ruby-builder-#{arch}:#{IMAGE_VERSION}" \
       " -f #{IMAGE_FILE} image"
   end
