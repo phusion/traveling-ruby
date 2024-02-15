@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 env:
-  PKG_DATE: 20240205
+  PKG_DATE: 20240215
   PLATFORM: osx
   ARCHITECTURES: x86_64
   DEVELOPER_DIR: /Applications/Xcode_14.2.app/Contents/Developer
@@ -22,10 +22,6 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
-      # - name: Cancel Previous Runs
-      #   uses: styfle/cancel-workflow-action@0.11.0
-      #   with:
-      #     all_but_latest: true
       - uses: actions/checkout@v3
       - name: download osx x86_64 runtime
         run: ./scripts/download-osx-runtime.sh

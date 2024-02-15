@@ -14,7 +14,7 @@ GEM
     json (2.7.1)
     kgio (2.11.4)
     mini_portile2 (2.8.5)
-    mysql2 (0.5.5)
+    mysql2 (0.5.6)
     nio4r (2.7.0)
     nokogiri (1.16.2)
       mini_portile2 (~> 2.8.2)
@@ -28,7 +28,7 @@ GEM
     raindrops (0.20.1)
     redcarpet (3.6.0)
     rexml (3.2.6)
-    rugged (1.7.1)
+    rugged (1.7.2)
     sqlite3 (1.7.2)
       mini_portile2 (~> 2.8.0)
     thin (1.8.2)
@@ -46,10 +46,7 @@ PLATFORMS
   arm-linux
   arm64-darwin
   ruby
-  universal-darwin
-  x64-mingw-ucrt
   x86-linux
-  x86-mingw32
   x86_64-darwin
   x86_64-linux
 
@@ -81,4 +78,4 @@ DEPENDENCIES
   yajl-ruby
 
 BUNDLED WITH
-   2.5.3
+   2.5.6

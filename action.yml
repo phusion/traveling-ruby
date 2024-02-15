@@ -8,7 +8,7 @@ inputs:
   release:
     description: 'Date of the package to install'
     required: false
-    default: '20240205'
+    default: '20240215'
   gems:
     description: 'List of gems and optionally versions, white space seperated (e.g. "nokogiri-1.10.10 rails")'
     required: false

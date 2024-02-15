@@ -1,0 +1,5 @@
+#!/bin/sh
+export CCACHE_COMPRESS=1
+export CCACHE_COMPRESS_LEVEL=3
+export CCACHE_DIR=/ccache
+exec ccache /opt/rh/devtoolset-9/root/usr/bin/gcc "$@"

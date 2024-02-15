@@ -1,0 +1,4 @@
+FROM --platform=linux/arm64 you54f/holy-build-box:3.1.0-arm64-alpine
+ADD . /tr_build
+# RUN apk --no-cache add bash
+RUN env ARCHITECTURE=arm64 /tr_build/install.sh
