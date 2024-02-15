@@ -10,7 +10,7 @@ env:
   PKG_DATE: 20240215
 
 jobs:
-  make-ubuntu-x86_64:
+  make-alpine-x86_64:
     strategy:
       matrix:
         os: [ubuntu-latest]
@@ -30,6 +30,7 @@ jobs:
       - name: package
         run: |
             cd alpine
+            rake image
             rake
             ls
         env:

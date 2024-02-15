@@ -382,6 +382,6 @@ find /output -name '*.so*'
 
 if $SANITY_CHECK_OUTPUT; then
 	header "Sanity checking build output"
-	env LIBCHECK_ALLOW='libreadline|libtinfo|libformw|libmenuw|libncursesw|libc.musl-aarch64' \
+	env LIBCHECK_ALLOW='libreadline|libtinfo|libformw|libmenuw|libncursesw|libc.musl-aarch64|libc.musl-x86_64' \
 		libcheck /output/bin.real/ruby $(find /output -name '*.so')
 fi
