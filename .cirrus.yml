@@ -110,6 +110,15 @@ RUBY_VERSIONS_MATRIX_LINUX: &RUBY_VERSIONS_MATRIX_LINUX
   # RUBY_VERSIONS: 3.0.6
   # RUBY_VERSIONS: 2.7.8
 
+RUBY_VERSIONS_MATRIX_LINUX_ALPINE: &RUBY_VERSIONS_MATRIX_LINUX_ALPINE
+  RUBY_VERSIONS: 3.3.0
+  RUBY_VERSIONS: 3.2.3
+  RUBY_VERSIONS: 3.1.4
+  # RUBY_VERSIONS: 3.0.4
+  # RUBY_VERSIONS: 2.6.10
+  # # RUBY_VERSIONS: 3.0.6
+  # # RUBY_VERSIONS: 2.7.8
+
 rake_package_and_test: &rake_package_and_test
   package_script: cd $PLATFORM && rake
   package_full_script: cd $PLATFORM && rake package_full
@@ -221,13 +230,13 @@ linux_x64_matrix_docker_builder:
 linux_arm64_alpine_matrix_docker_builder:
   cpu: 4
   memory: 4G
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-musl-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_BRANCH =~ 'main'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-musl-arm64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(alpine\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_BRANCH =~ 'main'
   env:
     CIRRUS_ARCH: arm64
     PLATFORM: alpine
     ARCHITECTURES: arm64
     matrix:
-      *RUBY_VERSIONS_MATRIX_LINUX
+      *RUBY_VERSIONS_MATRIX_LINUX_ALPINE
   <<: *ENV_CHECK_SCRIPT
   <<: *rake_package_and_test_docker
   <<: *INSTALL_GH_CLI
@@ -237,13 +246,13 @@ linux_arm64_alpine_matrix_docker_builder:
 linux_x64_alpine_matrix_docker_builder:
   cpu: 4
   memory: 4G
-  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-musl-x86_64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_BRANCH =~ 'main'
+  only_if: $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix-linux-musl-x86_64\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(alpine\).*' || $CIRRUS_CHANGE_TITLE =~ 'ci\(matrix\).*' || $CIRRUS_BRANCH =~ 'main'
   env:
     CIRRUS_ARCH: amd64
     PLATFORM: alpine
     ARCHITECTURES: x86_64
     matrix:
-      *RUBY_VERSIONS_MATRIX_LINUX
+      *RUBY_VERSIONS_MATRIX_LINUX_ALPINE
   <<: *ENV_CHECK_SCRIPT
   <<: *rake_package_and_test_docker
   <<: *INSTALL_GH_CLI
