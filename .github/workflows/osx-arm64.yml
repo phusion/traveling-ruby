@@ -1,0 +1,64 @@
+name: MacOS arm64
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  PKG_DATE: 20240215
+  PLATFORM: osx
+  ARCHITECTURES: arm64
+  DEVELOPER_DIR: /Applications/Xcode_14.3.1.app/Contents/Developer
+
+jobs:
+  make-osx-arm64:
+    strategy:
+      matrix:
+        os: [macos-14]
+        # ruby-version: [3.0.6] # Pre 3.1.0 builds with openssl 1.1.1
+        ruby-version: [3.0.6, 3.1.4, 3.2.3, 3.3.0]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: download osx arm64 runtime
+        run: ./scripts/download-osx-runtime.sh     
+        env:
+          RUBY_VERSIONS: ${{ matrix.ruby-version }}
+      - name: build arm64
+        run: |
+            ls /Applications/Xcode*
+            cd osx
+            rake stash_conflicting_paths
+            rake --trace
+            rake unstash_conflicting_paths
+            ls
+        env:
+          RUBY_VERSIONS: ${{ matrix.ruby-version }}
+      # - name: package osx arm64 runtime
+      #   run: ./scripts/package-osx-runtime.sh     
+      #   env:
+
+      #     RUBY_VERSIONS: ${{ matrix.ruby-version }}
+      # - name: 'Upload Runtime - osx arm64'
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: osx-runtime-arm64-gha-openssl_1_1.tar.gz
+      #     path: osx/osx-runtime-*.tar.gz
+      - name: package gems
+        run: ./scripts/package-gems.sh     
+        env:
+          PLATFORM: osx
+      - name: 'Upload Artifact- osx arm64'
+        uses: actions/upload-artifact@v3
+        with:
+          name: traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-osx-arm64.tar.gz
+          path: osx/traveling-ruby*.tar.gz
+      - name: test
+        run: |
+            cd osx
+            rake test
+        env:
+          RUBY_VERSIONS: ${{ matrix.ruby-version }}

@@ -1,0 +1,29 @@
+name: Linux - x86_64 - image builder
+
+on:
+  workflow_dispatch:
+  # push:
+  #   branches: [ main ]
+  # pull_request:
+  #   branches: [ main ]
+
+jobs:
+  make-ubuntu-x86_64-image:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: "Set up Ruby"
+        uses: ruby/setup-ruby@v1
+        with:
+            ruby-version: 3.3.0
+      - name: build image
+        run: |
+          cd linux
+          ARCHITECTURES="x86_64" rake image
+          docker images
+        env:
+          ARCHITECTURES: "x86_64"

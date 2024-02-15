@@ -1,0 +1,12 @@
+name pkg_date ruby_version os arch size
+--- -------- -------------- -- ---- ----
+traveling-ruby 20230528 2.6.10 windows x86 9.0M
+traveling-ruby 20230528 2.6.10 windows x86_64 9.0M
+traveling-ruby 20230528 2.7.8 windows x86 9.3M
+traveling-ruby 20230528 2.7.8 windows x86_64 9.2M
+traveling-ruby 20230528 3.0.4 windows x86 9.5M
+traveling-ruby 20230528 3.0.4 windows x86_64 9.4M
+traveling-ruby 20230528 3.1.4 windows x86 8.4M
+traveling-ruby 20230528 3.1.4 windows x86_64 8.3M
+traveling-ruby 20230528 3.2.2 windows x86 9.0M
+traveling-ruby 20230528 3.2.2 windows x86_64 9.0M

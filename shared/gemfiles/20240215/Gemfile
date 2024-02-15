@@ -1,0 +1,27 @@
+source 'https://rubygems.org'
+
+gem 'json'
+gem 'ffi'
+gem 'yajl-ruby'
+gem 'rexml'
+gem 'bcrypt'
+gem 'charlock_holmes', force_ruby_platform: true
+gem 'curses', force_ruby_platform: true
+gem 'escape_utils'
+gem 'eventmachine', force_ruby_platform: true
+gem 'fast-stemmer'
+gem 'hitimes'
+gem 'kgio', force_ruby_platform: true
+gem 'pg', force_ruby_platform: true
+gem 'posix-spawn', force_ruby_platform: true
+gem 'puma', force_ruby_platform: true
+gem 'raindrops', force_ruby_platform: true
+gem 'redcarpet'
+gem 'RedCloth'
+gem 'rugged', force_ruby_platform: true
+gem "sqlite3", force_ruby_platform: true
+gem 'thin'
+gem 'unf_ext'
+gem 'unicorn', force_ruby_platform: true
+gem 'nokogiri', force_ruby_platform: true
+gem 'mysql2', force_ruby_platform: true

@@ -1,0 +1,81 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    RedCloth (4.3.3)
+    bcrypt (3.1.20)
+    charlock_holmes (0.7.7)
+    curses (1.4.4)
+    daemons (1.4.1)
+    escape_utils (1.3.0)
+    eventmachine (1.2.7)
+    fast-stemmer (1.0.2)
+    ffi (1.16.3)
+    hitimes (2.0.0)
+    json (2.7.1)
+    kgio (2.11.4)
+    mini_portile2 (2.8.5)
+    mysql2 (0.5.6)
+    nio4r (2.7.0)
+    nokogiri (1.16.2)
+      mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
+    pg (1.5.4)
+    posix-spawn (0.3.15)
+    puma (6.4.2)
+      nio4r (~> 2.0)
+    racc (1.7.3)
+    rack (2.2.8)
+    raindrops (0.20.1)
+    redcarpet (3.6.0)
+    rexml (3.2.6)
+    rugged (1.7.2)
+    sqlite3 (1.7.2)
+      mini_portile2 (~> 2.8.0)
+    thin (1.8.2)
+      daemons (~> 1.0, >= 1.0.9)
+      eventmachine (~> 1.0, >= 1.0.4)
+      rack (>= 1, < 3)
+    unf_ext (0.0.9.1)
+    unicorn (6.1.0)
+      kgio (~> 2.6)
+      raindrops (~> 0.7)
+    yajl-ruby (1.4.3)
+
+PLATFORMS
+  aarch64-linux
+  arm-linux
+  arm64-darwin
+  ruby
+  x86-linux
+  x86_64-darwin
+  x86_64-linux
+
+DEPENDENCIES
+  RedCloth
+  bcrypt
+  charlock_holmes
+  curses
+  escape_utils
+  eventmachine
+  fast-stemmer
+  ffi
+  hitimes
+  json
+  kgio
+  mysql2
+  nokogiri
+  pg
+  posix-spawn
+  puma
+  raindrops
+  redcarpet
+  rexml
+  rugged
+  sqlite3
+  thin
+  unf_ext
+  unicorn
+  yajl-ruby
+
+BUNDLED WITH
+   2.5.3

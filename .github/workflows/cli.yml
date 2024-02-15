@@ -1,0 +1,93 @@
+name: Test cli.sh
+
+on:
+  # push:
+  workflow_dispatch:
+
+jobs:
+  macos:
+    name: "${{matrix.ruby-version}} ${{ matrix.os }} ${{ matrix.shell }}"
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        os: [macos-latest]
+        shell: [bash, sh]
+        ruby-version: [3.0.6,3.1.4,3.2.3,3.3.0]
+      fail-fast: false
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: remove system install ruby from macos
+        if: env.ACT != 'true'
+        run: |
+          ruby --version
+          which ruby
+          brew uninstall ruby@3.0
+      - uses: actions/checkout@v3
+      - run: ./cli.sh --ci -v ${{ matrix.ruby-version }}
+        name: install via cli.sh
+      - run: ruby --version
+        name: ruby --version via ${{ matrix.shell }}
+
+  linux:
+    name: "${{matrix.ruby-version}} ${{ matrix.os }} ${{ matrix.shell }}"
+    timeout-minutes: 10
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        shell: [bash, sh]
+        ruby-version: [2.6.10,3.0.4,3.1.2,3.2.3,3.3.0]
+      fail-fast: false
+    defaults:
+      run:
+        shell: ${{ matrix.shell }}
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: remove system installed ruby & linuxbrew from Linux
+        if: env.ACT != 'true' && runner.os == 'Linux'
+        # default act image doesn't contain ruby or linuxbrew
+        run : |
+          ruby --version
+          sudo rm -rf /usr/bin/ruby
+          sudo apt-get --purge remove ruby-full
+          ruby --version || echo "ruby not found as expected"
+          /home/linuxbrew/.linuxbrew/bin/brew --version
+          sudo rm -rf /home/linuxbrew
+      - uses: actions/checkout@v3
+      - run: ./cli.sh --ci -v ${{ matrix.ruby-version }}
+        name: install via cli.sh
+      - run: ruby --version
+        name: ruby --version via ${{ matrix.shell }}
+      # - run: gem install pact_broker-client
+
+  # windows_local_install_script:
+  #   name: "${{matrix.ruby-version}} Windows"
+  #   runs-on: windows-latest
+  #   strategy:
+  #     matrix:
+  #       shell: [cmd, powershell, pwsh, bash, sh]
+  #       ruby-version: [2.6.10,3.0.4,3.1.2,3.2.3,3.3.0]
+  #     fail-fast: false
+  #   defaults:
+  #     run:
+  #       shell: ${{ matrix.shell }}
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - run: |
+  #         "$HOME\.traveling-ruby\bin\" >> $env:GITHUB_PATH
+  #       shell: powershell
+  #       if: matrix.shell == 'powershell' || matrix.shell == 'pwsh' || matrix.shell == 'cmd'
+  #     - run: ./cli.sh --ci -v ${{ matrix.ruby-version }}
+  #       name: install via cli.sh
+  #       shell: sh
+  #     - run: ruby --version
+  #       name: ruby --version via ${{ matrix.shell }}
+  #       if: matrix.shell == 'bash' || matrix.shell == 'sh'
+  #     - run: ruby --version
+  #       name: ruby.exe --version via ${{ matrix.shell }}
+  #       if: matrix.shell == 'powershell' || matrix.shell == 'pwsh' || matrix.shell == 'cmd'
+

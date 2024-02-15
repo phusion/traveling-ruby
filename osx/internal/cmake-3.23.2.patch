@@ -1,0 +1,20 @@
+--- CMakeLists.txt.orig	2022-07-05 17:51:38.000000000 +0200
++++ CMakeLists.txt	2022-07-05 17:51:57.000000000 +0200
+@@ -101,17 +101,6 @@
+     endif()
+   endif()
+ endif()
+-if(NOT CMake_TEST_EXTERNAL_CMAKE)
+-  # include special compile flags for some compilers
+-  include(CompileFlags.cmake)
+-
+-  # check for available C++ features
+-  include(${CMake_SOURCE_DIR}/Source/Checks/cm_cxx_features.cmake)
+-
+-  if(NOT CMake_HAVE_CXX_UNIQUE_PTR)
+-    message(FATAL_ERROR "The C++ compiler does not support C++11 (e.g. std::unique_ptr).")
+-  endif()
+-endif()
+ 
+ # Inform STL library header wrappers whether to use system versions.
+ configure_file(${CMake_SOURCE_DIR}/Utilities/std/cmSTL.hxx.in

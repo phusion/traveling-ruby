@@ -1,6 +1,12 @@
+# FIXME: minimal supported deployment target on x86_64 and ARM64?
+# NOTE: it looks like this is used only for building PostgreSQL
+# export MACOSX_DEPLOYMENT_TARGET=12.2
+# 12.2 is the minimal supported deployment target on ARM64
+# https://developer.apple.com/documentation/apple-silicon/building-a-universal-macos-binary#Update-the-Architecture-List-in-Your-Xcode-Projects
+# FIXME: a full list of deployment targets on ARM64
+# FIXME: not used at all?
+# export MACOSX_COMPATIBLE_DEPLOYMENT_TARGETS="10.14 10.15 11.0 11.1 11.2 11.3 11.4 11.5 11.6 12.0 12.1"
 export PATH="$SELFDIR/internal/bin":/usr/bin:/bin:/usr/sbin:/sbin
-export MACOSX_DEPLOYMENT_TARGET=10.14
-export MACOSX_COMPATIBLE_DEPLOYMENT_TARGETS="10.14 10.15 11.0 11.1 11.2 11.3 11.4 11.5"
 export CC="$SELFDIR/internal/bin/cc"
 export CXX="$SELFDIR/internal/bin/c++"
 unset DYLD_LIBRARY_PATH
@@ -14,3 +20,5 @@ unset GEM_HOME
 unset GEM_PATH
 unset SSL_CERT_DIR
 unset SSL_CERT_FILE
+export MACOSX_DEPLOYMENT_TARGET=12.2
+export CMAKE_OSX_ARCHITECTURES=$ARCHITECTURE

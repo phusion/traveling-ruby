@@ -1,0 +1,49 @@
+name: Alpine Musl - x86_64 - build from dockerhub builder
+
+on:
+  push:
+    branches: [ main, alpine ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  PKG_DATE: 20240215
+
+jobs:
+  make-alpine-x86_64:
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        ruby-version: [3.1.4, 3.2.3, 3.3.0]
+      fail-fast: false
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: "Set up Ruby"
+        uses: ruby/setup-ruby@v1
+        with:
+            ruby-version: ${{ matrix.ruby-version }}
+      - name: package
+        run: |
+            cd alpine
+            rake
+            ls
+        env:
+          ARCHITECTURES: "x86_64"
+          RUBY_VERSIONS: ${{ matrix.ruby-version }}
+      - name: package gems
+        run: ./scripts/package-gems.sh     
+        env:
+          PLATFORM: alpine
+      - name: 'Upload Artifact - linux x86_64'
+        uses: actions/upload-artifact@v3
+        with:
+          name: traveling-ruby-${{ env.PKG_DATE }}-${{ matrix.ruby-version }}-linux-musl-x86_64.tar.gz
+          path: alpine/traveling-ruby*.tar.gz
+      - name: test
+        run: |
+            cd alpine
+            rake test_docker
+        env:
+          ARCHITECTURES: "x86_64"
+          RUBY_VERSIONS: ${{ matrix.ruby-version }}

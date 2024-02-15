@@ -1,0 +1,93 @@
+name: Test you54f/traveling-ruby@main
+
+on: 
+  workflow_dispatch:
+  # push:
+  #   branches: [ main ]
+  
+jobs:
+
+  linux:
+    runs-on: ubuntu-latest
+    name: test traveling-ruby action on Linux
+    steps:
+      - name: remove system installed ruby & linuxbrew from Linux
+        if: env.ACT != 'true' && runner.os == 'Linux'
+        # default act image doesn't contain ruby or linuxbrew
+        run : |
+          ruby --version
+          sudo rm -rf /usr/bin/ruby
+          sudo apt-get --purge remove ruby-full
+          ruby --version || echo "ruby not found as expected"
+          /home/linuxbrew/.linuxbrew/bin/brew --version
+          sudo rm -rf /home/linuxbrew
+
+      - uses: actions/checkout@v3
+
+      - id: traveling-ruby-action
+        uses: you54f/traveling-ruby@main
+
+      - name: bash
+        run: ruby --version
+        shell: bash
+
+      - name: sh
+        run: ruby --version
+        shell: sh
+
+  macos:
+    runs-on: macos-latest
+    name: test traveling-ruby action on macOS
+    steps:
+      - name: remove system install ruby from macos
+        if: runner.os == 'macOS'
+        run: |
+          ruby --version
+          which ruby
+          brew uninstall ruby@3.0
+          
+      - id: traveling-ruby-action
+        uses: you54f/traveling-ruby@main
+
+      - name: bash
+        run: ruby --version
+        shell: bash
+
+      - name: sh
+        run: ruby --version
+        shell: sh     
+
+
+  windows:
+    runs-on: windows-latest
+    name: test traveling-ruby action
+    steps:
+      - uses: actions/checkout@v3
+      - id: traveling-ruby-action
+        uses: you54f/traveling-ruby@main
+
+      - name: bash
+        run: ruby --version
+        shell: bash
+
+
+      - name: sh
+        run: ruby --version
+        shell: sh
+
+
+      - name: cmd
+        run: ruby.exe --version
+        shell: cmd
+
+
+      - name: powershell
+        run: ruby.exe --version
+        if: runner.os == 'windows'
+        shell: powershell
+
+
+      - name: pwsh
+        run: ruby.exe --version
+        if: runner.os == 'windows'
+        shell: pwsh

@@ -1,9 +1,16 @@
 VERSION       = File.read("../VERSION.txt").strip
-RUBY_VERSIONS = File.read("../RUBY_VERSIONS.txt").strip.split(/\s+/)
+RUBY_VERSIONS = ENV['RUBY_VERSIONS'] ? [].push(ENV['RUBY_VERSIONS']) : File.read("../RUBY_VERSIONS.txt").strip.split(/\s+/)
+ARCHITECTURES = ENV['ARCHITECTURES'] ? [].push(ENV['ARCHITECTURES']) : ["x86_64","arm64"]
 
+if RUBY_VERSIONS.any? { |version| Gem::Version.new(version) < Gem::Version.new('3.1.0') }
+  ENV['OPENSSL_1_1_LEGACY'] = 'true'
+  puts "OpenSSL 1.1.1 legacy mode enabled"
+end
+
+desc "Build all packages"
 task :default => :package
 
-desc "Create packages for all Ruby versions (#{RUBY_VERSIONS.join(' ')})"
+desc "Create packages for all Ruby versions (#{RUBY_VERSIONS.join(' ')}) and all architectures (#{ARCHITECTURES.join(' ')})"
 task :package do
   # Do nothing
 end
@@ -11,7 +18,7 @@ end
 desc "Build the runtime"
 task :runtime => "runtime/ok"
 
-desc "Build binaries for all Ruby versions (#{RUBY_VERSIONS.join(' ')})"
+desc "Build binaries for all Ruby versions (#{RUBY_VERSIONS.join(' ')}) and all architectures (#{ARCHITECTURES.join(' ')})"
 task :build do
   # Do nothing
 end
@@ -62,61 +69,72 @@ task :unstash_conflicting_paths do
   end
 end
 
+ARCHITECTURES.each do |arch|
+  RUBY_VERSIONS.each do |ruby_version|
 
-RUBY_VERSIONS.each do |ruby_version|
-  package = "traveling-ruby-#{VERSION}-#{ruby_version}-osx.tar.gz"
-  gem_dir = "traveling-ruby-gems-#{VERSION}-#{ruby_version}-osx"
+    package = "traveling-ruby-#{VERSION}-#{ruby_version}-osx-#{arch}.tar.gz"
+    package_full = "traveling-ruby-#{VERSION}-#{ruby_version}-osx-#{arch}-full.tar.gz"
+    gem_dir = "traveling-ruby-gems-#{VERSION}-#{ruby_version}-osx-#{arch}"
 
-  task :package => "package:#{ruby_version}"
-  task :build   => "build:#{ruby_version}"
-  task :test    => "test:#{ruby_version}"
-  task :upload  => "upload:#{ruby_version}"
-  task :clean   => "clean:#{ruby_version}"
+    task :package => "package:#{ruby_version}:#{arch}"
+    task :package_full => "package_full:#{ruby_version}:#{arch}"
+    task :build   => "build:#{ruby_version}:#{arch}"
+    task :test    => "test:#{ruby_version}:#{arch}"
+    task :upload  => "upload:#{ruby_version}:#{arch}"
+    task :clean   => "clean:#{ruby_version}:#{arch}"
 
-  desc "Create packages for Ruby #{ruby_version}"
-  task "package:#{ruby_version}" => [package, "#{gem_dir}/ok"]
+    desc "Create packages for Ruby #{ruby_version} #{arch}"
+    task "package:#{ruby_version}:#{arch}" => [package, "#{gem_dir}/ok"]
 
-  desc "Build binaries for Ruby #{ruby_version}"
-  task "build:#{ruby_version}" => "output/#{ruby_version}/bin"
+    desc "Build binaries for Ruby #{ruby_version} #{arch}"
+    task "build:#{ruby_version}:#{arch}" => "output/#{ruby_version}-#{arch}/bin"
+
+    desc "Create full fat package for Ruby #{ruby_version} #{arch}"
+    task "package_full:#{ruby_version}:#{arch}" => ["#{gem_dir}/ok"] do
+      sh "./package.sh -f -r #{package_full} output/#{ruby_version}-#{arch}"
+    end
+
+    file(package => "output/#{ruby_version}-#{arch}/bin") do
+      sh "./package.sh -r #{package} output/#{ruby_version}-#{arch}"
+    end
+
+    file("#{gem_dir}/ok" => "output/#{ruby_version}-#{arch}/bin") do
+      sh "./package.sh -E #{gem_dir} output/#{ruby_version}-#{arch}"
+      touch "#{gem_dir}/ok"
+    end
+
+    # We use 'file' instead of 'directory' here so that packages are updated
+    # whenever we update binaries.
+    file("output/#{ruby_version}-#{arch}/bin" => "runtime/ok") do
+      sh "mkdir -p output/#{ruby_version}-#{arch}"
+      sh "mkdir -p /tmp/ruby-#{ruby_version}-#{arch}"
+      sh "./build-ruby.sh -a #{arch}  -r #{ruby_version} -w /tmp/ruby-#{ruby_version}-#{arch} runtime output/#{ruby_version}-#{arch}"
+    end
 
 
-  file(package => "output/#{ruby_version}/bin") do
-    sh "./package -r #{package} output/#{ruby_version}"
-  end
+    desc "Test Ruby #{ruby_version} #{arch}"
+    task "test:#{ruby_version}:#{arch}" => "output/#{ruby_version}-#{arch}/bin" do
+      sh "./test-gems.sh output/#{ruby_version}-#{arch}"
+    end
 
-  file("#{gem_dir}/ok" => "output/#{ruby_version}/bin") do
-    sh "./package -E #{gem_dir} output/#{ruby_version}"
-    touch "#{gem_dir}/ok"
-  end
+    desc "Upload Ruby #{ruby_version} packages to the server"
+    task "upload:#{ruby_version}:#{arch}" => [package, "#{gem_dir}/ok"] do
+      sh "s3cmd -P sync --no-preserve #{package} s3://traveling-ruby/releases/"
+      sh "s3cmd -P --delete-removed --no-preserve -r sync #{gem_dir}/ s3://traveling-ruby/releases/#{gem_dir}/"
+      sh "s3cmd del s3://traveling-ruby/releases/#{gem_dir}/ok"
+    end
 
-  # We use 'file' instead of 'directory' here so that packages are updated
-  # whenever we update binaries.
-  file("output/#{ruby_version}/bin" => "runtime/ok") do
-    sh "mkdir -p output/#{ruby_version}"
-    sh "mkdir -p /tmp/ruby-#{ruby_version}"
-    sh "./build-ruby -r #{ruby_version} -w /tmp/ruby-#{ruby_version} runtime output/#{ruby_version}"
-  end
-
-
-  desc "Test Ruby #{ruby_version}"
-  task "test:#{ruby_version}" => "output/#{ruby_version}/bin" do
-    sh "./test-gems output/#{ruby_version}"
-  end
-
-  desc "Upload Ruby #{ruby_version} packages to the server"
-  task "upload:#{ruby_version}" => [package, "#{gem_dir}/ok"] do
-    sh "s3cmd -P sync --no-preserve #{package} s3://traveling-ruby/releases/"
-    sh "s3cmd -P --delete-removed --no-preserve -r sync #{gem_dir}/ s3://traveling-ruby/releases/#{gem_dir}/"
-    sh "s3cmd del s3://traveling-ruby/releases/#{gem_dir}/ok"
-  end
-
-  desc "Clean Ruby #{ruby_version} packages, but not the runtime"
-  task "clean:#{ruby_version}" do
-    sh "rm -rf #{package} #{gem_dir} output/#{ruby_version}"
+    desc "Clean Ruby #{ruby_version} packages, but not the runtime"
+    task "clean:#{ruby_version}:#{arch}" do
+      sh "rm -rf #{package} #{gem_dir} output/#{ruby_version}-#{arch}"
+    end
   end
 end
 
-file "runtime/ok" => "setup-runtime" do
-  sh "./setup-runtime runtime"
-  sh "touch runtime/ok"
+ARCHITECTURES.each do |arch|
+  file "runtime/ok" => "setup-runtime.sh" do
+    puts "Setting up runtime"
+    sh "./setup-runtime.sh -a #{arch} runtime"
+    sh "touch runtime/ok"
+  end
 end
