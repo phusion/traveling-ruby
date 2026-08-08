@@ -112,7 +112,7 @@ $ rm -rf hello-1.0.0-linux-x86_64
 $ rm -rf hello-1.0.0-osx
 ```
 
-Now you can test whether it works. Suppose that you're developing on OS X. Extract the OS X package and test it:
+Now you can test whether it works. Suppose that you're developing on macOS. Extract the macOS package and test it:
 
 ```
 $ tar xzf hello-1.0.0-osx.tar.gz
@@ -161,7 +161,7 @@ namespace :package do
     end
   end
 
-  desc "Package your app for OS X"
+  desc "Package your app for osx"
   task :osx => [:bundle_install,
     "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx.tar.gz",
     "packaging/traveling-ruby-#{TRAVELING_RUBY_VERSION}-osx-sqlite3-#{SQLITE3_VERSION}.tar.gz"
